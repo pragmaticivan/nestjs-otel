@@ -44,7 +44,8 @@
     "eslint": "7.29.0",
     "eslint-config-airbnb-typescript": "12.3.1",
     "eslint-plugin-import": "2.23.4",
-    "opentelemetry-node-metrics": "^1.0.2"
+    "opentelemetry-node-metrics": "^1.0.2",
+    "typescript": "4.1.5"
   },
   "peerDependencies": {
     "@opentelemetry/exporter-prometheus": "^0.22.0",
