@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.1.0...v1.2.0) (2021-06-25)
+
+
+### Features
+
+* export MetricService ([6ed93ae](https://www.github.com/pragmaticivan/nestjs-otel/commit/6ed93ae526dec7ed1c7f4eacb043c2df7168fc70))
+
 ## [1.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.0.0...v1.1.0) (2021-06-25)
 
 
