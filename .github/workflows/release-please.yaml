@@ -1,0 +1,35 @@
+on:
+  push:
+    branches:
+      - master
+name: release-please
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        uses: GoogleCloudPlatform/release-please-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+          package-name: nestjs-otel
+      - if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v1
+      - if: ${{ steps.release.outputs.release_created }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm install
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm install -g npm@latest
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm run build
+      - id: publish
+        if: ${{ steps.release.outputs.release_created }}
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+      - if: steps.publish.outputs.type != 'none'
+        run: |
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
