@@ -135,6 +135,10 @@ export class BookService {
 }
 ```
 
+## Prometheus Metrics
+
+When `withPrometheusExporter` is enabled it will start a new process on port `8081` and metrics will be available at `http://localhost:8081/metrics`.
+
 ## Using with a logger
 
 ### Pino
@@ -161,3 +165,9 @@ export const logger: Logger = Pino(loggerOptions);
 ## License
 
 [MIT License](https://pragmaticivan.mit-license.org/) © Ivan Santos
+
+## Inspiration
+
+* https://github.com/MetinSeylan/Nestjs-OpenTelemetry
+* https://github.com/digikare/nestjs-prom
+* https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.metrics
