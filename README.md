@@ -5,6 +5,7 @@
 # NestJS OpenTelemetry (OTEL)
 
 ![Build Status](https://github.com/pragmaticivan/nestjs-otel/actions/workflows/nodejs.yml/badge.svg)
+[![NPM](https://img.shields.io/npm/v/nestjs-otel.svg)](https://www.npmjs.com/package/nestjs-otel)
 ## Description
 
 [OpenTelemetry](https://opentelemetry.io/) module for [Nest](https://github.com/nestjs/nest).
