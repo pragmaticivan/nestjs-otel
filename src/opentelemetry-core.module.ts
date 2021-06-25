@@ -51,6 +51,7 @@ export class OpenTelemetryCoreModule implements NestModule {
       providers,
       exports: [
         TraceService,
+        MetricService,
       ],
     };
   }
