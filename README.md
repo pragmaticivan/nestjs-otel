@@ -139,7 +139,7 @@ export class BookService {
 
 ### Pino
 
-```
+```ts
 import Pino, { Logger } from 'pino';
 import { LoggerOptions } from 'pino';
 import { trace, context } from '@opentelemetry/api';
