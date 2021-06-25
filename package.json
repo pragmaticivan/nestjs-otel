@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-opentelemetry",
+  "name": "nestjs-otel",
   "version": "0.1.0",
   "description": "NestJS OpenTelemetry Library",
   "main": "lib/index.js",
@@ -12,11 +12,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pragmaticivan/nestjs-opentelemetry.git"
+    "url": "git+https://github.com/pragmaticivan/nestjs-otel.git"
   },
   "keywords": [
     "nestjs",
     "opentelemetry",
+    "otel",
     "tracing",
     "observability",
     "prometheus"
@@ -25,9 +26,9 @@
   "license": "MIT",
   "test": "jest --ci --runInBand",
   "bugs": {
-    "url": "https://github.com/pragmaticivan/nestjs-opentelemetry/issues"
+    "url": "https://github.com/pragmaticivan/nestjs-otel/issues"
   },
-  "homepage": "https://github.com/pragmaticivan/nestjs-opentelemetry#readme",
+  "homepage": "https://github.com/pragmaticivan/nestjs-otel#readme",
   "dependencies": {
     "@nestjs/common": "^7.6.18",
     "@nestjs/core": "^7.6.18",
