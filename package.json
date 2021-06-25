@@ -23,6 +23,7 @@
   ],
   "author": "pragmaticivan@gmail.com",
   "license": "MIT",
+  "test": "jest --ci --runInBand",
   "bugs": {
     "url": "https://github.com/pragmaticivan/nestjs-opentelemetry/issues"
   },
