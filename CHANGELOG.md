@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.0...v1.2.1) (2021-06-25)
+
+
+### Bug Fixes
+
+* exports MetricService on core module ([e8096a6](https://www.github.com/pragmaticivan/nestjs-otel/commit/e8096a65a262a1213e3f7117b74f657b812fbed0))
+
 ## [1.2.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.1.0...v1.2.0) (2021-06-25)
 
 
