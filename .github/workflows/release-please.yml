@@ -22,8 +22,6 @@ jobs:
       - if: ${{ steps.release.outputs.release_created }}
         run: npm install
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm install -g npm@latest
-      - if: ${{ steps.release.outputs.release_created }}
         run: npm run build
       - id: publish
         if: ${{ steps.release.outputs.release_created }}
