@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+      time: "01:00"
+      timezone: America/Chicago
+    pull-request-branch-name:
+      separator: "-"
+    open-pull-requests-limit: 99
+    target-branch: "main"
+    allow:
+      - dependency-type: direct
