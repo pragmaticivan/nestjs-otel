@@ -5,11 +5,10 @@ import { createOpenTelemetryModule } from '../utils';
 
 describe('OpenTelemetryModule', () => {
   let app: INestApplication;
-  let agent: Agent;
 
   describe('#register', () => {
     beforeEach(async () => {
-      ({ agent, app } = await createOpenTelemetryModule());
+      ({ app } = await createOpenTelemetryModule());
     });
 
     it('should load module with default configs', async () => {
