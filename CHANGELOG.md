@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.3](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.2...v1.2.3) (2021-06-27)
+
+
+### Bug Fixes
+
+* properly ignore /metrics path on middleware ([45973a4](https://www.github.com/pragmaticivan/nestjs-otel/commit/45973a4abd8270acc789aeecfe93a8b05f98b30a))
+
 ### [1.2.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.1...v1.2.2) (2021-06-27)
 
 
