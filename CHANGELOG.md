@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.1...v1.2.2) (2021-06-27)
+
+
+### Bug Fixes
+
+* resolve problems with conditional dependency and default configs and add jest config ([1f1fb12](https://www.github.com/pragmaticivan/nestjs-otel/commit/1f1fb12dcc2df42f2f3082031f31248c246128c1))
+
 ### [1.2.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.0...v1.2.1) (2021-06-25)
 
 
