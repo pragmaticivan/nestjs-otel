@@ -49,7 +49,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       if (path === '/favicon.ico') {
         return;
       }
-      if (path === this.options?.withPrometheusExporter?.metricPath) {
+      const metricPath = this.options?.withPrometheusExporter?.metricPath ? this.options.withPrometheusExporter.metricPath : '/metrics';
+      if (path === metricPath) {
         return;
       }
 
