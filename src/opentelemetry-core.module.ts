@@ -25,7 +25,7 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
   private readonly logger = new Logger('OpenTelemetryModule');
 
   constructor(
-    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions,
+    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
     private readonly moduleRef: ModuleRef,
   ) {}
 
@@ -70,7 +70,9 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
   }
 
   configure(consumer: MiddlewareConsumer) {
-    const { withHttpMiddleware } = this.options?.withPrometheusExporter;
+    const {
+      withHttpMiddleware = { enable: false },
+    } = this.options?.withPrometheusExporter;
     if (withHttpMiddleware.enable === true) {
       consumer.apply(ApiMetricsMiddleware).forRoutes('*');
     }
