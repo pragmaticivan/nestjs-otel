@@ -3,7 +3,7 @@ import { OPENTELEMETRY_MODULE_OPTIONS } from './opentelemetry.constants';
 import { OpenTelemetryModule } from './opentelemetry.module';
 
 describe('OpenTelemetryModule', () => {
-  it('boots successfully', async () => {
+  it('boots successfully with default values', async () => {
     const rootModule = await Test.createTestingModule({
       imports: [
         OpenTelemetryModule.register(),
