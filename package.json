@@ -8,7 +8,10 @@
     "build": "tsc",
     "build:check": "tsc --noEmit",
     "lint": "eslint . --ext .js,ts",
-    "format": "eslint . --ext .js,ts --fix"
+    "format": "eslint . --ext .js,ts --fix",
+    "test": "jest --ci",
+    "test:ci": "ENVIRONMENT=ci jest --ci",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -32,29 +35,55 @@
   "dependencies": {
     "@nestjs/common": "^7.6.18",
     "@nestjs/core": "^7.6.18",
-    "@opentelemetry/api": "^1.0.0",
+    "@opentelemetry/api": "^1.0.1",
     "@opentelemetry/api-metrics": "^0.22.0",
     "@opentelemetry/sdk-node": "^0.22.0",
     "response-time": "^2.3.2"
   },
   "devDependencies": {
+    "@nestjs/testing": "^7.6.18",
     "@opentelemetry/exporter-prometheus": "^0.22.0",
     "@opentelemetry/host-metrics": "^0.22.0",
     "@opentelemetry/metrics": "^0.22.0",
+    "@types/jest": "^26.0.23",
     "@types/node": "^15.12.4",
     "@typescript-eslint/eslint-plugin": "4.28.0",
     "@typescript-eslint/parser": "4.28.0",
     "eslint": "7.29.0",
     "eslint-config-airbnb-typescript": "12.3.1",
     "eslint-plugin-import": "2.23.4",
+    "jest": "^27.0.5",
     "opentelemetry-node-metrics": "^1.0.2",
+    "reflect-metadata": "^0.1.13",
     "rxjs": "^7.1.0",
-    "typescript": "4.1.5"
+    "ts-jest": "^27.0.3",
+    "typescript": "4.3.4"
   },
   "peerDependencies": {
     "@opentelemetry/exporter-prometheus": "^0.22.0",
     "@opentelemetry/host-metrics": "^0.22.0",
     "@opentelemetry/metrics": "^0.22.0",
     "opentelemetry-node-metrics": "^1.0.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts",
+      "node"
+    ],
+    "moduleNameMapper": {
+      "^src(.*)$": "<rootDir>/src/$1"
+    },
+    "reporters": [
+      "default"
+    ],
+    "testRegex": ".test.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "coverageDirectory": "./test-results/coverage",
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": []
   }
 }
