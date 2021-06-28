@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.3...v1.3.0) (2021-06-28)
+
+
+### Features
+
+* improves api metrics middleware ([df50305](https://www.github.com/pragmaticivan/nestjs-otel/commit/df503056087f1c128fe4999fbb77f8b45a6a1a74))
+
 ### [1.2.3](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.2...v1.2.3) (2021-06-27)
 
 
