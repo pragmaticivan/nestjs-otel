@@ -7,7 +7,7 @@
   "scripts": {
     "prebuild": "rimraf lib",
     "prepare": "husky install",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc",
     "lint": "eslint . --ext .js,ts",
     "format": "eslint . --ext .js,ts --fix",
     "test": "npm run test:unit && npm run test:integration",
