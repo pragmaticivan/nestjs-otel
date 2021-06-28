@@ -8,36 +8,57 @@ import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
-  private readonly defaultDurationMillisecondsBuckets = [
-    5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000,
+  private readonly defaultLongRunningRequestBuckets = [
+    0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, // standard
+    30, 60, 120, 300, 600, // Sometimes requests may be really long-running
   ];
-
-  private allRequestTotal: Counter;
-
-  private allSuccessTotal: Counter;
-
-  private allErrorsTotal: Counter;
-
-  private allClientErrorTotal: Counter;
-
-  private allServerErrorTotal: Counter;
 
   private requestTotal: Counter;
 
-  private responseTime: ValueRecorder;
+  private responseTotal: Counter;
+
+  private responseSuccessTotal: Counter;
+
+  private responseErrorTotal: Counter;
+
+  private responseClientErrorTotal: Counter;
+
+  private responseServerErrorTotal: Counter;
+
+  private requestDuration: ValueRecorder;
 
   constructor(
-    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions,
+    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
     @Inject(MetricService) private readonly metricService: MetricService,
   ) {
-    this.allRequestTotal = this.metricService.getCounter('http_all_request_total');
-    this.allSuccessTotal = this.metricService.getCounter('http_all_success_total');
-    this.allErrorsTotal = this.metricService.getCounter('http_all_errors_total');
-    this.allClientErrorTotal = this.metricService.getCounter('http_all_client_error_total');
-    this.allServerErrorTotal = this.metricService.getCounter('http_all_server_error_total');
-    this.requestTotal = this.metricService.getCounter('http_request_total');
-    this.responseTime = this.metricService.getValueRecorder('http_request_duration_milliseconds', {
-      boundaries: this.defaultDurationMillisecondsBuckets,
+    this.requestTotal = this.metricService.getCounter('http_request_total', {
+      description: 'Total number of HTTP requests',
+    });
+
+    this.responseTotal = this.metricService.getCounter('http_response_total', {
+      description: 'Total number of HTTP responses',
+    });
+
+    this.responseSuccessTotal = this.metricService.getCounter('http_response_success_total', {
+      description: 'Total number of all successful responses',
+    });
+
+    this.responseErrorTotal = this.metricService.getCounter('http_response_error_total', {
+      description: 'Total number of all response errors',
+    });
+
+    this.responseClientErrorTotal = this.metricService.getCounter('http_client_error_total', {
+      description: 'Total number of client error requests',
+    });
+
+    this.responseServerErrorTotal = this.metricService.getCounter('http_server_error_total', {
+      description: 'Total number of server error requests',
+    });
+
+    const { timeBuckets = [] } = this.options?.withPrometheusExporter?.withHttpMiddleware;
+    this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
+      boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
+      description: 'HTTP latency value recorder in seconds',
     });
   }
 
@@ -54,36 +75,37 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         return;
       }
 
+      this.requestTotal.bind({ method, path }).add(1);
+
       const status = res.statusCode || 500;
       const labels = { method, status, path };
 
-      this.responseTime.bind(labels).record(time);
-
-      this.countResponse(res, labels);
+      this.countResponse(status, labels, time);
     })(req, res, next);
   }
 
-  private countResponse(res, labels) {
-    this.allRequestTotal.add(1);
-    this.requestTotal.bind(labels).add(1);
+  private countResponse(statusCode, labels, time) {
+    this.responseTotal.bind(labels).add(1);
+    this.requestDuration.bind(labels).record(time / 1000);
 
-    const codeClass = this.getStatusCodeClass(res.statusCode);
+    const codeClass = this.getStatusCodeClass(statusCode);
 
     // eslint-disable-next-line default-case
     switch (codeClass) {
       case 'success':
-        this.allSuccessTotal.add(1);
+        this.responseSuccessTotal.add(1);
         break;
       case 'redirect':
-        this.allSuccessTotal.add(1);
+        // TODO: Review what should be appropriate for redirects.
+        this.responseSuccessTotal.add(1);
         break;
       case 'client_error':
-        this.allErrorsTotal.add(1);
-        this.allClientErrorTotal.add(1);
+        this.responseErrorTotal.add(1);
+        this.responseClientErrorTotal.add(1);
         break;
       case 'server_error':
-        this.allErrorsTotal.add(1);
-        this.allServerErrorTotal.add(1);
+        this.responseErrorTotal.add(1);
+        this.responseServerErrorTotal.add(1);
         break;
     }
   }
