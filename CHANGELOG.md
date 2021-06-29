@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.3.0...v1.4.0) (2021-06-29)
+
+
+### Features
+
+* removes prometheus Interface and use metrics instead ([f3fd29e](https://www.github.com/pragmaticivan/nestjs-otel/commit/f3fd29eab94cb6ab4302d7990d25a3bcc3250f56))
+* sets meter provider globally on sdk ([4be57ef](https://www.github.com/pragmaticivan/nestjs-otel/commit/4be57ef02eeff516ef5b7ceb88731e2de570f553))
+
 ## [1.3.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.2.3...v1.3.0) (2021-06-28)
 
 
