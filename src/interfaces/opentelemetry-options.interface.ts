@@ -6,6 +6,19 @@ export type OpenTelemetryModuleOptions = {
    * Prometheus Exporter Setup
    */
   withPrometheusExporter?: PrometheusExporterOptions;
+  /**
+   * OpenTelemetry Metrics Setup
+   */
+  metrics?: OpenTelemetryMetrics
+};
+
+export type OpenTelemetryMetrics = {
+  defaultMetrics?: boolean,
+  hostMetrics?: boolean,
+  apiMetrics?: {
+    enable?: boolean,
+    timeBuckets: number[]
+  }
 };
 
 export type PrometheusExporterOptions = {
