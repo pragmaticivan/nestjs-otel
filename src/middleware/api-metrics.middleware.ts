@@ -55,7 +55,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       description: 'Total number of server error requests',
     });
 
-    const { timeBuckets = [] } = this.options?.withPrometheusExporter?.withHttpMiddleware;
+    const { timeBuckets = [] } = this.options?.metrics?.apiMetrics;
     this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
       boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
       description: 'HTTP latency value recorder in seconds',
@@ -70,7 +70,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       if (path === '/favicon.ico') {
         return;
       }
-      const metricPath = this.options?.withPrometheusExporter?.metricPath ? this.options.withPrometheusExporter.metricPath : '/metrics';
+      // TODO Support `ignore routes array instead`
+      const metricPath = '/metrics';
       if (path === metricPath) {
         return;
       }
