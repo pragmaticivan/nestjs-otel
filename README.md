@@ -34,17 +34,19 @@ opentelemetry-node-metrics
 `nodeSDKConfiguration` property accepts OpenTelemetry NodeSDK configuration.
 
 ```ts
-const OpenTelemetryModuleConfig = OpenTelemetryModule.register({
-  withPrometheusExporter: {
-    enable: true, // Enables prometheus exporter
-    withHostMetrics: true, // Includes Host Metrics
-    withDefaultMetrics: true, // Includes Default Metrics
-    withHttpMiddleware: {  // Includes api metrics
-      enable: true,
+const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
+  metrics: {
+    hostMetrics: true, // Includes Host Metrics
+    defaultMetrics: true, // Includes Default Metrics
+    apiMetrics: {
+      enable: true, // Includes api metrics
       timeBuckets: [],
     },
   },
   nodeSDKConfiguration: {
+    metricExporter: new PrometheusExporter({
+      port: 8081,
+    }),
     spanProcessor: new BatchSpanProcessor(new JaegerExporter()),
     contextManager: new AsyncLocalStorageContextManager(),
     textMapPropagator: new CompositePropagator({
@@ -155,7 +157,7 @@ Impl |Metric |Description| Labels | Metric Type
 
 ## Prometheus Metrics
 
-When `withPrometheusExporter` is enabled it will start a new process on port `8081` and metrics will be available at `http://localhost:8081/metrics`.
+When `nodeSDKConfiguration.metricExporter` is defined with a `PrometheusExporter`it will start a new process on port `8081` (default port) and metrics will be available at `http://localhost:8081/metrics`.
 
 ## Using with a logger
 
