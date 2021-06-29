@@ -3,24 +3,21 @@ import { NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 export type OpenTelemetryModuleOptions = {
   nodeSDKConfiguration?: Partial<NodeSDKConfiguration>
   /**
-   * Prometheus Exporter Setup
+   * OpenTelemetry Metrics Setup
    */
-  withPrometheusExporter?: PrometheusExporterOptions;
+  metrics?: OpenTelemetryMetrics
 };
 
-export type PrometheusExporterOptions = {
-  enable?: boolean,
-  withHttpMiddleware?: {
+export type OpenTelemetryMetrics = {
+  defaultMetrics?: boolean,
+  hostMetrics?: boolean,
+  apiMetrics?: {
     enable?: boolean,
     timeBuckets: number[]
   },
-  withHostMetrics?: boolean,
-  withDefaultMetrics?: boolean,
   defaultLabels?: {
     [key: string]: string | number
   },
-  metricPath?: string
-  port?: number,
 };
 
 export interface OpenTelemetryOptionsFactory {

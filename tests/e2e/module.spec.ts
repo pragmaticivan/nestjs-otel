@@ -6,7 +6,7 @@ import { createOpenTelemetryModule } from '../utils';
 describe('OpenTelemetryModule', () => {
   let app: INestApplication;
 
-  describe('#register', () => {
+  describe('#forRoot', () => {
     beforeEach(async () => {
       ({ app } = await createOpenTelemetryModule());
     });

@@ -4,12 +4,12 @@ import { OpenTelemetryModuleOptions } from './interfaces';
 
 @Module({})
 export class OpenTelemetryModule {
-  static async register(
+  static async forRoot(
     options?: OpenTelemetryModuleOptions,
   ): Promise<DynamicModule> {
     return {
       module: OpenTelemetryModule,
-      imports: [await OpenTelemetryCoreModule.register(options)],
+      imports: [await OpenTelemetryCoreModule.forRoot(options)],
     };
   }
 }

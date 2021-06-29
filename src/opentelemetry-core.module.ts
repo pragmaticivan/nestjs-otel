@@ -4,18 +4,18 @@ import {
   OnApplicationShutdown, Provider,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { HostMetrics } from '@opentelemetry/host-metrics';
 import { MeterProvider } from '@opentelemetry/metrics';
-import { NodeSDK } from '@opentelemetry/sdk-node';
 import * as nodeMetrics from 'opentelemetry-node-metrics';
+import { metrics } from '@opentelemetry/api-metrics';
+import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OpenTelemetryModuleOptions } from './interfaces';
 import { MetricService } from './metrics/metric.service';
 import { ApiMetricsMiddleware } from './middleware';
 import {
   OPENTELEMETRY_METER_PROVIDER,
   OPENTELEMETRY_MODULE_OPTIONS,
-  OPENTELEMETRY_PROMETHEUS_EXPORTER, OPENTELEMETRY_SDK,
+  OPENTELEMETRY_SDK,
 } from './opentelemetry.constants';
 import { TraceService } from './tracing/trace.service';
 
@@ -29,8 +29,8 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
     private readonly moduleRef: ModuleRef,
   ) {}
 
-  static async register(
-    options: OpenTelemetryModuleOptions = { withPrometheusExporter: {} },
+  static async forRoot(
+    options: OpenTelemetryModuleOptions = { metrics: {} },
   ): Promise<DynamicModule> {
     const openTelemetryModuleOptions = {
       provide: OPENTELEMETRY_MODULE_OPTIONS,
@@ -40,27 +40,15 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
     const providers = [
       openTelemetryModuleOptions,
       await this.createNodeSDKProvider(),
+      this.createMeterProvider(),
       TraceService,
+      MetricService,
     ];
 
     const exports: Provider[] = [
       TraceService,
+      MetricService,
     ];
-
-    const {
-      enable = false,
-    } = options?.withPrometheusExporter;
-
-    if (enable) {
-      providers.push(this.createPrometheusExporterProvider());
-      providers.push(this.createMeterProvider());
-      providers.push(MetricService);
-      exports.push(MetricService);
-    } else {
-      // Conditional Injection for factories/static methods is not available yet.
-      // More info here: https://github.com/nestjs/nest/issues/7306
-      providers.push(this.noopPrometheusExporterProvider());
-    }
 
     return {
       module: OpenTelemetryCoreModule,
@@ -71,18 +59,23 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
 
   configure(consumer: MiddlewareConsumer) {
     const {
-      withHttpMiddleware = { enable: false },
-    } = this.options?.withPrometheusExporter;
-    if (withHttpMiddleware.enable === true) {
+      apiMetrics = { enable: false },
+    } = this.options?.metrics;
+    if (apiMetrics.enable === true) {
       consumer.apply(ApiMetricsMiddleware).forRoutes('*');
     }
   }
 
   async onApplicationBootstrap() {
     const nodeOtelSDK = this.moduleRef.get<NodeSDK>(OPENTELEMETRY_SDK);
-
+    const meterProvider = this.moduleRef.get<MeterProvider>(OPENTELEMETRY_METER_PROVIDER);
     try {
+      this.logger.log('NestJS OpenTelemetry starting');
       await nodeOtelSDK.start();
+      // Start method sets a custom meter provider
+      // when exporter is defined. Overwrites that here.
+      // Possible improvements can be found here: https://github.com/open-telemetry/opentelemetry-js/issues/2307
+      metrics.setGlobalMeterProvider(meterProvider);
     } catch (e) {
       this.logger.error(e?.message);
     }
@@ -101,60 +94,41 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
   private static async createNodeSDKProvider(): Promise<Provider> {
     return {
       provide: OPENTELEMETRY_SDK,
-      useFactory: async (options: OpenTelemetryModuleOptions, exporter: PrometheusExporter) => {
-        const { enable = false } = options?.withPrometheusExporter;
-        if (enable) {
-          // eslint-disable-next-line no-param-reassign
-          options.nodeSDKConfiguration.metricExporter = exporter;
-        }
-        return new NodeSDK(options.nodeSDKConfiguration);
+      useFactory: (options: OpenTelemetryModuleOptions, meterProvider: MeterProvider) => {
+        const sdk = new NodeSDK(
+          { ...options.nodeSDKConfiguration },
+        );
+        return sdk;
       },
-      inject: [OPENTELEMETRY_MODULE_OPTIONS, OPENTELEMETRY_PROMETHEUS_EXPORTER],
-    };
-  }
-
-  private static createPrometheusExporterProvider(): Provider {
-    return {
-      provide: OPENTELEMETRY_PROMETHEUS_EXPORTER,
-      useFactory: (options: OpenTelemetryModuleOptions) => {
-        const { port = 8081 } = options?.withPrometheusExporter;
-        return new PrometheusExporter({ port });
-      },
-      inject: [OPENTELEMETRY_MODULE_OPTIONS],
-    };
-  }
-
-  private static noopPrometheusExporterProvider(): Provider {
-    return {
-      provide: OPENTELEMETRY_PROMETHEUS_EXPORTER,
-      useFactory: () => null,
+      inject: [OPENTELEMETRY_MODULE_OPTIONS, OPENTELEMETRY_METER_PROVIDER],
     };
   }
 
   private static createMeterProvider(): Provider {
     return {
       provide: OPENTELEMETRY_METER_PROVIDER,
-      useFactory: (exporter: PrometheusExporter, options: OpenTelemetryModuleOptions) => {
+      useFactory: (options: OpenTelemetryModuleOptions) => {
         const {
-          withDefaultMetrics = false, withHostMetrics = false,
-        } = options?.withPrometheusExporter;
+          defaultMetrics = false, hostMetrics = false,
+        } = options?.metrics;
 
         const meterProvider = new MeterProvider({
-          exporter,
           interval: 1000,
+          exporter: options?.nodeSDKConfiguration?.metricExporter,
         });
 
-        if (withDefaultMetrics) {
+        if (defaultMetrics) {
           nodeMetrics(meterProvider);
         }
 
-        if (withHostMetrics) {
-          const hostMetrics = new HostMetrics({ meterProvider, name: 'host-metrics' });
-          hostMetrics.start();
+        if (hostMetrics) {
+          const host = new HostMetrics({ meterProvider, name: 'host-metrics' });
+          host.start();
         }
+
         return meterProvider;
       },
-      inject: [OPENTELEMETRY_PROMETHEUS_EXPORTER, OPENTELEMETRY_MODULE_OPTIONS],
+      inject: [OPENTELEMETRY_MODULE_OPTIONS],
     };
   }
 }

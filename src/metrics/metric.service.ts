@@ -20,7 +20,7 @@ export class MetricService {
   private meterData: Map<string, GenericMetric> = new Map();
 
   constructor(@Inject(OPENTELEMETRY_METER_PROVIDER) private readonly meterProvider: MeterProvider) {
-    this.meter = this.meterProvider.getMeter('prometheus-metrics');
+    this.meter = this.meterProvider.getMeter('metrics');
   }
 
   getCounter(name: string, options?: MetricOptions) {

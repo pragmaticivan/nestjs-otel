@@ -17,7 +17,7 @@ export async function createOpenTelemetryModule(
   options?: OpenTelemetryModuleOptions,
 ): Promise<TestHarness> {
   const testingModule = await Test.createTestingModule({
-    imports: [OpenTelemetryModule.register(options)],
+    imports: [OpenTelemetryModule.forRoot(options)],
   }).compile();
 
   const app = testingModule.createNestApplication();
