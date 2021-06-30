@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.4.0...v1.5.0) (2021-06-30)
+
+
+### Features
+
+* support forRootAsync ([8cb00a4](https://www.github.com/pragmaticivan/nestjs-otel/commit/8cb00a455e65e1de9b893291720c037b29a847aa))
+
 ## [1.4.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.3.0...v1.4.0) (2021-06-29)
 
 
