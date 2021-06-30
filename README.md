@@ -182,10 +182,6 @@ export const loggerOptions: LoggerOptions = {
 export const logger: Logger = Pino(loggerOptions);
 ```
 
-## License
-
-[MIT License](https://pragmaticivan.mit-license.org/) © Ivan Santos
-
 ## Inspiration
 
 * https://github.com/MetinSeylan/Nestjs-OpenTelemetry
