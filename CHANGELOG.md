@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.5.0...v1.6.0) (2021-06-30)
+
+
+### Features
+
+* changes license to Apache2 ([5129fdb](https://www.github.com/pragmaticivan/nestjs-otel/commit/5129fdba49a834437faddda20044afd3d91ea7a7))
+
 ## [1.5.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.4.0...v1.5.0) (2021-06-30)
 
 
