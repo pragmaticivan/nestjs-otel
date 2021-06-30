@@ -1,15 +1,32 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { OpenTelemetryCoreModule } from './opentelemetry-core.module';
-import { OpenTelemetryModuleOptions } from './interfaces';
+import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions } from './interfaces';
 
+/**
+ * The NestJS module for OpenTelemetry
+ */
 @Module({})
 export class OpenTelemetryModule {
-  static async forRoot(
-    options?: OpenTelemetryModuleOptions,
-  ): Promise<DynamicModule> {
+  /**
+   * Bootstraps the OpenTelemetry Module synchronously
+   * @param options The options for the OpenTelemetry Module
+   */
+  static forRoot(options?: OpenTelemetryModuleOptions): DynamicModule {
     return {
       module: OpenTelemetryModule,
-      imports: [await OpenTelemetryCoreModule.forRoot(options)],
+      imports: [OpenTelemetryCoreModule.forRoot(options)],
+    };
+  }
+
+  /**
+   * Bootstrap the OpenTelemetry Module asynchronously
+   * @see https://dev.to/nestjs/advanced-nestjs-how-to-build-completely-dynamic-nestjs-modules-1370
+   * @param options The options for the OpenTelemetry module
+   */
+  static forRootAsync(options?: OpenTelemetryModuleAsyncOptions): DynamicModule {
+    return {
+      module: OpenTelemetryModule,
+      imports: [OpenTelemetryCoreModule.forRootAsync(options)],
     };
   }
 }

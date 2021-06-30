@@ -1,7 +1,7 @@
 import {
   DynamicModule, Global, Inject, Logger,
   MiddlewareConsumer, Module, OnApplicationBootstrap,
-  OnApplicationShutdown, Provider,
+  OnApplicationShutdown, Provider, Type,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { HostMetrics } from '@opentelemetry/host-metrics';
@@ -9,7 +9,7 @@ import { MeterProvider } from '@opentelemetry/metrics';
 import * as nodeMetrics from 'opentelemetry-node-metrics';
 import { metrics } from '@opentelemetry/api-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { OpenTelemetryModuleOptions } from './interfaces';
+import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions, OpenTelemetryOptionsFactory } from './interfaces';
 import { MetricService } from './metrics/metric.service';
 import { ApiMetricsMiddleware } from './middleware';
 import {
@@ -18,7 +18,14 @@ import {
   OPENTELEMETRY_SDK,
 } from './opentelemetry.constants';
 import { TraceService } from './tracing/trace.service';
+import { OpenTelemetryModule } from './opentelemetry.module';
 
+/**
+ * The internal OpenTelemetry Module which handles the integration
+ * with the third party OpenTelemetry library and Nest
+ *
+ * @internal
+ */
 @Global()
 @Module({})
 export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplicationBootstrap {
@@ -29,31 +36,56 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
     private readonly moduleRef: ModuleRef,
   ) {}
 
-  static async forRoot(
+  /**
+   * Bootstraps the internal OpenTelemetry Module with the given options
+   * synchronously and sets the correct providers
+   * @param options The options to bootstrap the module synchronously
+   */
+  static forRoot(
     options: OpenTelemetryModuleOptions = { metrics: {} },
-  ): Promise<DynamicModule> {
+  ): DynamicModule {
     const openTelemetryModuleOptions = {
       provide: OPENTELEMETRY_MODULE_OPTIONS,
       useValue: options,
     };
 
-    const providers = [
-      openTelemetryModuleOptions,
-      await this.createNodeSDKProvider(),
-      this.createMeterProvider(),
-      TraceService,
-      MetricService,
-    ];
-
-    const exports: Provider[] = [
-      TraceService,
-      MetricService,
-    ];
-
     return {
       module: OpenTelemetryCoreModule,
-      providers,
-      exports,
+      providers: [
+        openTelemetryModuleOptions,
+        this.createNodeSDKProvider(),
+        this.createMeterProvider(),
+        TraceService,
+        MetricService,
+      ],
+      exports: [
+        TraceService,
+        MetricService,
+      ],
+    };
+  }
+
+  /**
+   * Bootstraps the internal OpenTelemetry Module with the given
+   * options asynchronously and sets the correct providers
+   * @param options The options to bootstrap the module
+   */
+  static forRootAsync(options: OpenTelemetryModuleAsyncOptions): DynamicModule {
+    const asyncProviders = this.createAsyncProviders(options);
+    return {
+      module: OpenTelemetryModule,
+      imports: [...(options.imports || [])],
+      providers: [
+        ...asyncProviders,
+        this.createNodeSDKProvider(),
+        this.createMeterProvider(),
+        TraceService,
+        MetricService,
+      ],
+      exports: [
+        TraceService,
+        MetricService,
+      ],
     };
   }
 
@@ -91,16 +123,16 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
     }
   }
 
-  private static async createNodeSDKProvider(): Promise<Provider> {
+  private static createNodeSDKProvider(): Provider {
     return {
       provide: OPENTELEMETRY_SDK,
-      useFactory: (options: OpenTelemetryModuleOptions, meterProvider: MeterProvider) => {
+      useFactory: (options: OpenTelemetryModuleOptions) => {
         const sdk = new NodeSDK(
           { ...options.nodeSDKConfiguration },
         );
         return sdk;
       },
-      inject: [OPENTELEMETRY_MODULE_OPTIONS, OPENTELEMETRY_METER_PROVIDER],
+      inject: [OPENTELEMETRY_MODULE_OPTIONS],
     };
   }
 
@@ -130,5 +162,60 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
       },
       inject: [OPENTELEMETRY_MODULE_OPTIONS],
     };
+  }
+
+  /**
+   * Returns the asynchrnous OpenTelemetry options providers depending on the
+   * given module options
+   * @param options Options for the asynchrnous OpenTelemetry module
+   */
+  private static createAsyncOptionsProvider(
+    options: OpenTelemetryModuleAsyncOptions,
+  ): Provider {
+    if (options.useFactory) {
+      return {
+        provide: OPENTELEMETRY_MODULE_OPTIONS,
+        useFactory: options.useFactory,
+        inject: options.inject || [],
+      };
+    }
+
+    if (options.useClass || options.useExisting) {
+      const inject = [
+        (options.useClass || options.useExisting) as Type<
+        OpenTelemetryOptionsFactory
+        >,
+      ];
+      return {
+        provide: OPENTELEMETRY_MODULE_OPTIONS,
+        // eslint-disable-next-line max-len
+        useFactory: async (optionsFactory: OpenTelemetryOptionsFactory) => optionsFactory.createOpenTelemetryOptions(),
+        inject,
+      };
+    }
+
+    throw new Error();
+  }
+
+  /**
+   * Returns the asynchrnous providers depending on the given module
+   * options
+   * @param options Options for the asynchrnous OpenTelemetry module
+   */
+  private static createAsyncProviders(
+    options: OpenTelemetryModuleAsyncOptions,
+  ): Provider[] {
+    if (options.useFactory || options.useExisting) {
+      return [this.createAsyncOptionsProvider(options)];
+    }
+    const useClass = options.useClass as Type<OpenTelemetryOptionsFactory>;
+    return [
+      this.createAsyncOptionsProvider(options),
+      {
+        provide: useClass,
+        useClass,
+        inject: [...(options.inject || [])],
+      },
+    ];
   }
 }
