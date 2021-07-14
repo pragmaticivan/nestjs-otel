@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.6.0...v1.7.0) (2021-07-14)
+
+
+### Features
+
+* remove unused constant and reorganize pkgs ([d37fc28](https://www.github.com/pragmaticivan/nestjs-otel/commit/d37fc28c7bc3944399cda157a6ee87a5b83919e3))
+
 ## [1.6.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.5.0...v1.6.0) (2021-06-30)
 
 
