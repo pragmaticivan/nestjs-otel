@@ -4,6 +4,7 @@ module.exports = {
     project: './tsconfig.json',
     createDefaultProgram: true,
   },
+  ignorePatterns: ['**/examples/**/*', 'lib/**/*'],
   rules: {
     'import/prefer-default-export': 'off',
     'import/no-cycle': 'off',

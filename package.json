@@ -8,8 +8,8 @@
     "prebuild": "rimraf lib",
     "prepare": "husky install",
     "build": "tsc",
-    "lint": "eslint --ignore-pattern 'examples/*' . --ext .js,ts",
-    "format": "eslint --ignore-pattern 'examples/*' . --ext .js,ts --fix",
+    "lint": "eslint . --ext .js,ts",
+    "format": "eslint . --ext .js,ts --fix",
     "test": "npm run test:unit && npm run test:integration",
     "test:coverage": "jest --coverage",
     "test:unit": "jest --passWithNoTests",
@@ -96,7 +96,7 @@
     "testEnvironment": "node"
   },
   "lint-staged": {
-    "*.{js,ts}": "eslint --ignore-pattern 'examples/*' --cache --fix"
+    "*.{js,ts}": "eslint --cache --fix"
   },
   "commitlint": {
     "extends": [
