@@ -1,8 +1,7 @@
-import { INestApplication } from '@nestjs/common';
+import { DynamicModule, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { OpenTelemetryModule } from '../src';
-import { OpenTelemetryModuleOptions } from '../src/interfaces';
 
 export type Agent = request.SuperTest<request.Test>;
 export type App = INestApplication;
@@ -14,10 +13,10 @@ export interface TestHarness {
 }
 
 export async function createOpenTelemetryModule(
-  options?: OpenTelemetryModuleOptions,
+  module: DynamicModule,
 ): Promise<TestHarness> {
   const testingModule = await Test.createTestingModule({
-    imports: [OpenTelemetryModule.forRoot(options)],
+    imports: [module],
   }).compile();
 
   const app = testingModule.createNestApplication();

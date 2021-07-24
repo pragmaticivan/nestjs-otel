@@ -6,12 +6,14 @@ import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 
+export const DEFAULT_LONG_RUNNING_REQUEST_BUCKETS = [
+  0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, // standard
+  30, 60, 120, 300, 600, // Sometimes requests may be really long-running
+];
+
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
-  private readonly defaultLongRunningRequestBuckets = [
-    0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, // standard
-    30, 60, 120, 300, 600, // Sometimes requests may be really long-running
-  ];
+  private readonly defaultLongRunningRequestBuckets = DEFAULT_LONG_RUNNING_REQUEST_BUCKETS;
 
   private requestTotal: Counter;
 
@@ -55,7 +57,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       description: 'Total number of server error requests',
     });
 
-    const { timeBuckets = [] } = this.options?.metrics?.apiMetrics;
+    const { timeBuckets = [] } = options?.metrics?.apiMetrics;
     this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
       boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
       description: 'HTTP latency value recorder in seconds',
@@ -65,8 +67,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
   use(req, res, next) {
     // eslint-disable-next-line @typescript-eslint/no-shadow
     responseTime((req, res, time) => {
-      const { url, method } = req;
-      const { path } = urlParser.parse(url);
+      const { route, method } = req;
+      const { path } = route;
       if (path === '/favicon.ico') {
         return;
       }
