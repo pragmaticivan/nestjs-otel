@@ -4,6 +4,8 @@ import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions } from './i
 
 /**
  * The NestJS module for OpenTelemetry
+ *
+ * @publicApi
  */
 @Module({})
 export class OpenTelemetryModule {
@@ -23,7 +25,7 @@ export class OpenTelemetryModule {
    * @see https://dev.to/nestjs/advanced-nestjs-how-to-build-completely-dynamic-nestjs-modules-1370
    * @param options The options for the OpenTelemetry module
    */
-  static forRootAsync(options?: OpenTelemetryModuleAsyncOptions): DynamicModule {
+  static forRootAsync(options: OpenTelemetryModuleAsyncOptions): DynamicModule {
     return {
       module: OpenTelemetryModule,
       imports: [OpenTelemetryCoreModule.forRootAsync(options)],

@@ -126,7 +126,7 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
   private static createNodeSDKProvider(): Provider {
     return {
       provide: OPENTELEMETRY_SDK,
-      useFactory: (options: OpenTelemetryModuleOptions) => {
+      useFactory: (options?: OpenTelemetryModuleOptions) => {
         const sdk = new NodeSDK(
           { ...options.nodeSDKConfiguration },
         );
@@ -140,9 +140,15 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
     return {
       provide: OPENTELEMETRY_METER_PROVIDER,
       useFactory: (options: OpenTelemetryModuleOptions) => {
-        const {
-          defaultMetrics = false, hostMetrics = false,
-        } = options?.metrics;
+        let defaultMetrics; let
+          hostMetrics;
+
+        if (options?.metrics) {
+          defaultMetrics = options.metrics.defaultMetrics
+            !== undefined ? options.metrics.defaultMetrics : false;
+          hostMetrics = options.metrics.hostMetrics
+            !== undefined ? options.metrics.hostMetrics : false;
+        }
 
         const meterProvider = new MeterProvider({
           interval: 1000,
