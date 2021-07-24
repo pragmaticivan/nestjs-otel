@@ -10,9 +10,7 @@ export type OpenTelemetryModuleOptions = {
 };
 
 export interface OpenTelemetryOptionsFactory {
-  createOpenTelemetryOptions(
-    connectionName?: string,
-  ): Promise<OpenTelemetryModuleOptions> | OpenTelemetryModuleOptions;
+  createOpenTelemetryOptions(): Promise<OpenTelemetryModuleOptions> | OpenTelemetryModuleOptions;
 }
 
 /**
