@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.8.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.7.0...v1.8.0) (2021-07-24)
+
+
+### Features
+
+* update api metrics to use route match path instead of full route ([ad51bac](https://www.github.com/pragmaticivan/nestjs-otel/commit/ad51bac1b0121257434cc4543853227669f15aca)), closes [#48](https://www.github.com/pragmaticivan/nestjs-otel/issues/48)
+
+
+### Bug Fixes
+
+* fixes forRootAsync usage ([a390f0e](https://www.github.com/pragmaticivan/nestjs-otel/commit/a390f0e564227b5e9019d1b8da19e4966e3d7ddf))
+
 ## [1.7.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.6.0...v1.7.0) (2021-07-14)
 
 
