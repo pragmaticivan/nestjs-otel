@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+quote_type = double
+
+# editorconfig-tools is unable to ignore longs strings or urls
+max_line_length = null
+
+[*.js, *.jsx, *.tsx, *.ts]
+quote_type = single
+indent_style = space
+indent_size = 2
+
+[*.{json,yaml,yml}]
+indent_size = 2
