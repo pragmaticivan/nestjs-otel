@@ -35,9 +35,19 @@ export class MetricService {
     return this.getOrCreateValueRecorder(name, MetricType.ValueRecorder, options);
   }
 
-  getOrCreateValueRecorder(name: string, type: MetricType, options: MetricOptions): ValueRecorder {
-    if (this.meterData[name]) {
-      return this.meterData[name];
+  getMeterData(): Map<string, GenericMetric> {
+    return this.meterData;
+  }
+
+  getMeter(): Meter {
+    return this.meter;
+  }
+
+  private getOrCreateValueRecorder(
+    name: string, type: MetricType, options: MetricOptions,
+  ): ValueRecorder {
+    if (this.meterData.has(name)) {
+      return this.meterData.get(name) as ValueRecorder;
     }
     switch (type) {
       case MetricType.ValueRecorder:
@@ -49,11 +59,11 @@ export class MetricService {
     }
   }
 
-  getOrCreateCounter(
+  private getOrCreateCounter(
     name: string, type: MetricType, options: MetricOptions,
   ): Counter | UpDownCounter {
-    if (this.meterData[name]) {
-      return this.meterData[name];
+    if (this.meterData.has(name)) {
+      return this.meterData.get(name) as Counter | UpDownCounter;
     }
     switch (type) {
       case MetricType.Counter:

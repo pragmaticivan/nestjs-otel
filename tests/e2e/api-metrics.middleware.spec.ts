@@ -1,10 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { MeterProvider } from '@opentelemetry/metrics';
 import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { MetricService, OpenTelemetryModule } from '../../src';
-import { ApiMetricsMiddleware, DEFAULT_LONG_RUNNING_REQUEST_BUCKETS } from '../../src/middleware';
+import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS } from '../../src/middleware';
 import { AppController } from '../fixture-app/app.controller';
 import { EmptyLogger } from '../utils';
 
