@@ -7,7 +7,7 @@ import { MetricService, OpenTelemetryModule } from '../../src';
 import { ApiMetricsMiddleware, DEFAULT_LONG_RUNNING_REQUEST_BUCKETS } from '../../src/middleware';
 import { AppController } from '../fixture-app/app.controller';
 
-describe('Api Metrics Midasync dleware', () => {
+describe('Api Metrics Middleware', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
