@@ -67,11 +67,19 @@ export class ApiMetricsMiddleware implements NestMiddleware {
   use(req, res, next) {
     // eslint-disable-next-line @typescript-eslint/no-shadow
     responseTime((req, res, time) => {
-      const { route, method } = req;
-      const { path } = route;
+      const { route, url, method } = req;
+      let path;
+
+      if (route) {
+        path = route.path;
+      } else {
+        path = urlParser.parse(url).pathname;
+      }
+
       if (path === '/favicon.ico') {
         return;
       }
+
       // TODO Support `ignore routes array instead`
       const metricPath = '/metrics';
       if (path === metricPath) {
