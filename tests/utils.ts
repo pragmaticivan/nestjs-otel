@@ -1,4 +1,4 @@
-import { DynamicModule, INestApplication } from '@nestjs/common';
+import { DynamicModule, INestApplication, LoggerService } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { OpenTelemetryModule } from '../src';
@@ -29,4 +29,16 @@ export async function createOpenTelemetryModule(
     app,
     agent,
   };
+}
+
+export class EmptyLogger implements LoggerService {
+  log(message: string): any {}
+
+  error(message: string, trace: string): any {}
+
+  warn(message: string): any {}
+
+  debug(message: string): any {}
+
+  verbose(message: string): any {}
 }

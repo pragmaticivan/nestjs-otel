@@ -6,6 +6,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { MetricService, OpenTelemetryModule } from '../../src';
 import { ApiMetricsMiddleware, DEFAULT_LONG_RUNNING_REQUEST_BUCKETS } from '../../src/middleware';
 import { AppController } from '../fixture-app/app.controller';
+import { EmptyLogger } from '../utils';
 
 describe('Api Metrics Middleware', () => {
   beforeEach(() => {
@@ -168,6 +169,46 @@ describe('Api Metrics Middleware', () => {
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/4\/invalid-route"[^}]*}/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
+  });
+
+  it('registers server error request records', async () => {
+    exporter = new PrometheusExporter({
+      port: 8089,
+    });
+
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+          },
+          // hostMetrics: true,
+        },
+        nodeSDKConfiguration: {
+          metricExporter: exporter,
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+    testingModule.useLogger(new EmptyLogger());
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/example/internal-error');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_server_error_total 1/.test(text)).toBeTruthy();
   });
 
   afterEach(async () => {
