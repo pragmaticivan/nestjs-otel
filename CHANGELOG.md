@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.8.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.8.0...v1.8.1) (2021-07-25)
+
+
+### Bug Fixes
+
+* **middleware:** fixes api middleware when no requesting invalid route ([2a008d9](https://www.github.com/pragmaticivan/nestjs-otel/commit/2a008d9ab605a1660c0e5015bd7d635813e3fc57))
+
 ## [1.8.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.7.0...v1.8.0) (2021-07-24)
 
 
