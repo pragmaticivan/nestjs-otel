@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.8.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.8.1...v1.8.2) (2021-07-25)
+
+
+### Bug Fixes
+
+* **metric:** fixes metric service not properly reusing existing metrics ([9f24fd8](https://www.github.com/pragmaticivan/nestjs-otel/commit/9f24fd8a76e6ee0060468de1326265c1fb7b4824))
+
 ### [1.8.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.8.0...v1.8.1) (2021-07-25)
 
 
