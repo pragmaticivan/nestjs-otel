@@ -228,9 +228,9 @@ export class AppController {
 
 You have the following decorators:
 
-* @OtelCounter()
-* @OtelUpDownCounter()
-* @OtelValueRecorder()
+* `@OtelCounter()`
+* `@OtelUpDownCounter()`
+* `@OtelValueRecorder()`
 
 Example of usage:
 
