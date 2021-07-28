@@ -10,12 +10,12 @@
     "build": "tsc",
     "lint": "eslint . --ext .js,ts",
     "format": "eslint . --ext .js,ts --fix",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "npm run test:unit && npm run test:e2e",
     "test:coverage": "jest --coverage",
     "test:unit": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:integration": "jest --config ./tests/jest-e2e.json --runInBand --detectOpenHandles",
-    "test:integration:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch"
+    "test:e2e": "jest --config ./tests/jest-e2e.json --runInBand --detectOpenHandles",
+    "test:e2e:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch"
   },
   "repository": {
     "type": "git",
@@ -41,13 +41,13 @@
     "@nestjs/swagger": "^5.0.1",
     "@opentelemetry/api": "^1.0.1",
     "@opentelemetry/api-metrics": "^0.22.0",
-    "@opentelemetry/sdk-node": "^0.22.0",
     "@opentelemetry/metrics": "^0.22.0",
     "opentelemetry-node-metrics": "^1.0.2",
     "response-time": "^2.3.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
+    "@opentelemetry/sdk-node": "^0.22.0",
     "@commitlint/config-conventional": "^12.1.4",
     "@nestjs/common": "^7.6.18",
     "@nestjs/core": "^7.6.18",

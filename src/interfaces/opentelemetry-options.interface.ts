@@ -1,8 +1,6 @@
 import { ModuleMetadata, Type, Abstract } from '@nestjs/common';
-import { NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 
 export type OpenTelemetryModuleOptions = {
-  nodeSDKConfiguration?: Partial<NodeSDKConfiguration>
   /**
    * OpenTelemetry Metrics Setup
    */

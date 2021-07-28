@@ -2,23 +2,39 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { MetricService, OpenTelemetryModule } from '../../src';
-import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS } from '../../src/middleware';
-import { AppController } from '../fixture-app/app.controller';
-import { EmptyLogger } from '../utils';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { metrics } from '@opentelemetry/api-metrics';
+import { MetricService, OpenTelemetryModule, OTEL_METER_NAME } from '../../../src';
+import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS } from '../../../src/middleware';
+import { AppController } from '../../fixture-app/app.controller';
+import { EmptyLogger } from '../../utils';
+import { meterData } from '../../../src/metrics/metric-data';
 
 describe('Api Metrics Middleware', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   let app: INestApplication;
-  let exporter: PrometheusExporter;
-
   const metricService = {
     getCounter: jest.fn(),
     getValueRecorder: jest.fn(),
   };
+
+  let exporter: PrometheusExporter;
+  let otelSDK: NodeSDK;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    exporter = new PrometheusExporter({
+      preventServerStart: true,
+    });
+
+    otelSDK = new NodeSDK({
+      metricExporter: exporter,
+      metricInterval: 100,
+    });
+    meterData.clear();
+
+    await otelSDK.start();
+    await exporter.startServer();
+  });
 
   it('does not register api metrics when disabled', async () => {
     const testingModule = await Test.createTestingModule({
@@ -82,20 +98,12 @@ describe('Api Metrics Middleware', () => {
   });
 
   it('registers successful request records', async () => {
-    exporter = new PrometheusExporter({
-      port: 8089,
-    });
-
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
         metrics: {
           apiMetrics: {
             enable: true,
           },
-          // hostMetrics: true,
-        },
-        nodeSDKConfiguration: {
-          metricExporter: exporter,
         },
       })],
       controllers: [AppController],
@@ -108,7 +116,7 @@ describe('Api Metrics Middleware', () => {
     await agent.get('/example/4?foo=bar');
 
     // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // TODO: OpenTelemetry exporter does not expose server in a public function.
     // @ts-ignore
@@ -126,10 +134,6 @@ describe('Api Metrics Middleware', () => {
   });
 
   it('registers unsuccessful request records', async () => {
-    exporter = new PrometheusExporter({
-      port: 8089,
-    });
-
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
         metrics: {
@@ -137,9 +141,6 @@ describe('Api Metrics Middleware', () => {
             enable: true,
           },
           // hostMetrics: true,
-        },
-        nodeSDKConfiguration: {
-          metricExporter: exporter,
         },
       })],
       controllers: [AppController],
@@ -152,7 +153,7 @@ describe('Api Metrics Middleware', () => {
     await agent.get('/example/4/invalid-route?foo=bar');
 
     // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // TODO: OpenTelemetry exporter does not expose server in a public function.
     // @ts-ignore
@@ -171,20 +172,12 @@ describe('Api Metrics Middleware', () => {
   });
 
   it('registers server error request records', async () => {
-    exporter = new PrometheusExporter({
-      port: 8089,
-    });
-
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
         metrics: {
           apiMetrics: {
             enable: true,
           },
-          // hostMetrics: true,
-        },
-        nodeSDKConfiguration: {
-          metricExporter: exporter,
         },
       })],
       controllers: [AppController],
@@ -198,7 +191,7 @@ describe('Api Metrics Middleware', () => {
     await agent.get('/example/internal-error');
 
     // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // TODO: OpenTelemetry exporter does not expose server in a public function.
     // @ts-ignore
@@ -211,6 +204,13 @@ describe('Api Metrics Middleware', () => {
   });
 
   afterEach(async () => {
+    metrics.disable();
+    if (exporter) {
+      await exporter.stopServer();
+    }
+    if (otelSDK) {
+      await otelSDK.shutdown();
+    }
     if (app) {
       await app.close();
     }
