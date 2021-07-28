@@ -6,7 +6,7 @@
   "typings": "lib/index",
   "scripts": {
     "prebuild": "rimraf lib",
-    "prepare": "husky install",
+    "prepare": "tsc",
     "build": "tsc",
     "lint": "eslint . --ext .js,ts",
     "format": "eslint . --ext .js,ts --fix",
