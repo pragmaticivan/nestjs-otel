@@ -188,6 +188,69 @@ export class BookService {
 }
 ```
 
+## Metric Decorators
+
+### Metric Class Instances
+
+If you want to count how many instance of a specific class has been created:
+
+```ts
+@OtelInstanceCounter() // It will generate a counter called: app_MyClass_instances_total.
+export class MyClass {
+
+}
+```
+
+
+### Metric Class Method
+
+If you want to increment a counter on each call of a specific method:
+
+```ts
+@Injectable()
+export class MyService {
+  @OtelMethodCounter()
+  doSomething() {
+
+  }
+}
+@Controller()
+export class AppController {
+  @Get()
+  @OtelMethodCounter() // It will generate `app_AppController_doSomething_calls_total` counter.
+  doSomething() {
+    // do your stuff
+  }
+}
+```
+
+### Metric Param Decorator
+
+You have the following decorators:
+
+* `@OtelCounter()`
+* `@OtelUpDownCounter()`
+* `@OtelValueRecorder()`
+
+Example of usage:
+
+```ts
+import { OtelCounter } from 'nestjs-otel';
+import { Counter } from '@opentelemetry/api-metrics';
+
+@Controller()
+export class AppController {
+
+  @Get('/home')
+  home(
+    @OtelCounter('app_counter_1_inc', { description: 'counter 1 description' }) counter1: Counter,
+  ) {
+    counter1.inc(1);
+  }
+}
+
+```
+
 ## API Metrics with Middleware
 
 Impl |Metric |Description| Labels | Metric Type
