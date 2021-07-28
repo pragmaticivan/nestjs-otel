@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.8.2...v2.0.0) (2021-07-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* removes nodeSDKConfiguration option
+
+### Features
+
+* node-sdk to be defined by the user instead of through the lib ([5156324](https://www.github.com/pragmaticivan/nestjs-otel/commit/5156324b64cee8fccd2d06eaf5d155e22a5c0fbf))
+
 ### [1.8.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.8.1...v1.8.2) (2021-07-25)
 
 
