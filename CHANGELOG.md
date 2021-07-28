@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.0.0...v2.1.0) (2021-07-28)
+
+
+### Features
+
+* add metric decorators ([9263bd0](https://www.github.com/pragmaticivan/nestjs-otel/commit/9263bd0844e203920375ca04a4876fe60e8ea2a7))
+
 ## [2.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v1.8.2...v2.0.0) (2021-07-28)
 
 
