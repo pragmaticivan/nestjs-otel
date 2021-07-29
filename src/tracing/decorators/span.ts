@@ -1,6 +1,12 @@
 import { context, SpanStatusCode, trace } from '@opentelemetry/api';
 
-export function Span(name?: string) {
+type Param = {
+  name?: string;
+  setStatus?: boolean;
+};
+
+export function Span(param: Param = {}) {
+  const { name, setStatus = true } = param;
   return (
     target: any,
     propertyKey: string,
@@ -18,11 +24,15 @@ export function Span(name?: string) {
         if (method.constructor.name === 'AsyncFunction') {
           return method.apply(this, args)
             .then((r) => {
-              span.setStatus({ code: SpanStatusCode.OK });
+              if (setStatus) {
+                span.setStatus({ code: SpanStatusCode.OK });
+              }
               return r;
             })
             .catch((e) => {
-              span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
+              if (setStatus) {
+                span.setStatus({ code: SpanStatusCode.ERROR, message: e.message });
+              }
               throw e;
             })
             .finally(() => {
