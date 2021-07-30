@@ -7,6 +7,7 @@
   "scripts": {
     "prebuild": "rimraf lib",
     "prepare": "tsc",
+    "install": "tsc",
     "build": "tsc",
     "lint": "eslint . --ext .js,ts",
     "format": "eslint . --ext .js,ts --fix",
