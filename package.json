@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/pragmaticivan/nestjs-otel#readme",
   "dependencies": {
-    "@opentelemetry/host-metrics": "^0.22.0",
+    "@opentelemetry/host-metrics": "^0.24.0",
     "@nestjs/swagger": "^5.0.1",
     "@opentelemetry/api": "^1.0.1",
     "@opentelemetry/api-metrics": "^0.22.0",
