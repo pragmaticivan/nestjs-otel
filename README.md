@@ -200,7 +200,6 @@ export class MyClass {
 }
 ```
 
-
 ### Metric Class Method
 
 If you want to increment a counter on each call of a specific method:
