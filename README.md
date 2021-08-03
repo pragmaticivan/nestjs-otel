@@ -102,7 +102,6 @@ bootstrap();
 
 3. Configure nest-otel:
 
-
 ```ts
 const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   metrics: {
