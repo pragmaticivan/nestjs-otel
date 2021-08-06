@@ -294,6 +294,18 @@ export const loggerOptions: LoggerOptions = {
 export const logger: Logger = Pino(loggerOptions);
 ```
 
+## Examples
+
+A full working example can be found in `/examples/nestjs-prom-grafana-tempo`. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo.
+
+A dashboard example is also available:
+
+![Grafana Dashboard](./examples/nestjs-prom-grafana-tempo/grafana-dashboard.png)
+
+Logs are automatically associated with tracing (Loki + Tempo):
+
+![Loki](./examples/nestjs-prom-grafana-tempo/loki-logs.png)
+
 ## Inspiration
 
 * https://github.com/MetinSeylan/Nestjs-OpenTelemetry
