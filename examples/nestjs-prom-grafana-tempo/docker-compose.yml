@@ -23,7 +23,7 @@ services:
     depends_on:
       - tempo
   loki:
-    image: grafana/loki:2.2.0
+    image: grafana/loki:2.2.1
     command: -config.file=/etc/loki/loki-local.yaml
     ports:
       - "3101:3100"                                   # loki needs to be exposed so it receives logs
@@ -36,7 +36,7 @@ services:
       - ./etc/loki-local.yaml:/etc/loki/loki-local.yaml
       - ./data/loki-data:/tmp/loki
   promtail:
-    image: grafana/promtail:2.2.0
+    image: grafana/promtail:2.2.1
     command: -config.file=/etc/promtail/promtail-local.yaml
     volumes:
       - ./etc/promtail-local.yaml:/etc/promtail/promtail-local.yaml
@@ -66,7 +66,7 @@ services:
       - nestjs-example
 
   grafana:
-    image: grafana/grafana:7.4.0-ubuntu
+    image: grafana/grafana:8.1.0-ubuntu
     volumes:
       - ./data/grafana-data/datasources:/etc/grafana/provisioning/datasources
       - ./data/grafana-data/dashboards-provisioning:/etc/grafana/provisioning/dashboards
@@ -86,6 +86,7 @@ services:
     build: .
     ports:
       - 5555:5555
+      - 8081:8081
     volumes:
       - ./data/logs:/app/logs
     environment:
