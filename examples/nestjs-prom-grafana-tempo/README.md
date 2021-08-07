@@ -1,4 +1,4 @@
-# Prometheus + Grafana + Tempo + Jaeger Observability Stack example
+# Prometheus + Grafana + Tempo + Loki Observability Stack example
 
 ### Running
 

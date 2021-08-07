@@ -32,6 +32,7 @@
     "@opentelemetry/metrics": "^0.24.0",
     "@opentelemetry/propagator-b3": "^0.24.0",
     "@opentelemetry/propagator-jaeger": "^0.24.0",
+    "@opentelemetry/sdk-node": "^0.24.0",
     "@opentelemetry/tracing": "^0.24.0",
     "nestjs-otel": "^2.1.0",
     "nestjs-pino": "^1.4.0",

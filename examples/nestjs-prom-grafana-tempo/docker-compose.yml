@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   tempo:
-    image: grafana/tempo:0.7.0
+    image: grafana/tempo:1.0.1
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ./etc/tempo-local.yaml:/etc/tempo.yaml
@@ -13,15 +13,6 @@ services:
       - "3100"       # tempo
       - "6831/udp"   # Jaeger - Thrift Compact
       - "6832/udp"   # Jaeger - Thrift Binary
-  tempo-query:
-    image: grafana/tempo-query:0.7.0
-    command: ["--grpc-storage-plugin.configuration-file=/etc/tempo-query.yaml"]
-    volumes:
-      - ./etc/tempo-query.yaml:/etc/tempo-query.yaml
-    ports:
-      - "16686:16686"  # jaeger-ui
-    depends_on:
-      - tempo
   loki:
     image: grafana/loki:2.2.1
     command: -config.file=/etc/loki/loki-local.yaml
@@ -79,7 +70,7 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
-      - tempo-query
+      - tempo
       - loki
       - volume_exporter
   nestjs-example:
