@@ -7,6 +7,7 @@ export type OpenTelemetryModuleOptions = {
    * OpenTelemetry Metrics Setup
    */
   metrics?: OpenTelemetryMetrics
+  isGlobal?: boolean
 };
 
 export interface OpenTelemetryOptionsFactory {

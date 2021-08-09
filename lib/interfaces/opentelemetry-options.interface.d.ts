@@ -3,6 +3,7 @@ import { NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 export declare type OpenTelemetryModuleOptions = {
     nodeSDKConfiguration?: Partial<NodeSDKConfiguration>;
     metrics?: OpenTelemetryMetrics;
+    isGlobal?: boolean;
 };
 export interface OpenTelemetryOptionsFactory {
     createOpenTelemetryOptions(): Promise<OpenTelemetryModuleOptions> | OpenTelemetryModuleOptions;

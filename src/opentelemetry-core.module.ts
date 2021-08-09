@@ -26,7 +26,6 @@ import { OpenTelemetryModule } from './opentelemetry.module';
  *
  * @internal
  */
-@Global()
 @Module({})
 export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplicationBootstrap {
   private readonly logger = new Logger('OpenTelemetryModule');
@@ -62,6 +61,7 @@ export class OpenTelemetryCoreModule implements OnApplicationShutdown, OnApplica
         TraceService,
         MetricService,
       ],
+      global: options.isGlobal,
     };
   }
 

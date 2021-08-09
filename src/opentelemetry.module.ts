@@ -1,4 +1,4 @@
-import { DynamicModule, Global, Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { OpenTelemetryCoreModule } from './opentelemetry-core.module';
 import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions } from './interfaces';
 
@@ -8,7 +8,6 @@ import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions } from './i
  * @publicApi
  */
 @Module({})
-@Global()
 export class OpenTelemetryModule {
   /**
    * Bootstraps the OpenTelemetry Module synchronously
