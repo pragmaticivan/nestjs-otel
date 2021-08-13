@@ -4,7 +4,6 @@ import {
   Provider, Type,
 } from '@nestjs/common';
 import { HostMetrics } from '@opentelemetry/host-metrics';
-import * as nodeMetrics from 'opentelemetry-node-metrics';
 import { metrics } from '@opentelemetry/api-metrics';
 import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions, OpenTelemetryOptionsFactory } from './interfaces';
 import { MetricService } from './metrics/metric.service';
@@ -89,8 +88,8 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-    let defaultMetrics;
-    let hostMetrics;
+    let defaultMetrics:boolean = false;
+    let hostMetrics:boolean = false;
 
     if (this.options?.metrics) {
       defaultMetrics = this.options.metrics.defaultMetrics
@@ -102,7 +101,8 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
     const meterProvider = metrics.getMeterProvider();
 
     if (defaultMetrics) {
-      nodeMetrics(meterProvider);
+      // eslint-disable-next-line global-require
+      require('opentelemetry-node-metrics')(meterProvider);
     }
 
     if (hostMetrics) {
