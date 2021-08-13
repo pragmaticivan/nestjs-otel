@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.2.0...v2.3.0) (2021-08-13)
+
+
+### Features
+
+* update peer dependency to allow support for both v7 and v8 of NestJs ([647eb89](https://www.github.com/pragmaticivan/nestjs-otel/commit/647eb8906675414a05d14640c2374be1e8837f0e))
+
+
+### Bug Fixes
+
+* error nodeMetrics is not a function ([cf7d0fc](https://www.github.com/pragmaticivan/nestjs-otel/commit/cf7d0fc2e0d728470b5b259932bfad4be8f6aa3c))
+* removed .npmrc file, as it only had default values ([c27a8af](https://www.github.com/pragmaticivan/nestjs-otel/commit/c27a8af8d757ec67113158a3ee466adca32c9b04))
+* updates package-lock.json with default node 14 np version ([3301753](https://www.github.com/pragmaticivan/nestjs-otel/commit/330175321fc58e1ce269061101a537a3f0cc45bf))
+
 ## [2.2.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.1.0...v2.2.0) (2021-08-02)
 
 
