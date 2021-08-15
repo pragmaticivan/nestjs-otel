@@ -1,0 +1,5 @@
+# npm
+node_modules
+
+# npm run build
+dist
