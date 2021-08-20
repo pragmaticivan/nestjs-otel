@@ -14,6 +14,12 @@
 
 Setting up observability metrics with nestjs requires multiple libraries and patterns. OpenTelemetry has support for multiple exporters and types of metrics such as Prometheus Metrics.
 
+## Observability
+
+Please read this [comprehensive whitepaper](https://github.com/cncf/tag-observability/blob/main/whitepaper.md) if that's your first time working with metrics, tracing, and logs.
+
+![observability-signals](https://user-images.githubusercontent.com/24193764/121773601-55f86b80-cb53-11eb-8c8b-262a5aad781f.png)
+
 ## Installation
 
 ```bash
@@ -305,11 +311,3 @@ A dashboard example is also available:
 Logs are automatically associated with tracing (Loki + Tempo):
 
 ![Loki](./examples/nestjs-prom-grafana-tempo/loki-logs.png)
-
-## Inspiration
-
-* https://github.com/MetinSeylan/Nestjs-OpenTelemetry
-* https://github.com/digikare/nestjs-prom
-* https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.metrics
-* https://github.com/prometheus/haproxy_exporter/blob/master/haproxy_exporter.go
-* https://github.com/mnadeem/nodejs-opentelemetry-tempo
