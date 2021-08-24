@@ -266,12 +266,9 @@ Impl |Metric |Description| Labels | Metric Type
 | ✅ | http_request_duration_seconds | HTTP latency value recorder in seconds. | method, status, path | ValueRecorder |
 | ✅ | http_client_error_total | Total number of client error requests. | - | Counter |
 | ✅ | http_server_error_total | Total number of server error requests. | - | Counter |
-|    | http_server_aborts_total | Total number of data transfers aborted by the client. | - | Counter |
-|    | http_client_aborts_total | Total number of data transfers aborted by the server. | - | Counter |
-|    | http_connection_error_total | Total of connection errors.| - | Counter |
-|    | http_request_size_bytes | Current total of incoming bytes. | - | ValueRecorder|
-|    | http_response_size_bytes | Current total of outgoing bytes. | - | ValueRecorder |
-|    | http_slow_request_total | The server handled slow requests counter - `t=%d`. | - | Counter |
+| ✅ | http_server_aborts_total | Total number of data transfers aborted. | - | Counter |
+| ✅ | http_request_size_bytes | Current total of incoming bytes. | - | ValueRecorder|
+| ✅ | http_response_size_bytes | Current total of outgoing bytes. | - | ValueRecorder |
 
 ## Prometheus Metrics
 

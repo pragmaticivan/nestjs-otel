@@ -10,10 +10,18 @@ export const DEFAULT_LONG_RUNNING_REQUEST_BUCKETS = [
   0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, // standard
   30, 60, 120, 300, 600, // Sometimes requests may be really long-running
 ];
+export const DEFAULT_REQUEST_SIZE_BUCKETS = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+export const DEFAULT_RESPONSE_SIZE_BUCKETS = [
+  5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000,
+];
 
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
   private readonly defaultLongRunningRequestBuckets = DEFAULT_LONG_RUNNING_REQUEST_BUCKETS;
+
+  private readonly defaultRequestSizeBuckets = DEFAULT_REQUEST_SIZE_BUCKETS;
+
+  private readonly defaultResponseSizeBuckets = DEFAULT_RESPONSE_SIZE_BUCKETS;
 
   private requestTotal: Counter;
 
@@ -27,7 +35,13 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   private responseServerErrorTotal: Counter;
 
+  private serverAbortsTotal: Counter;
+
   private requestDuration: ValueRecorder;
+
+  private requestSizeValueRecorder: ValueRecorder;
+
+  private responseSizeValueRecorder: ValueRecorder;
 
   constructor(
     @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
@@ -57,10 +71,29 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       description: 'Total number of server error requests',
     });
 
-    const { timeBuckets = [] } = options?.metrics?.apiMetrics;
+    this.serverAbortsTotal = this.metricService.getCounter('http_server_aborts_total', {
+      description: 'Total number of data transfers aborted',
+    });
+
+    const {
+      timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [],
+    } = options?.metrics?.apiMetrics;
+
     this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
       boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
       description: 'HTTP latency value recorder in seconds',
+    });
+
+    this.requestSizeValueRecorder = this.metricService.getValueRecorder('http_request_size_bytes', {
+      boundaries:
+        requestSizeBuckets.length > 0 ? requestSizeBuckets : this.defaultRequestSizeBuckets,
+      description: 'Current total of incoming bytes',
+    });
+
+    this.responseSizeValueRecorder = this.metricService.getValueRecorder('http_response_size_bytes', {
+      boundaries:
+        responseSizeBuckets.length > 0 ? responseSizeBuckets : this.defaultResponseSizeBuckets,
+      description: 'Current total of outgoing bytes',
     });
   }
 
@@ -88,37 +121,45 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
       this.requestTotal.bind({ method, path }).add(1);
 
+      const requestLength = parseInt(req.get('content-length'), 10) || 0;
+      const responseLength: number = parseInt(res.get('Content-Length'), 10) || 0;
+
       const status = res.statusCode || 500;
       const labels = { method, status, path };
 
-      this.countResponse(status, labels, time);
-    })(req, res, next);
-  }
+      this.requestSizeValueRecorder.bind(labels).record(requestLength);
+      this.responseSizeValueRecorder.bind(labels).record(responseLength);
 
-  private countResponse(statusCode, labels, time) {
-    this.responseTotal.bind(labels).add(1);
-    this.requestDuration.bind(labels).record(time / 1000);
+      this.responseTotal.bind(labels).add(1);
+      this.requestDuration.bind(labels).record(time / 1000);
 
-    const codeClass = this.getStatusCodeClass(statusCode);
+      const codeClass = this.getStatusCodeClass(status);
 
-    // eslint-disable-next-line default-case
-    switch (codeClass) {
-      case 'success':
-        this.responseSuccessTotal.add(1);
-        break;
-      case 'redirect':
+      // eslint-disable-next-line default-case
+      switch (codeClass) {
+        case 'success':
+          this.responseSuccessTotal.add(1);
+          break;
+        case 'redirect':
         // TODO: Review what should be appropriate for redirects.
-        this.responseSuccessTotal.add(1);
-        break;
-      case 'client_error':
-        this.responseErrorTotal.add(1);
-        this.responseClientErrorTotal.add(1);
-        break;
-      case 'server_error':
-        this.responseErrorTotal.add(1);
-        this.responseServerErrorTotal.add(1);
-        break;
-    }
+          this.responseSuccessTotal.add(1);
+          break;
+        case 'client_error':
+          this.responseErrorTotal.add(1);
+          this.responseClientErrorTotal.add(1);
+          break;
+        case 'server_error':
+          this.responseErrorTotal.add(1);
+          this.responseServerErrorTotal.add(1);
+          break;
+      }
+
+      req.on('end', () => {
+        if (req.aborted === true) {
+          this.serverAbortsTotal.add(1);
+        }
+      });
+    })(req, res, next);
   }
 
   private getStatusCodeClass(code: number): string {

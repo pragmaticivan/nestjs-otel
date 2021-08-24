@@ -47,7 +47,9 @@ export type OpenTelemetryMetrics = {
   hostMetrics?: boolean,
   apiMetrics?: {
     enable?: boolean,
-    timeBuckets?: number[]
+    timeBuckets?: number[],
+    requestSizeBuckets?: number[],
+    responseSizeBuckets?: number[],
   },
   defaultLabels?: {
     [key: string]: string | number
