@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.3.0...v2.4.0) (2021-08-24)
+
+
+### Features
+
+* add http size and server abort metrics ([ba64308](https://www.github.com/pragmaticivan/nestjs-otel/commit/ba64308e7c986cddceed06f2248476c66747f4c6))
+
 ## [2.3.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.2.0...v2.3.0) (2021-08-13)
 
 
