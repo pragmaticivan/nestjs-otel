@@ -312,3 +312,8 @@ A dashboard example is also available:
 Logs are automatically associated with tracing (Loki + Tempo):
 
 ![Loki](./examples/nestjs-prom-grafana-tempo/loki-logs.png)
+
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/pragmaticivan/nestjs-otel.svg)](https://starchart.cc/pragmaticivan/nestjs-otel)
