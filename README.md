@@ -12,7 +12,7 @@
 
 ## Questions
 
-For questions and support please use the official [Discord channel](https://discord.gg/3ATNx6rY).
+For questions and support please use the official [Discord channel](https://discord.gg/ju8C2zJgBJ).
 
 ## Why
 
