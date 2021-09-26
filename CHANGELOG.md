@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.4.0...v2.5.0) (2021-09-26)
+
+
+### Features
+
+* add defaultLabels support ([6efb0a5](https://www.github.com/pragmaticivan/nestjs-otel/commit/6efb0a540546bd78d0ea582e949beb3c77be3288))
+
 ## [2.4.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.3.0...v2.4.0) (2021-08-24)
 
 
