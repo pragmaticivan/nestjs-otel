@@ -1,4 +1,5 @@
 import { ModuleMetadata, Type, Abstract } from '@nestjs/common';
+import { Labels } from '@opentelemetry/api-metrics';
 
 export type OpenTelemetryModuleOptions = {
   /**
@@ -50,8 +51,6 @@ export type OpenTelemetryMetrics = {
     timeBuckets?: number[],
     requestSizeBuckets?: number[],
     responseSizeBuckets?: number[],
-  },
-  defaultLabels?: {
-    [key: string]: string | number
+    defaultLabels?: Labels,
   },
 };

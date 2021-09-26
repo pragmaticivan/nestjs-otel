@@ -235,6 +235,41 @@ describe('Api Metrics Middleware', () => {
     expect(/http_server_error_total 1/.test(text)).toBeTruthy();
   });
 
+  it('registers requests with custom labels', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            defaultLabels: {
+              custom: 'label',
+            },
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+    testingModule.useLogger(new EmptyLogger());
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/example/internal-error');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/custom/.test(text)).toBeTruthy();
+  });
+
   afterEach(async () => {
     metrics.disable();
     if (exporter) {

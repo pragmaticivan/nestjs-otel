@@ -1,7 +1,7 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import * as responseTime from 'response-time';
 import * as urlParser from 'url';
-import { Counter, ValueRecorder } from '@opentelemetry/api-metrics';
+import { Counter, Labels, ValueRecorder } from '@opentelemetry/api-metrics';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
@@ -43,6 +43,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   private responseSizeValueRecorder: ValueRecorder;
 
+  private defaultLabels: Labels;
+
   constructor(
     @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
     @Inject(MetricService) private readonly metricService: MetricService,
@@ -76,8 +78,10 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     });
 
     const {
-      timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [],
+      timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [], defaultLabels = {},
     } = options?.metrics?.apiMetrics;
+
+    this.defaultLabels = defaultLabels;
 
     this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
       boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
@@ -125,7 +129,9 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       const responseLength: number = parseInt(res.get('Content-Length'), 10) || 0;
 
       const status = res.statusCode || 500;
-      const labels = { method, status, path };
+      const labels: Labels = {
+        method, status, path, ...this.defaultLabels,
+      };
 
       this.requestSizeValueRecorder.bind(labels).record(requestLength);
       this.responseSizeValueRecorder.bind(labels).record(responseLength);
