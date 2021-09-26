@@ -120,6 +120,9 @@ const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
     apiMetrics: {
       enable: true, // Includes api metrics
       timeBuckets: [], // You can change the default time buckets
+      defaultLabels: { // You can set default labels for api metrics
+        custom: 'label'
+      }
     },
   },
 });
