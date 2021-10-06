@@ -125,8 +125,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
       this.requestTotal.bind({ method, path }).add(1);
 
-      const requestLength = parseInt(req.get('content-length'), 10) || 0;
-      const responseLength: number = parseInt(res.get('Content-Length'), 10) || 0;
+      const requestLength = parseInt(req.headers['content-length'], 10) || 0;
+      const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
 
       const status = res.statusCode || 500;
       const labels: Labels = {
