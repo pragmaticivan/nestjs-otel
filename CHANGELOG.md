@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.5.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.5.0...v2.5.1) (2021-10-06)
+
+
+### Bug Fixes
+
+* metrics for fastify platform ([4b61e70](https://www.github.com/pragmaticivan/nestjs-otel/commit/4b61e7079d5470088b92d459e7923e4460dd606c))
+
 ## [2.5.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.4.0...v2.5.0) (2021-09-26)
 
 
