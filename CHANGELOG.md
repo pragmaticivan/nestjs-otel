@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.5.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.5.1...v2.5.2) (2021-10-07)
+
+
+### Bug Fixes
+
+* enable nestjs 7.x as peer dependency ([e6c6a1e](https://www.github.com/pragmaticivan/nestjs-otel/commit/e6c6a1e9dd2ae0f906dea2775faaf7a51daeb755))
+
 ### [2.5.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.5.0...v2.5.1) (2021-10-06)
 
 
