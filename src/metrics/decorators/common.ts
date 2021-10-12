@@ -40,7 +40,7 @@ export const OtelMethodCounter = (
   let counterMetric: Counter;
   const methodFunc = descriptor.value;
   // eslint-disable-next-line no-param-reassign
-  descriptor.value = function (...args: any[]) {
+  descriptor.value = (...args: any[]) => {
     if (!counterMetric) {
       counterMetric = getOrCreateCounter(name, MetricType.Counter, { description, ...options });
     }
