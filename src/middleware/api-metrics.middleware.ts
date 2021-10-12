@@ -45,6 +45,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   private defaultLabels: Labels;
 
+  private readonly ignoreUndefinedRoutes: boolean;
+
   constructor(
     @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
     @Inject(MetricService) private readonly metricService: MetricService,
@@ -79,9 +81,11 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
     const {
       timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [], defaultLabels = {},
+      ignoreUndefinedRoutes = false,
     } = options?.metrics?.apiMetrics;
 
     this.defaultLabels = defaultLabels;
+    this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
 
     this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
       boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
@@ -109,6 +113,8 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
       if (route) {
         path = route.path;
+      } else if (this.ignoreUndefinedRoutes) {
+        return;
       } else {
         path = urlParser.parse(url).pathname;
       }

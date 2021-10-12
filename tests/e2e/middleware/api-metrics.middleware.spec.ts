@@ -422,6 +422,92 @@ describe('Api Metrics Middleware', () => {
     expect(/custom/.test(text)).toBeTruthy();
   });
 
+  it('does register non-existing route when ignoreUndefinedRoutes option is disabled', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            ignoreUndefinedRoutes: false,
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/thispathdoesnotexist');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+  });
+
+  it('does not register non-existing route when ignoreUndefinedRoutes option is enabled', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            ignoreUndefinedRoutes: true,
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/thispathdoesnotexist');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_response_error_total 1/.test(text)).toBeFalsy();
+    expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+  });
+
   it('does not register endpoint when listed in ignoreRoutes explicitly', async () => {
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
@@ -452,17 +538,17 @@ describe('Api Metrics Middleware', () => {
       .expect(200);
 
     expect(/http_response_success_total 1/.test(text)).toBeFalsy();
-    expect(/http_request_total{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_total{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/metrics"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/metrics"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/metrics"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
   });
 
   it('does not register endpoint when listed in ignoreRoutes using wildcards', async () => {
@@ -495,17 +581,17 @@ describe('Api Metrics Middleware', () => {
       .expect(200);
 
     expect(/http_response_success_total 1/.test(text)).toBeFalsy();
-    expect(/http_request_total{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_total{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/metrics"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/metrics"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/metrics"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/metrics"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
   });
 
   afterEach(async () => {
