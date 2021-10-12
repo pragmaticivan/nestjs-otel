@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.6.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.5.2...v2.6.0) (2021-10-12)
+
+
+### Features
+
+* **metrics:** option for ignoring undefined routes ([15577e8](https://www.github.com/pragmaticivan/nestjs-otel/commit/15577e83c7b3ea7642dc7eba65517361edfe3a54))
+* **metrics:** option to ignore specific routes ([b8a05f1](https://www.github.com/pragmaticivan/nestjs-otel/commit/b8a05f1ef46b9e077f8c4edbad59f91b00d3a49e))
+
+
+### Bug Fixes
+
+* eslint setup ([14d9870](https://www.github.com/pragmaticivan/nestjs-otel/commit/14d9870d9aacee325a7338dd764ccfef404b7ad5))
+* linting ([1961f18](https://www.github.com/pragmaticivan/nestjs-otel/commit/1961f18ae1203a4e721e72caeb9f425f1937d918))
+* **linting:** replace unnamed function with arrow function ([12fa02c](https://www.github.com/pragmaticivan/nestjs-otel/commit/12fa02c081ef85ddde7208c7b865efcaa05bab6f))
+* **metrics:** add missing commas in example config in README.md ([7b159c6](https://www.github.com/pragmaticivan/nestjs-otel/commit/7b159c603bc9655b270f9447414cdab473b31526))
+
 ### [2.5.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.5.1...v2.5.2) (2021-10-07)
 
 
