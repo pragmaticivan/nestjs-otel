@@ -508,6 +508,92 @@ describe('Api Metrics Middleware', () => {
     expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
   });
 
+  it('does not register endpoint when listed in ignoreRoutes explicitly', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            ignoreRoutes: ['/example/4'],
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/example/4?foo=bar');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_response_success_total 1/.test(text)).toBeFalsy();
+    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+  });
+
+  it('does not register endpoint when listed in ignoreRoutes using wildcards', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            ignoreRoutes: ['/(.*)'],
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/example/4?foo=bar');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_response_success_total 1/.test(text)).toBeFalsy();
+    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+  });
+
   afterEach(async () => {
     metrics.disable();
     if (exporter) {
