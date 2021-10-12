@@ -52,5 +52,6 @@ export type OpenTelemetryMetrics = {
     requestSizeBuckets?: number[],
     responseSizeBuckets?: number[],
     defaultLabels?: Labels,
+    ignoreUndefinedRoutes?: boolean,
   },
 };

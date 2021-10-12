@@ -4,12 +4,12 @@ import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { metrics } from '@opentelemetry/api-metrics';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { MetricService, OpenTelemetryModule, OTEL_METER_NAME } from '../../../src';
 import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS, DEFAULT_REQUEST_SIZE_BUCKETS, DEFAULT_RESPONSE_SIZE_BUCKETS } from '../../../src/middleware';
 import { AppController } from '../../fixture-app/app.controller';
 import { EmptyLogger } from '../../utils';
 import { meterData } from '../../../src/metrics/metric-data';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 
 describe('Api Metrics Middleware', () => {
   let app: INestApplication;
@@ -300,7 +300,6 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-
     expect(/http_response_success_total 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
@@ -421,6 +420,92 @@ describe('Api Metrics Middleware', () => {
       .expect(200);
 
     expect(/custom/.test(text)).toBeTruthy();
+  });
+
+  it('does register non-existing route when ignoreUndefinedRoutes option is disabled', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            ignoreUndefinedRoutes: false,
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/thispathdoesnotexist');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+  });
+
+  it('does not register non-existing route when ignoreUndefinedRoutes option is enabled', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            ignoreUndefinedRoutes: true,
+          },
+        },
+      })],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/thispathdoesnotexist');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    // eslint-disable-next-line no-underscore-dangle
+    const { text } = await request(exporter._server)
+      .get('/metrics')
+      .expect(200);
+
+    expect(/http_response_error_total 1/.test(text)).toBeFalsy();
+    expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_duration_seconds_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_request_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
+    expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
   });
 
   afterEach(async () => {
