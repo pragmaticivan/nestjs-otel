@@ -113,16 +113,6 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         path = urlParser.parse(url).pathname;
       }
 
-      if (path === '/favicon.ico') {
-        return;
-      }
-
-      // TODO Support `ignore routes array instead`
-      const metricPath = '/metrics';
-      if (path === metricPath) {
-        return;
-      }
-
       this.requestTotal.bind({ method, path }).add(1);
 
       const requestLength = parseInt(req.headers['content-length'], 10) || 0;

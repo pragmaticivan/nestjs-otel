@@ -1,5 +1,6 @@
 import { ModuleMetadata, Type, Abstract } from '@nestjs/common';
 import { Labels } from '@opentelemetry/api-metrics';
+import { RouteInfo } from '@nestjs/common/interfaces';
 
 export type OpenTelemetryModuleOptions = {
   /**
@@ -52,5 +53,6 @@ export type OpenTelemetryMetrics = {
     requestSizeBuckets?: number[],
     responseSizeBuckets?: number[],
     defaultLabels?: Labels,
+    ignoreRoutes?: (string | RouteInfo)[],
   },
 };

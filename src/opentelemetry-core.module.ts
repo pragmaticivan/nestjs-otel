@@ -82,8 +82,13 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
     const {
       apiMetrics = { enable: false },
     } = this.options?.metrics;
+
     if (apiMetrics.enable === true) {
-      consumer.apply(ApiMetricsMiddleware).forRoutes('*');
+      if (apiMetrics?.ignoreRoutes && apiMetrics?.ignoreRoutes.length > 0) {
+        consumer.apply(ApiMetricsMiddleware).exclude(...apiMetrics.ignoreRoutes).forRoutes('*');
+      } else {
+        consumer.apply(ApiMetricsMiddleware).forRoutes('*');
+      }
     }
   }
 

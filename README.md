@@ -123,6 +123,7 @@ const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
       defaultLabels: { // You can set default labels for api metrics
         custom: 'label'
       }
+      ignoreRoutes: ['/favicon.ico'] // You can ignore specific routes (See https://docs.nestjs.com/middleware#excluding-routes for options)
     },
   },
 });
