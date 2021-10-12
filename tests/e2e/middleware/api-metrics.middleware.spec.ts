@@ -4,12 +4,12 @@ import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { metrics } from '@opentelemetry/api-metrics';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { MetricService, OpenTelemetryModule, OTEL_METER_NAME } from '../../../src';
 import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS, DEFAULT_REQUEST_SIZE_BUCKETS, DEFAULT_RESPONSE_SIZE_BUCKETS } from '../../../src/middleware';
 import { AppController } from '../../fixture-app/app.controller';
 import { EmptyLogger } from '../../utils';
 import { meterData } from '../../../src/metrics/metric-data';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 
 describe('Api Metrics Middleware', () => {
   let app: INestApplication;
@@ -299,7 +299,6 @@ describe('Api Metrics Middleware', () => {
     const { text } = await request(exporter._server)
       .get('/metrics')
       .expect(200);
-
 
     expect(/http_response_success_total 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
