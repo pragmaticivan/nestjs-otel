@@ -39,8 +39,8 @@ export const OtelMethodCounter = (
   const description = `app_${className}#${propertyKey.toString()} called total`;
   let counterMetric: Counter;
   const methodFunc = descriptor.value;
-  // eslint-disable-next-line no-param-reassign
-  descriptor.value = (...args: any[]) => {
+  // eslint-disable-next-line no-param-reassign, func-names
+  descriptor.value = function (...args: any[]) {
     if (!counterMetric) {
       counterMetric = getOrCreateCounter(name, MetricType.Counter, { description, ...options });
     }
