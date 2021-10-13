@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.6.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.6.0...v2.6.1) (2021-10-13)
+
+
+### Reverts
+
+* replace arrow function back with unnamed function ([3e7ac1f](https://www.github.com/pragmaticivan/nestjs-otel/commit/3e7ac1f160e1454f7c36470aafd7e8bfa7ee47b5))
+
 ## [2.6.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.5.2...v2.6.0) (2021-10-12)
 
 
