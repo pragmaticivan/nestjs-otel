@@ -1,12 +1,10 @@
 import { createParamDecorator } from '@nestjs/common';
 import { MetricOptions } from '@opentelemetry/api-metrics';
-import { getOrCreateValueRecorder, MetricType } from '../metric-data';
+import { getOrCreateHistogram, MetricType } from '../metric-data';
 
-export const OtelValueRecorder = createParamDecorator((
-  name: string, options?: MetricOptions,
-) => {
+export const OtelHistogram = createParamDecorator((name: string, options?: MetricOptions) => {
   if (!name || name.length === 0) {
-    throw new Error('OtelValueRecorder need a name argument');
+    throw new Error('OtelHistogram need a name argument');
   }
-  return getOrCreateValueRecorder(name, MetricType.ValueRecorder, options);
+  return getOrCreateHistogram(name, MetricType.Histogram, options);
 });

@@ -243,7 +243,7 @@ You have the following decorators:
 
 * `@OtelCounter()`
 * `@OtelUpDownCounter()`
-* `@OtelValueRecorder()`
+* `@OtelHistogram()`
 
 Example of usage:
 
