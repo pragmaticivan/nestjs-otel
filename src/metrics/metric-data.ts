@@ -14,7 +14,9 @@ export enum MetricType {
 export const meterData: Map<string, GenericMetric> = new Map();
 
 export function getOrCreateValueRecorder(
-  name: string, type: MetricType, options: MetricOptions,
+  name: string,
+  type: MetricType,
+  options: MetricOptions,
 ): ValueRecorder {
   if (meterData.has(name)) {
     return meterData.get(name) as ValueRecorder;
@@ -33,7 +35,9 @@ export function getOrCreateValueRecorder(
 }
 
 export function getOrCreateCounter(
-  name: string, type: MetricType, options: MetricOptions,
+  name: string,
+  type: MetricType,
+  options: MetricOptions,
 ): Counter | UpDownCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as Counter | UpDownCounter;

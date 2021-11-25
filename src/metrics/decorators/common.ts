@@ -31,7 +31,9 @@ export const OtelInstanceCounter = (
 export const OtelMethodCounter = (
   options?: MetricOptions,
 ) => (
-  target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<(...args: any[]
+  target: Object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<(...args: any[]
   ) => any>,
 ) => {
   const className = target.constructor.name;

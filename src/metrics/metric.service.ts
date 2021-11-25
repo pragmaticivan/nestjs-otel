@@ -21,13 +21,17 @@ export class MetricService {
   }
 
   private getOrCreateValueRecorder(
-    name: string, type: MetricType, options: MetricOptions,
+    name: string,
+    type: MetricType,
+    options: MetricOptions,
   ): ValueRecorder {
     return getOrCreateValueRecorder(name, type, options);
   }
 
   private getOrCreateCounter(
-    name: string, type: MetricType, options: MetricOptions,
+    name: string,
+    type: MetricType,
+    options: MetricOptions,
   ): Counter | UpDownCounter {
     return getOrCreateCounter(name, type, options);
   }

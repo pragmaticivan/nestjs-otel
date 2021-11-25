@@ -27,7 +27,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
 
   constructor(
     @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
-  ) {}
+  ) { }
 
   /**
    * Bootstraps the internal OpenTelemetry Module with the given options
@@ -93,8 +93,8 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-    let defaultMetrics:boolean = false;
-    let hostMetrics:boolean = false;
+    let defaultMetrics: boolean = false;
+    let hostMetrics: boolean = false;
 
     if (this.options?.metrics) {
       defaultMetrics = this.options.metrics.defaultMetrics

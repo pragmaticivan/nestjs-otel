@@ -21,5 +21,7 @@ module.exports = {
     'new-cap': 'off',
     'class-methods-use-this': 'off',
     'no-case-declarations': 'off',
+    'no-promise-executor-return': 'off',
+    'no-unsafe-optional-chaining': 'off',
   },
 };
