@@ -15,6 +15,14 @@ export const DEFAULT_RESPONSE_SIZE_BUCKETS = [
   5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000,
 ];
 
+enum StatusCodeClass {
+  info,
+  success,
+  redirect,
+  clientError,
+  serverError,
+}
+
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
   private readonly defaultLongRunningRequestBuckets = DEFAULT_LONG_RUNNING_REQUEST_BUCKETS;
@@ -139,20 +147,20 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
       // eslint-disable-next-line default-case
       switch (codeClass) {
-        case 'success':
-          this.responseSuccessTotal.add(1);
+        case StatusCodeClass.success:
+          this.responseSuccessTotal.bind(labels).add(1);
           break;
-        case 'redirect':
+        case StatusCodeClass.redirect:
         // TODO: Review what should be appropriate for redirects.
-          this.responseSuccessTotal.add(1);
+          this.responseSuccessTotal.bind(labels).add(1);
           break;
-        case 'client_error':
-          this.responseErrorTotal.add(1);
-          this.responseClientErrorTotal.add(1);
+        case StatusCodeClass.clientError:
+          this.responseErrorTotal.bind(labels).add(1);
+          this.responseClientErrorTotal.bind(labels).add(1);
           break;
-        case 'server_error':
-          this.responseErrorTotal.add(1);
-          this.responseServerErrorTotal.add(1);
+        case StatusCodeClass.serverError:
+          this.responseErrorTotal.bind(labels).add(1);
+          this.responseServerErrorTotal.bind(labels).add(1);
           break;
       }
 
@@ -164,11 +172,11 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     })(req, res, next);
   }
 
-  private getStatusCodeClass(code: number): string {
-    if (code < 200) return 'info';
-    if (code < 300) return 'success';
-    if (code < 400) return 'redirect';
-    if (code < 500) return 'client_error';
-    return 'server_error';
+  private getStatusCodeClass(code: number): StatusCodeClass {
+    if (code < 200) return StatusCodeClass.info;
+    if (code < 300) return StatusCodeClass.success;
+    if (code < 400) return StatusCodeClass.redirect;
+    if (code < 500) return StatusCodeClass.clientError;
+    return StatusCodeClass.serverError;
   }
 }

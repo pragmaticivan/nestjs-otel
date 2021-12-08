@@ -5,8 +5,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { metrics } from '@opentelemetry/api-metrics';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { MetricService, OpenTelemetryModule, OTEL_METER_NAME } from '../../../src';
-import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS, DEFAULT_REQUEST_SIZE_BUCKETS, DEFAULT_RESPONSE_SIZE_BUCKETS } from '../../../src/middleware';
+import { MetricService, OpenTelemetryModule } from '../../../src';
 import { AppController } from '../../fixture-app/app.controller';
 import { EmptyLogger } from '../../utils';
 import { meterData } from '../../../src/metrics/metric-data';
@@ -152,7 +151,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_success_total 1/.test(text)).toBeTruthy();
+    expect(/http_response_success_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
@@ -195,8 +194,8 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_client_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_response_error_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_client_error_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
@@ -233,7 +232,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_server_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_server_error_total{[^}]*path="\/example\/internal-error"[^}]*} 1/.test(text)).toBeTruthy();
   });
 
   it('registers requests with custom labels', async () => {
@@ -300,7 +299,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_success_total 1/.test(text)).toBeTruthy();
+    expect(/http_response_success_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
@@ -344,8 +343,8 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_client_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_response_error_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_client_error_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
@@ -383,7 +382,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_server_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_server_error_total{[^}]*path="\/example\/internal-error"[^}]*} 1/.test(text)).toBeTruthy();
   });
 
   it('registers requests with custom labels when using Fastify', async () => {
@@ -451,7 +450,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
+    expect(/http_response_error_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
@@ -494,7 +493,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_error_total 1/.test(text)).toBeFalsy();
+    expect(/http_response_error_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
@@ -537,7 +536,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_success_total 1/.test(text)).toBeFalsy();
+    expect(/http_response_success_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
@@ -580,7 +579,7 @@ describe('Api Metrics Middleware', () => {
       .get('/metrics')
       .expect(200);
 
-    expect(/http_response_success_total 1/.test(text)).toBeFalsy();
+    expect(/http_response_success_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
