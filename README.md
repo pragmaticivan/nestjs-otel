@@ -16,7 +16,7 @@ For questions and support please use the official [Discord channel](https://disc
 
 ## Why
 
-Setting up observability metrics with nestjs requires multiple libraries and patterns. OpenTelemetry has support for multiple exporters and types of metrics such as Prometheus Metrics.
+Setting up observability metrics with nestjs requires multiple libraries and patterns. OpenTelemetry has support for multiple exporters and  types of metrics such as Prometheus Metrics.
 
 ## Observability
 
@@ -288,7 +288,21 @@ When `metricExporter` is defined in otel SDK with a `PrometheusExporter`it will 
 
 ## Using with a logger
 
-### Pino
+### Pino with instrumentation
+
+This approach uses otel instrumentation to automatically inject spanId and traceId.
+
+```ts
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
+
+const otelSDK = new NodeSDK({
+  instrumentations: [new PinoInstrumentation()],
+});
+```
+
+### Pino with custom formatter
+
+This approach uses the global trace context for injecting SpanId and traceId as a property of your structured log.
 
 ```ts
 import Pino, { Logger } from 'pino';

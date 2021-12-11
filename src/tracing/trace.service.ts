@@ -3,12 +3,15 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TraceService {
+  public getTracer() {
+    return trace.getTracer('default');
+  }
+
   public getSpan(): Span {
     return trace.getSpan(context.active());
   }
 
   public startSpan(name: string): Span {
-    const tracer = trace.getTracer('default');
-    return tracer.startSpan(name);
+    return this.getTracer().startSpan(name);
   }
 }
