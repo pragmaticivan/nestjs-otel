@@ -1,5 +1,5 @@
 import { Counter, MetricOptions } from '@opentelemetry/api-metrics';
-import { getOrCreateCounter, getOrCreateValueRecorder, MetricType } from '../metric-data';
+import { getOrCreateCounter, MetricType } from '../metric-data';
 
 /**
  * Create and increment a counter when a new instance is created

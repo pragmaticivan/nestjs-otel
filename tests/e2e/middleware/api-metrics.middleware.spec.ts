@@ -15,7 +15,7 @@ describe('Api Metrics Middleware', () => {
   let app: INestApplication;
   const metricService = {
     getCounter: jest.fn(),
-    getValueRecorder: jest.fn(),
+    getHistogram: jest.fn(),
   };
 
   let exporter: PrometheusExporter;
@@ -76,7 +76,7 @@ describe('Api Metrics Middleware', () => {
     expect(metricService.getCounter).toHaveBeenCalledWith('http_response_total', { description: 'Total number of HTTP responses' });
     expect(metricService.getCounter).toHaveBeenCalledWith('http_response_success_total', { description: 'Total number of all successful responses' });
 
-    expect(metricService.getValueRecorder).toHaveBeenCalledTimes(3);
+    expect(metricService.getHistogram).toHaveBeenCalledTimes(3);
   });
 
   it('registers custom boundaries', async () => {
@@ -99,9 +99,9 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getValueRecorder).toHaveBeenCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries });
-    expect(metricService.getValueRecorder).toHaveBeenCalledWith('http_request_size_bytes', { description: 'Current total of incoming bytes', boundaries });
-    expect(metricService.getValueRecorder).toHaveBeenCalledWith('http_response_size_bytes', { description: 'Current total of outgoing bytes', boundaries });
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries });
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http_request_size_bytes', { description: 'Current total of incoming bytes', boundaries });
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http_response_size_bytes', { description: 'Current total of outgoing bytes', boundaries });
   });
 
   it('uses custom buckets when provided', async () => {
@@ -121,7 +121,7 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getValueRecorder).toBeCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries: [1, 2] });
+    expect(metricService.getHistogram).toBeCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries: [1, 2] });
   });
 
   it('registers successful request records', async () => {
@@ -236,13 +236,13 @@ describe('Api Metrics Middleware', () => {
     expect(/http_server_error_total 1/.test(text)).toBeTruthy();
   });
 
-  it('registers requests with custom labels', async () => {
+  it('registers requests with custom attributes', async () => {
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
         metrics: {
           apiMetrics: {
             enable: true,
-            defaultLabels: {
+            defaultAttributes: {
               custom: 'label',
             },
           },
@@ -386,13 +386,13 @@ describe('Api Metrics Middleware', () => {
     expect(/http_server_error_total 1/.test(text)).toBeTruthy();
   });
 
-  it('registers requests with custom labels when using Fastify', async () => {
+  it('registers requests with custom attributes when using Fastify', async () => {
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
         metrics: {
           apiMetrics: {
             enable: true,
-            defaultLabels: {
+            defaultAttributes: {
               custom: 'label',
             },
           },

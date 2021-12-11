@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import {
-  Counter, UpDownCounter, ValueRecorder, MetricOptions,
+  Counter, UpDownCounter, Histogram, MetricOptions,
 } from '@opentelemetry/api-metrics';
 import {
-  getOrCreateCounter, getOrCreateValueRecorder, MetricType,
+  getOrCreateCounter, getOrCreateHistogram, MetricType,
 } from './metric-data';
 
 @Injectable()
@@ -16,16 +16,16 @@ export class MetricService {
     return this.getOrCreateCounter(name, MetricType.UpDownCounter, options);
   }
 
-  getValueRecorder(name: string, options?: MetricOptions) {
-    return this.getOrCreateValueRecorder(name, MetricType.ValueRecorder, options);
+  getHistogram(name: string, options?: MetricOptions) {
+    return this.getOrCreateHistogram(name, MetricType.Histogram, options);
   }
 
-  private getOrCreateValueRecorder(
+  private getOrCreateHistogram(
     name: string,
     type: MetricType,
     options: MetricOptions,
-  ): ValueRecorder {
-    return getOrCreateValueRecorder(name, type, options);
+  ): Histogram {
+    return getOrCreateHistogram(name, type, options);
   }
 
   private getOrCreateCounter(

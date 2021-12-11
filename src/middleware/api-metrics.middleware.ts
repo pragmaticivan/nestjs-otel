@@ -1,7 +1,7 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import * as responseTime from 'response-time';
 import * as urlParser from 'url';
-import { Counter, Labels, ValueRecorder } from '@opentelemetry/api-metrics';
+import { Counter, Attributes, Histogram } from '@opentelemetry/api-metrics';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
@@ -37,19 +37,19 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   private serverAbortsTotal: Counter;
 
-  private requestDuration: ValueRecorder;
+  private requestDuration: Histogram;
 
-  private requestSizeValueRecorder: ValueRecorder;
+  private requestSizeHistogram: Histogram;
 
-  private responseSizeValueRecorder: ValueRecorder;
+  private responseSizeHistogram: Histogram;
 
-  private defaultLabels: Labels;
+  private defaultAttributes: Attributes;
 
   private readonly ignoreUndefinedRoutes: boolean;
 
   constructor(
-    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
     @Inject(MetricService) private readonly metricService: MetricService,
+    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
   ) {
     this.requestTotal = this.metricService.getCounter('http_request_total', {
       description: 'Total number of HTTP requests',
@@ -80,25 +80,25 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     });
 
     const {
-      timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [], defaultLabels = {},
+      timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [], defaultAttributes = {},
       ignoreUndefinedRoutes = false,
     } = options?.metrics?.apiMetrics;
 
-    this.defaultLabels = defaultLabels;
+    this.defaultAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
 
-    this.requestDuration = this.metricService.getValueRecorder('http_request_duration_seconds', {
+    this.requestDuration = this.metricService.getHistogram('http_request_duration_seconds', {
       boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
       description: 'HTTP latency value recorder in seconds',
     });
 
-    this.requestSizeValueRecorder = this.metricService.getValueRecorder('http_request_size_bytes', {
+    this.requestSizeHistogram = this.metricService.getHistogram('http_request_size_bytes', {
       boundaries:
         requestSizeBuckets.length > 0 ? requestSizeBuckets : this.defaultRequestSizeBuckets,
       description: 'Current total of incoming bytes',
     });
 
-    this.responseSizeValueRecorder = this.metricService.getValueRecorder('http_response_size_bytes', {
+    this.responseSizeHistogram = this.metricService.getHistogram('http_response_size_bytes', {
       boundaries:
         responseSizeBuckets.length > 0 ? responseSizeBuckets : this.defaultResponseSizeBuckets,
       description: 'Current total of outgoing bytes',
@@ -119,21 +119,21 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         path = urlParser.parse(url).pathname;
       }
 
-      this.requestTotal.bind({ method, path }).add(1);
+      this.requestTotal.add(1, { method, path });
 
       const requestLength = parseInt(req.headers['content-length'], 10) || 0;
       const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
 
       const status = res.statusCode || 500;
-      const labels: Labels = {
-        method, status, path, ...this.defaultLabels,
+      const attributes: Attributes = {
+        method, status, path, ...this.defaultAttributes,
       };
 
-      this.requestSizeValueRecorder.bind(labels).record(requestLength);
-      this.responseSizeValueRecorder.bind(labels).record(responseLength);
+      this.requestSizeHistogram.record(requestLength, attributes);
+      this.responseSizeHistogram.record(responseLength, attributes);
 
-      this.responseTotal.bind(labels).add(1);
-      this.requestDuration.bind(labels).record(time / 1000);
+      this.responseTotal.add(1, attributes);
+      this.requestDuration.record(time / 1000, attributes);
 
       const codeClass = this.getStatusCodeClass(status);
 
@@ -143,7 +143,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
           this.responseSuccessTotal.add(1);
           break;
         case 'redirect':
-        // TODO: Review what should be appropriate for redirects.
+          // TODO: Review what should be appropriate for redirects.
           this.responseSuccessTotal.add(1);
           break;
         case 'client_error':

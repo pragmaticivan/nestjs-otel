@@ -165,8 +165,8 @@ describe('MetricService', () => {
     });
   });
 
-  describe('getValueRecorder', () => {
-    it('creates a new valueRecorder on meterData on the first time method is called', async () => {
+  describe('getHistogram', () => {
+    it('creates a new histogram on meterData on the first time method is called', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [OpenTelemetryModule.forRoot({
           metrics: {
@@ -184,15 +184,15 @@ describe('MetricService', () => {
       // Starts empty
       expect(meterData.size).toBe(0);
 
-      const counter = metricService.getValueRecorder('test1');
-      counter.clear();
+      const counter = metricService.getHistogram('test1');
+      // counter.clear();
 
       // Has new key record
       const data = meterData;
       expect(data.has('test1')).toBeTruthy();
     });
 
-    it('reuses an existing valueRecorder on meterData when method is called twice', async () => {
+    it('reuses an existing histogram on meterData when method is called twice', async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [OpenTelemetryModule.forRoot({
           metrics: {
@@ -208,10 +208,10 @@ describe('MetricService', () => {
 
       metricService = moduleRef.get<MetricService>(MetricService);
 
-      const counter = metricService.getValueRecorder('test1', { description: 'test1 description' });
-      counter.clear();
+      const counter = metricService.getHistogram('test1', { description: 'test1 description' });
+      // counter.clear();
 
-      const existingCounter = metricService.getValueRecorder('test1');
+      const existingCounter = metricService.getHistogram('test1');
       expect(meterData.has('test1')).toBeTruthy();
 
       // TODO: The metric class does not expose current description

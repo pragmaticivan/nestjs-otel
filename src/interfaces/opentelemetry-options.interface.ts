@@ -1,12 +1,12 @@
 import { ModuleMetadata, Type, Abstract } from '@nestjs/common';
-import { Labels } from '@opentelemetry/api-metrics';
+import { Attributes } from '@opentelemetry/api-metrics';
 import { RouteInfo } from '@nestjs/common/interfaces';
 
 export type OpenTelemetryModuleOptions = {
   /**
    * OpenTelemetry Metrics Setup
    */
-  metrics?: OpenTelemetryMetrics
+  metrics?: OpenTelemetryMetrics;
 };
 
 export interface OpenTelemetryOptionsFactory {
@@ -52,7 +52,7 @@ export type OpenTelemetryMetrics = {
     timeBuckets?: number[],
     requestSizeBuckets?: number[],
     responseSizeBuckets?: number[],
-    defaultLabels?: Labels,
+    defaultAttributes?: Attributes,
     ignoreRoutes?: (string | RouteInfo)[],
     ignoreUndefinedRoutes?: boolean,
   },

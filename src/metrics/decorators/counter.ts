@@ -1,6 +1,6 @@
 import { createParamDecorator } from '@nestjs/common';
 import { MetricOptions } from '@opentelemetry/api-metrics';
-import { getOrCreateCounter, getOrCreateValueRecorder, MetricType } from '../metric-data';
+import { getOrCreateCounter, MetricType } from '../metric-data';
 
 export const OtelCounter = createParamDecorator((name: string, options?: MetricOptions) => {
   if (!name || name.length === 0) {
