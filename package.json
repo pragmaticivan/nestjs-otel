@@ -14,7 +14,7 @@
     "test:coverage": "jest --coverage",
     "test:unit": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:e2e": "jest --config ./tests/jest-e2e.json --runInBand --detectOpenHandles",
+    "test:e2e": "jest --config ./tests/jest-e2e.json --runInBand --forceExit",
     "test:e2e:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch"
   },
   "repository": {
@@ -31,7 +31,6 @@
   ],
   "author": "pragmaticivan@gmail.com",
   "license": "Apache-2.0",
-  "test": "jest --ci --runInBand",
   "bugs": {
     "url": "https://github.com/pragmaticivan/nestjs-otel/issues"
   },
