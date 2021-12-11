@@ -1,38 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import {
-  Counter, UpDownCounter, Histogram, MetricOptions,
+  MetricOptions,
 } from '@opentelemetry/api-metrics';
 import {
-  getOrCreateCounter, getOrCreateHistogram, MetricType,
+  getOrCreateCounter, getOrCreateHistogram,
+  getOrCreateObservableCounter, getOrCreateObservableGauge,
+  getOrCreateObservableUpDownCounter, getOrCreateUpDownCounter, MetricType,
 } from './metric-data';
 
 @Injectable()
 export class MetricService {
   getCounter(name: string, options?: MetricOptions) {
-    return this.getOrCreateCounter(name, MetricType.Counter, options);
+    return getOrCreateCounter(name, options);
   }
 
   getUpDownCounter(name: string, options?: MetricOptions) {
-    return this.getOrCreateCounter(name, MetricType.UpDownCounter, options);
+    return getOrCreateUpDownCounter(name, options);
   }
 
   getHistogram(name: string, options?: MetricOptions) {
-    return this.getOrCreateHistogram(name, MetricType.Histogram, options);
+    return getOrCreateHistogram(name, options);
   }
 
-  private getOrCreateHistogram(
-    name: string,
-    type: MetricType,
-    options: MetricOptions,
-  ): Histogram {
-    return getOrCreateHistogram(name, type, options);
+  getObservableCounter(name: string, options?: MetricOptions) {
+    return getOrCreateObservableCounter(name, options);
   }
 
-  private getOrCreateCounter(
-    name: string,
-    type: MetricType,
-    options: MetricOptions,
-  ): Counter | UpDownCounter {
-    return getOrCreateCounter(name, type, options);
+  getObservableGauge(name: string, options?: MetricOptions) {
+    return getOrCreateObservableGauge(name, options);
+  }
+
+  getObservableUpDownCounter(name: string, options?: MetricOptions) {
+    return getOrCreateObservableUpDownCounter(name, options);
   }
 }

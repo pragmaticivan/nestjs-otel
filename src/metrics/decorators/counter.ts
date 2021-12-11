@@ -6,12 +6,12 @@ export const OtelCounter = createParamDecorator((name: string, options?: MetricO
   if (!name || name.length === 0) {
     throw new Error('OtelCounter need a name argument');
   }
-  return getOrCreateCounter(name, MetricType.Counter, options);
+  return getOrCreateCounter(name, options);
 });
 
 export const OtelUpDownCounter = createParamDecorator((name: string, options?: MetricOptions) => {
   if (!name || name.length === 0) {
     throw new Error('OtelUpDownCounter need a name argument');
   }
-  return getOrCreateCounter(name, MetricType.UpDownCounter, options);
+  return getOrCreateCounter(name, options);
 });

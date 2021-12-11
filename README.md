@@ -244,6 +244,9 @@ You have the following decorators:
 * `@OtelCounter()`
 * `@OtelUpDownCounter()`
 * `@OtelHistogram()`
+* `@OtelObservableGauge()`
+* `@OtelObservableCounter()`
+* `@OtelObservableUpDownCounter()`
 
 Example of usage:
 
@@ -258,7 +261,7 @@ export class AppController {
   home(
     @OtelCounter('app_counter_1_inc', { description: 'counter 1 description' }) counter1: Counter,
   ) {
-    counter1.inc(1);
+    counter1.add(1);
   }
 }
 

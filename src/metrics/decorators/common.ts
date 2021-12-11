@@ -1,5 +1,5 @@
 import { Counter, MetricOptions } from '@opentelemetry/api-metrics';
-import { getOrCreateCounter, MetricType } from '../metric-data';
+import { getOrCreateCounter } from '../metric-data';
 
 /**
  * Create and increment a counter when a new instance is created
@@ -16,7 +16,7 @@ export const OtelInstanceCounter = (
   return class extends ctor {
     constructor(...args) {
       if (!counterMetric) {
-        counterMetric = getOrCreateCounter(name, MetricType.Counter, { description, ...options });
+        counterMetric = getOrCreateCounter(name, { description, ...options });
       }
 
       counterMetric.add(1);
@@ -44,7 +44,7 @@ export const OtelMethodCounter = (
   // eslint-disable-next-line no-param-reassign, func-names
   descriptor.value = function (...args: any[]) {
     if (!counterMetric) {
-      counterMetric = getOrCreateCounter(name, MetricType.Counter, { description, ...options });
+      counterMetric = getOrCreateCounter(name, { description, ...options });
     }
     counterMetric.add(1);
     return methodFunc.apply(this, args);
