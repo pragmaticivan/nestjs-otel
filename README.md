@@ -179,7 +179,7 @@ export class BookService {
 
 ## Metric Service
 
-[OpenTelemetry Metrics](https://www.npmjs.com/package/@opentelemetry/metrics) allow a user to collect data and export it to metrics backend like Prometheus.
+[OpenTelemetry Metrics](https://www.npmjs.com/package/@opentelemetry/api-metrics) allow a user to collect data and export it to metrics backend like Prometheus.
 
 ```ts
 import { MetricService } from 'nestjs-otel';
