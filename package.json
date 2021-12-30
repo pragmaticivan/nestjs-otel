@@ -95,7 +95,7 @@
     "testEnvironment": "node"
   },
   "lint-staged": {
-    "*.{js,ts}": "eslint --cache --fix"
+    "!(examples/**/*)*.{js,ts}": "eslint --cache --fix"
   },
   "commitlint": {
     "extends": [

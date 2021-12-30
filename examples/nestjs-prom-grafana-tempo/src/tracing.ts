@@ -1,9 +1,9 @@
 import {
   CompositePropagator,
-  HttpTraceContextPropagator,
-  HttpBaggagePropagator,
+  W3CTraceContextPropagator,
+  W3CBaggagePropagator,
 } from '@opentelemetry/core';
-import { BatchSpanProcessor } from '@opentelemetry/tracing';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { JaegerPropagator } from '@opentelemetry/propagator-jaeger';
@@ -23,8 +23,8 @@ const otelSDK = new NodeSDK({
   textMapPropagator: new CompositePropagator({
     propagators: [
       new JaegerPropagator(),
-      new HttpTraceContextPropagator(),
-      new HttpBaggagePropagator(),
+      new W3CTraceContextPropagator(),
+      new W3CBaggagePropagator(),
       new B3Propagator(),
       new B3Propagator({
         injectEncoding: B3InjectEncoding.MULTI_HEADER,
