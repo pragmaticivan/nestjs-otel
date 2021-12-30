@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.6.1...v3.0.0) (2021-12-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* Anything related to metrics sdk has changed. OTEL now has a stable spec and all the projects are moving towards new interfaces.
+
+### Features
+
+* ename value recorder on decorators and update readme ([646e2ea](https://www.github.com/pragmaticivan/nestjs-otel/commit/646e2eacd07127f9658b302c09d3056b3b2e1771))
+* support all metric types from otel spec ([36a7c5f](https://www.github.com/pragmaticivan/nestjs-otel/commit/36a7c5f2f895157b3e675a7a6ff6693fea6cc8f2))
+* update metric spec to the latest otel lib ([6ed63ae](https://www.github.com/pragmaticivan/nestjs-otel/commit/6ed63aefbc1e39da9659d6e232a4883f7ed93dac))
+* update packages to compply with latest otel metric spec ([943ca06](https://www.github.com/pragmaticivan/nestjs-otel/commit/943ca06ea62e95d8a07af63030609f226b78c4b8))
+
 ### [2.6.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.6.0...v2.6.1) (2021-10-13)
 
 
