@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.0.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.0...v3.0.1) (2022-01-03)
+
+
+### Bug Fixes
+
+* **#171:** fixes missing observation callback for observable metrics ([7d89c1f](https://www.github.com/pragmaticivan/nestjs-otel/commit/7d89c1f910b28d0661da6f2989ddea4b9bdcc643)), closes [#171](https://www.github.com/pragmaticivan/nestjs-otel/issues/171)
+
 ## [3.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v2.6.1...v3.0.0) (2021-12-30)
 
 
