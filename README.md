@@ -76,7 +76,6 @@ const otelSDK = new NodeSDK({
   }),
   instrumentations: [getNodeAutoInstrumentations()],
 });
-
 export default otelSDK;
 
 // You can also use the shutdown method to gracefully shut down the SDK before process shutdown
