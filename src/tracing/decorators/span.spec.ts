@@ -1,6 +1,6 @@
 import { context, trace } from '@opentelemetry/api';
-import { Span } from './span';
 import { NodeSDK, tracing } from '@opentelemetry/sdk-node';
+import { Span } from './span';
 
 class TestSpan {
   @Span()
