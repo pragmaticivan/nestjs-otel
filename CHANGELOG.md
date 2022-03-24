@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.0.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.1...v3.0.2) (2022-03-24)
+
+
+### Bug Fixes
+
+* **tracing:** use startActiveSpan to ensure span in correct context ([d608b84](https://www.github.com/pragmaticivan/nestjs-otel/commit/d608b84e582b41105c6871ee2e7174f7a0116d96))
+
 ### [3.0.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.0...v3.0.1) (2022-01-03)
 
 
