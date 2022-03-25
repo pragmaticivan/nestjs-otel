@@ -1,5 +1,12 @@
 # Changelog
 
+### [3.0.3](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.2...v3.0.3) (2022-03-25)
+
+
+### Bug Fixes
+
+* **tracing:** record exception and set correct span status ([616c12b](https://www.github.com/pragmaticivan/nestjs-otel/commit/616c12b157f7736e9fd45cd38bf9a4c21c11e140))
+
 ### [3.0.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.1...v3.0.2) (2022-03-24)
 
 
