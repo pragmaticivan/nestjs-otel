@@ -1,48 +1,91 @@
-import { context, trace } from '@opentelemetry/api';
-import { NodeSDK, tracing } from '@opentelemetry/sdk-node';
+import { SpanStatusCode } from '@opentelemetry/api';
+import { tracing } from '@opentelemetry/sdk-node';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { Span } from './span';
 
 class TestSpan {
   @Span()
-  singleSpan() {
-    return trace.getSpan(context.active());
-  }
+  singleSpan() {}
 
   @Span()
   doubleSpan() {
     return this.singleSpan();
   }
+
+  @Span()
+  error() {
+    throw new Error('hello world');
+  }
 }
 
 describe('Span', () => {
   let instance: TestSpan;
-  let otelSdk: NodeSDK;
+  let traceExporter: tracing.InMemorySpanExporter;
+  let spanProcessor: tracing.SimpleSpanProcessor;
+  let provider: NodeTracerProvider;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     instance = new TestSpan();
+    traceExporter = new tracing.InMemorySpanExporter();
+    spanProcessor = new tracing.SimpleSpanProcessor(traceExporter);
 
-    otelSdk = new NodeSDK({
-      traceExporter: new tracing.ConsoleSpanExporter(),
-      // Noop Span Processor disables any spans from being outputted
-      // by ConsoleSpanExporter.
-      // Remove it if you want to debug spans exported.
-      spanProcessor: new tracing.NoopSpanProcessor(),
-    });
-
-    await otelSdk.start();
+    provider = new NodeTracerProvider();
+    provider.addSpanProcessor(spanProcessor);
+    provider.register();
   });
 
   afterEach(async () => {
-    await otelSdk.shutdown();
+    spanProcessor.forceFlush();
+    traceExporter.reset();
+  });
+
+  afterAll(async () => {
+    await provider.shutdown();
   });
 
   it('should set correct span', async () => {
-    const response = instance.singleSpan();
-    expect((response as any).name).toEqual('TestSpan.singleSpan');
+    instance.singleSpan();
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(1);
+    expect(spans.map(span => span.name)).toEqual(['TestSpan.singleSpan']);
   });
 
   it('should set correct span even when calling other method with Span decorator', async () => {
-    const response = instance.doubleSpan();
-    expect((response as any).name).toEqual('TestSpan.singleSpan');
+    instance.doubleSpan();
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(2);
+    expect(spans.map(span => span.name)).toEqual(['TestSpan.singleSpan', 'TestSpan.doubleSpan']);
+  });
+
+  it('should propagate errors', () => {
+    expect(instance.error).toThrowError('hello world');
+  });
+
+  it('should set setStatus to ERROR and message to error message', async () => {
+    expect(instance.error).toThrowError('hello world');
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(1);
+    expect(spans[0].status).toEqual({ code: SpanStatusCode.ERROR, message: 'hello world' });
+  });
+
+  it('should set recordException with error', () => {
+    expect(instance.error).toThrowError('hello world');
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(1);
+    // Contain one exception event
+    expect(spans[0].events).toHaveLength(1);
+    expect(spans[0].events[0]).toEqual({
+      name: 'exception',
+      attributes: expect.anything(),
+      time: expect.anything(),
+    });
   });
 });
