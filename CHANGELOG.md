@@ -1,5 +1,13 @@
 # Changelog
 
+### [3.0.4](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.3...v3.0.4) (2022-03-29)
+
+
+### Bug Fixes
+
+* **metrics:** make sure metadata is kept ([de7ca0f](https://www.github.com/pragmaticivan/nestjs-otel/commit/de7ca0f387dbe44142c58c827ccd777348ae491b))
+* **tracing:** make sure metadata is kept ([c34ae56](https://www.github.com/pragmaticivan/nestjs-otel/commit/c34ae561e73daea879f6871f2f781a565d03a95a))
+
 ### [3.0.3](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.2...v3.0.3) (2022-03-25)
 
 
