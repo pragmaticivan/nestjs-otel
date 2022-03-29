@@ -1,7 +1,11 @@
+import 'reflect-metadata';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { tracing } from '@opentelemetry/sdk-node';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { SetMetadata } from '@nestjs/common';
 import { Span } from './span';
+
+const TestDecoratorThatSetsMetadata = () => SetMetadata('some-metadata', true);
 
 class TestSpan {
   @Span()
@@ -16,6 +20,10 @@ class TestSpan {
   error() {
     throw new Error('hello world');
   }
+
+  @Span()
+  @TestDecoratorThatSetsMetadata()
+  metadata() {}
 }
 
 describe('Span', () => {
@@ -41,6 +49,10 @@ describe('Span', () => {
 
   afterAll(async () => {
     await provider.shutdown();
+  });
+
+  it('should maintain reflect metadataa', async () => {
+    expect(Reflect.getMetadata('some-metadata', instance.metadata)).toEqual(true);
   });
 
   it('should set correct span', async () => {

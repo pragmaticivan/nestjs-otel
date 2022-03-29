@@ -1,4 +1,5 @@
 import { Span as ApiSpan, SpanStatusCode, trace } from '@opentelemetry/api';
+import { copyMetadataFromFunctionToFunction } from '../../opentelemetry.utils';
 
 const recordException = (span: ApiSpan, error: any) => {
   span.recordException(error);
@@ -7,15 +8,14 @@ const recordException = (span: ApiSpan, error: any) => {
 
 export function Span(name?: string) {
   return (target: any, propertyKey: string, propertyDescriptor: PropertyDescriptor) => {
-    const method = propertyDescriptor.value;
-    // eslint-disable-next-line no-param-reassign
-    propertyDescriptor.value = function PropertyDescriptor(...args: any[]) {
+    const originalFunction = propertyDescriptor.value;
+    const wrappedFunction = function PropertyDescriptor(...args: any[]) {
       const tracer = trace.getTracer('default');
       const spanName = name || `${target.constructor.name}.${propertyKey}`;
 
       return tracer.startActiveSpan(spanName, span => {
-        if (method.constructor.name === 'AsyncFunction') {
-          return method
+        if (originalFunction.constructor.name === 'AsyncFunction') {
+          return originalFunction
             .apply(this, args)
             .catch(error => {
               recordException(span, error);
@@ -28,7 +28,7 @@ export function Span(name?: string) {
         }
 
         try {
-          return method.apply(this, args);
+          return originalFunction.apply(this, args);
         } catch (error) {
           recordException(span, error);
           // Throw error to propagate it further
@@ -38,5 +38,9 @@ export function Span(name?: string) {
         }
       });
     };
+    // eslint-disable-next-line no-param-reassign
+    propertyDescriptor.value = wrappedFunction;
+
+    copyMetadataFromFunctionToFunction(originalFunction, wrappedFunction);
   };
 }
