@@ -64,7 +64,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   static forRootAsync(options: OpenTelemetryModuleAsyncOptions): DynamicModule {
     const asyncProviders = this.createAsyncProviders(options);
     return {
-      module: OpenTelemetryModule,
+      module: OpenTelemetryCoreModule,
       imports: [...(options.imports || [])],
       providers: [
         ...asyncProviders,
