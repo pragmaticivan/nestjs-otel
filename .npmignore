@@ -1,19 +1,14 @@
-# source
-lib
-tests
-index.ts
-package-lock.json
-tslint.json
-tsconfig.json
-.prettierrc
-
-# github
 .github
-CONTRIBUTING.md
-renovate.json
-
-# misc
-.commitlintrc.json
-.release-it.json
-.eslintignore
-.eslintrc.js
+.husky
+.vscode
+node_modules
+src
+tests
+.editorconfig
+.estlintcache
+.estlintignore
+.estlintrc.js
+.prettierrc.js
+CHANGELOG.md
+commitlint.config.js
+REFERENCE.md
