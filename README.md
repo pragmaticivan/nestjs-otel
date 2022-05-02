@@ -320,16 +320,11 @@ export const logger: Logger = Pino(loggerOptions);
 
 ## Examples
 
-A full working example can be found in `/examples/nestjs-prom-grafana-tempo`. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo.
+A full working examples are available. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo:
 
-A dashboard example is also available:
-
-![Grafana Dashboard](./examples/nestjs-prom-grafana-tempo/grafana-dashboard.png)
-
-Logs are automatically associated with tracing (Loki + Tempo):
-
-![Loki](./examples/nestjs-prom-grafana-tempo/loki-logs.png)
-
+* [nestjs-otel-prom-grafana-tempo-otel-collector](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo-otel-collector)
+* [nestjs-otel-fastify-prom-grafana-tempo ](https://github.com/pragmaticivan/nestjs-otel-fastify-prom-grafana-tempo )
+* [nestjs-otel-prom-grafana-tempo ](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/pragmaticivan/nestjs-otel.svg)](https://starchart.cc/pragmaticivan/nestjs-otel)
