@@ -12,7 +12,6 @@ import {
   OPENTELEMETRY_MODULE_OPTIONS,
 } from './opentelemetry.constants';
 import { TraceService } from './tracing/trace.service';
-import { OpenTelemetryModule } from './opentelemetry.module';
 
 /**
  * The internal OpenTelemetry Module which handles the integration
@@ -34,9 +33,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
    * synchronously and sets the correct providers
    * @param options The options to bootstrap the module synchronously
    */
-  static forRoot(
-    options: OpenTelemetryModuleOptions = { metrics: {} },
-  ): DynamicModule {
+  static forRoot(options: OpenTelemetryModuleOptions = {}): DynamicModule {
     const openTelemetryModuleOptions = {
       provide: OPENTELEMETRY_MODULE_OPTIONS,
       useValue: options,
@@ -64,7 +61,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   static forRootAsync(options: OpenTelemetryModuleAsyncOptions): DynamicModule {
     const asyncProviders = this.createAsyncProviders(options);
     return {
-      module: OpenTelemetryModule,
+      module: OpenTelemetryCoreModule,
       imports: [...(options.imports || [])],
       providers: [
         ...asyncProviders,
@@ -81,7 +78,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   configure(consumer: MiddlewareConsumer) {
     const {
       apiMetrics = { enable: false },
-    } = this.options?.metrics;
+    } = this.options?.metrics ?? {};
 
     if (apiMetrics.enable === true) {
       if (apiMetrics?.ignoreRoutes && apiMetrics?.ignoreRoutes.length > 0) {
