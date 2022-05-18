@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.4...v3.1.0) (2022-05-18)
+
+
+### Features
+
+* **build:** update dependencies ([c2f8b7b](https://www.github.com/pragmaticivan/nestjs-otel/commit/c2f8b7b9fbe116953521fb6b5d7f4648d09d7712))
+
+
+### Bug Fixes
+
+* forRootAsync uses the wrong module and empty options breaks the configure method ([c2dc102](https://www.github.com/pragmaticivan/nestjs-otel/commit/c2dc102d41f2ddc1ca3e8a814e7243fc4cc4b773))
+
 ### [3.0.4](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.3...v3.0.4) (2022-03-29)
 
 
