@@ -90,22 +90,14 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap() {
-    let defaultMetrics: boolean = false;
     let hostMetrics: boolean = false;
 
     if (this.options?.metrics) {
-      defaultMetrics = this.options.metrics.defaultMetrics
-        !== undefined ? this.options.metrics.defaultMetrics : false;
       hostMetrics = this.options.metrics.hostMetrics
         !== undefined ? this.options.metrics.hostMetrics : false;
     }
 
     const meterProvider = metrics.getMeterProvider();
-
-    if (defaultMetrics) {
-      // eslint-disable-next-line global-require
-      require('opentelemetry-node-metrics')(meterProvider);
-    }
 
     if (hostMetrics) {
       // For some reason meterProvider type does not match here.
@@ -133,9 +125,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
 
     if (options.useClass || options.useExisting) {
       const inject = [
-        (options.useClass || options.useExisting) as Type<
-        OpenTelemetryOptionsFactory
-        >,
+        (options.useClass || options.useExisting) as Type<OpenTelemetryOptionsFactory>,
       ];
       return {
         provide: OPENTELEMETRY_MODULE_OPTIONS,

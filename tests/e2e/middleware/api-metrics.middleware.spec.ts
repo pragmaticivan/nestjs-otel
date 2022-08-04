@@ -5,11 +5,23 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { metrics } from '@opentelemetry/api-metrics';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { MetricService, OpenTelemetryModule, OTEL_METER_NAME } from '../../../src';
-import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS, DEFAULT_REQUEST_SIZE_BUCKETS, DEFAULT_RESPONSE_SIZE_BUCKETS } from '../../../src/middleware';
+import { AggregationTemporality, MeterProvider, MetricReader } from '@opentelemetry/sdk-metrics-base';
+import { MetricService, OpenTelemetryModule } from '../../../src';
 import { AppController } from '../../fixture-app/app.controller';
 import { EmptyLogger } from '../../utils';
 import { meterData } from '../../../src/metrics/metric-data';
+
+class TestMetricReader extends MetricReader {
+  selectAggregationTemporality() {
+    return AggregationTemporality.CUMULATIVE;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onForceFlush() { }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async onShutdown() { }
+}
 
 describe('Api Metrics Middleware', () => {
   let app: INestApplication;
@@ -18,23 +30,23 @@ describe('Api Metrics Middleware', () => {
     getHistogram: jest.fn(),
   };
 
-  let exporter: PrometheusExporter;
-  let otelSDK: NodeSDK;
+  let promExporter: PrometheusExporter;
+  let meterProvider: MeterProvider;
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    exporter = new PrometheusExporter({
+    promExporter = new PrometheusExporter({
       preventServerStart: true,
     });
 
-    otelSDK = new NodeSDK({
-      metricExporter: exporter,
-      metricInterval: 100,
-    });
+    meterProvider = new MeterProvider();
+    meterProvider.addMetricReader(promExporter);
+
+    metrics.setGlobalMeterProvider(meterProvider);
+
     meterData.clear();
 
-    await otelSDK.start();
-    await exporter.startServer();
+    await promExporter.startServer();
   });
 
   it('does not register api metrics when disabled', async () => {
@@ -72,36 +84,11 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getCounter).toHaveBeenCalledWith('http_request_total', { description: 'Total number of HTTP requests' });
-    expect(metricService.getCounter).toHaveBeenCalledWith('http_response_total', { description: 'Total number of HTTP responses' });
-    expect(metricService.getCounter).toHaveBeenCalledWith('http_response_success_total', { description: 'Total number of all successful responses' });
-
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.request.count', {
+      description: 'Total number of HTTP requests',
+      unit: 'requests',
+    });
     expect(metricService.getHistogram).toHaveBeenCalledTimes(3);
-  });
-
-  it('registers custom boundaries', async () => {
-    const boundaries = [1, 2];
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            requestSizeBuckets: [...boundaries],
-            responseSizeBuckets: [...boundaries],
-            timeBuckets: [...boundaries],
-          },
-        },
-      })],
-    }).overrideProvider(MetricService)
-      .useValue(metricService)
-      .compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries });
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http_request_size_bytes', { description: 'Current total of incoming bytes', boundaries });
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http_response_size_bytes', { description: 'Current total of outgoing bytes', boundaries });
   });
 
   it('uses custom buckets when provided', async () => {
@@ -110,7 +97,6 @@ describe('Api Metrics Middleware', () => {
         metrics: {
           apiMetrics: {
             enable: true,
-            timeBuckets: [1, 2],
           },
         },
       })],
@@ -121,10 +107,10 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getHistogram).toBeCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries: [1, 2] });
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', { description: 'The duration of the inbound HTTP request', unit: 'ms' });
   });
 
-  it('registers successful request records', async () => {
+  it.only('registers successful request records', async () => {
     const testingModule = await Test.createTestingModule({
       imports: [OpenTelemetryModule.forRoot({
         metrics: {
@@ -148,12 +134,12 @@ describe('Api Metrics Middleware', () => {
     // TODO: OpenTelemetry exporter does not expose server in a public function.
     // @ts-ignore
     // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
+    const { text } = await request(promExporter._server)
       .get('/metrics')
       .expect(200);
-
-    expect(/http_response_success_total 1/.test(text)).toBeTruthy();
-    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+    console.log('text', text);
+    expect(/http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+    expect(/http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeTruthy();
@@ -173,7 +159,6 @@ describe('Api Metrics Middleware', () => {
           apiMetrics: {
             enable: true,
           },
-          // hostMetrics: true,
         },
       })],
       controllers: [AppController],
@@ -596,11 +581,8 @@ describe('Api Metrics Middleware', () => {
 
   afterEach(async () => {
     metrics.disable();
-    if (exporter) {
-      await exporter.stopServer();
-    }
-    if (otelSDK) {
-      await otelSDK.shutdown();
+    if (promExporter) {
+      await promExporter.stopServer();
     }
     if (app) {
       await app.close();

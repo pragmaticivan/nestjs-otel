@@ -45,13 +45,9 @@ export interface OpenTelemetryModuleAsyncOptions
 }
 
 export type OpenTelemetryMetrics = {
-  defaultMetrics?: boolean,
   hostMetrics?: boolean,
   apiMetrics?: {
     enable?: boolean,
-    timeBuckets?: number[],
-    requestSizeBuckets?: number[],
-    responseSizeBuckets?: number[],
     defaultAttributes?: Attributes,
     ignoreRoutes?: (string | RouteInfo)[],
     ignoreUndefinedRoutes?: boolean,

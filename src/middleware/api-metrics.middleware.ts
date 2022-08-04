@@ -1,49 +1,38 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import * as responseTime from 'response-time';
 import * as urlParser from 'url';
-import { Counter, Attributes, Histogram } from '@opentelemetry/api-metrics';
+import {
+  Counter, MetricAttributes, Histogram, UpDownCounter,
+} from '@opentelemetry/api-metrics';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 
-export const DEFAULT_LONG_RUNNING_REQUEST_BUCKETS = [
-  0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, // standard
-  30, 60, 120, 300, 600, // Sometimes requests may be really long-running
-];
-export const DEFAULT_REQUEST_SIZE_BUCKETS = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
-export const DEFAULT_RESPONSE_SIZE_BUCKETS = [
-  5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000,
-];
-
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
-  private readonly defaultLongRunningRequestBuckets = DEFAULT_LONG_RUNNING_REQUEST_BUCKETS;
+  private defaultMetricAttributes: MetricAttributes;
 
-  private readonly defaultRequestSizeBuckets = DEFAULT_REQUEST_SIZE_BUCKETS;
+  private httpServerRequestCount: Counter;
 
-  private readonly defaultResponseSizeBuckets = DEFAULT_RESPONSE_SIZE_BUCKETS;
+  private httpServerResponseCount: Counter;
 
-  private requestTotal: Counter;
+  private httpServerDuration: Histogram;
 
-  private responseTotal: Counter;
+  // private httpServerActiveRequests: UpDownCounter;
 
-  private responseSuccessTotal: Counter;
+  private httpServerRequestSize: Histogram;
 
-  private responseErrorTotal: Counter;
+  private httpServerResponseSize: Histogram;
 
-  private responseClientErrorTotal: Counter;
+  private httpServerResponseSuccess: Counter;
 
-  private responseServerErrorTotal: Counter;
+  private httpServerResponseErrorCount: Counter;
 
-  private serverAbortsTotal: Counter;
+  private httpClientRequestErrorCount: Counter;
 
-  private requestDuration: Histogram;
+  private httpServerAbortCount: Counter;
 
-  private requestSizeHistogram: Histogram;
-
-  private responseSizeHistogram: Histogram;
-
-  private defaultAttributes: Attributes;
+  // private httpServerRequestErrorCount: Counter;
 
   private readonly ignoreUndefinedRoutes: boolean;
 
@@ -51,57 +40,57 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     @Inject(MetricService) private readonly metricService: MetricService,
     @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
   ) {
-    this.requestTotal = this.metricService.getCounter('http_request_total', {
-      description: 'Total number of HTTP requests',
-    });
-
-    this.responseTotal = this.metricService.getCounter('http_response_total', {
-      description: 'Total number of HTTP responses',
-    });
-
-    this.responseSuccessTotal = this.metricService.getCounter('http_response_success_total', {
-      description: 'Total number of all successful responses',
-    });
-
-    this.responseErrorTotal = this.metricService.getCounter('http_response_error_total', {
-      description: 'Total number of all response errors',
-    });
-
-    this.responseClientErrorTotal = this.metricService.getCounter('http_client_error_total', {
-      description: 'Total number of client error requests',
-    });
-
-    this.responseServerErrorTotal = this.metricService.getCounter('http_server_error_total', {
-      description: 'Total number of server error requests',
-    });
-
-    this.serverAbortsTotal = this.metricService.getCounter('http_server_aborts_total', {
-      description: 'Total number of data transfers aborted',
-    });
-
     const {
-      timeBuckets = [], requestSizeBuckets = [], responseSizeBuckets = [], defaultAttributes = {},
+      defaultAttributes = {},
       ignoreUndefinedRoutes = false,
     } = options?.metrics?.apiMetrics;
 
-    this.defaultAttributes = defaultAttributes;
+    this.defaultMetricAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
 
-    this.requestDuration = this.metricService.getHistogram('http_request_duration_seconds', {
-      boundaries: timeBuckets.length > 0 ? timeBuckets : this.defaultLongRunningRequestBuckets,
-      description: 'HTTP latency value recorder in seconds',
+    // Semantic Convention
+    this.httpServerRequestCount = this.metricService.getCounter('http.server.request.count', {
+      description: 'Total number of HTTP requests',
+      unit: 'requests',
     });
 
-    this.requestSizeHistogram = this.metricService.getHistogram('http_request_size_bytes', {
-      boundaries:
-        requestSizeBuckets.length > 0 ? requestSizeBuckets : this.defaultRequestSizeBuckets,
-      description: 'Current total of incoming bytes',
+    this.httpServerResponseCount = this.metricService.getCounter('http.server.response.count', {
+      description: 'Total number of HTTP responses',
+      unit: 'responses',
     });
 
-    this.responseSizeHistogram = this.metricService.getHistogram('http_response_size_bytes', {
-      boundaries:
-        responseSizeBuckets.length > 0 ? responseSizeBuckets : this.defaultResponseSizeBuckets,
-      description: 'Current total of outgoing bytes',
+    this.httpServerAbortCount = this.metricService.getCounter('http.server.abort.count', {
+      description: 'Total number of data transfers aborted',
+      unit: 'requests',
+    });
+
+    this.httpServerDuration = this.metricService.getHistogram('http.server.duration', {
+      description: 'The duration of the inbound HTTP request',
+      unit: 'ms',
+    });
+
+    this.httpServerRequestSize = this.metricService.getHistogram('http.server.request.size', {
+      description: 'Size of incoming bytes',
+      unit: 'By',
+    });
+
+    this.httpServerResponseSize = this.metricService.getHistogram('http.server.response.size', {
+      description: 'Size of outgoing bytes',
+      unit: 'By',
+    });
+
+    // Helpers
+    this.httpServerResponseSuccess = this.metricService.getCounter('http.server.response.success', {
+      description: 'Total number of all successful responses',
+      unit: 'responses',
+    });
+
+    this.httpServerResponseErrorCount = this.metricService.getCounter('http.server.response.error.count', {
+      description: 'Total number of all response errors',
+    });
+
+    this.httpClientRequestErrorCount = this.metricService.getCounter('http.client.request.error.count', {
+      description: 'Total number of client error requests',
     });
   }
 
@@ -119,46 +108,46 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         path = urlParser.parse(url).pathname;
       }
 
-      this.requestTotal.add(1, { method, path });
+      this.httpServerRequestCount.add(1, { method, path });
 
       const requestLength = parseInt(req.headers['content-length'], 10) || 0;
       const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
 
       const status = res.statusCode || 500;
-      const attributes: Attributes = {
-        method, status, path, ...this.defaultAttributes,
+      const attributes: MetricAttributes = {
+        method, status, path, ...this.defaultMetricAttributes,
       };
 
-      this.requestSizeHistogram.record(requestLength, attributes);
-      this.responseSizeHistogram.record(responseLength, attributes);
+      this.httpServerRequestSize.record(requestLength, attributes);
+      this.httpServerResponseSize.record(responseLength, attributes);
 
-      this.responseTotal.add(1, attributes);
-      this.requestDuration.record(time / 1000, attributes);
+      this.httpServerResponseCount.add(1, attributes);
+      this.httpServerDuration.record(time / 1000, attributes);
 
       const codeClass = this.getStatusCodeClass(status);
 
       // eslint-disable-next-line default-case
       switch (codeClass) {
         case 'success':
-          this.responseSuccessTotal.add(1);
+          this.httpServerResponseSuccess.add(1);
           break;
         case 'redirect':
           // TODO: Review what should be appropriate for redirects.
-          this.responseSuccessTotal.add(1);
+          this.httpServerResponseSuccess.add(1);
           break;
         case 'client_error':
-          this.responseErrorTotal.add(1);
-          this.responseClientErrorTotal.add(1);
+          this.httpServerResponseErrorCount.add(1);
+          this.httpClientRequestErrorCount.add(1);
           break;
         case 'server_error':
-          this.responseErrorTotal.add(1);
-          this.responseServerErrorTotal.add(1);
+          this.httpServerResponseErrorCount.add(1);
+          this.httpClientRequestErrorCount.add(1);
           break;
       }
 
       req.on('end', () => {
         if (req.aborted === true) {
-          this.serverAbortsTotal.add(1);
+          this.httpServerAbortCount.add(1);
         }
       });
     })(req, res, next);

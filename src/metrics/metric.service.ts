@@ -25,24 +25,21 @@ export class MetricService {
   getObservableCounter(
     name: string,
     options?: MetricOptions,
-    callback?: (observableResult: ObservableResult) => void,
   ) {
-    return getOrCreateObservableCounter(name, options, callback);
+    return getOrCreateObservableCounter(name, options);
   }
 
   getObservableGauge(
     name: string,
     options?: MetricOptions,
-    callback?: (observableResult: ObservableResult) => void,
   ) {
-    return getOrCreateObservableGauge(name, options, callback);
+    return getOrCreateObservableGauge(name, options);
   }
 
   getObservableUpDownCounter(
     name: string,
     options?: MetricOptions,
-    callback?: (observableResult: ObservableResult) => void,
   ) {
-    return getOrCreateObservableUpDownCounter(name, options, callback);
+    return getOrCreateObservableUpDownCounter(name, options);
   }
 }

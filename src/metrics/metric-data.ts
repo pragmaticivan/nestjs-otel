@@ -70,7 +70,6 @@ export function getOrCreateUpDownCounter(
 export function getOrCreateObservableGauge(
   name: string,
   options: MetricOptions,
-  callback?: (observableResult: ObservableResult) => void,
 ): ObservableGauge {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableGauge;
@@ -78,7 +77,7 @@ export function getOrCreateObservableGauge(
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const observableGauge = meter.createObservableGauge(name, options, callback);
+  const observableGauge = meter.createObservableGauge(name, options);
   meterData.set(name, observableGauge);
   return observableGauge;
 }
@@ -86,7 +85,6 @@ export function getOrCreateObservableGauge(
 export function getOrCreateObservableCounter(
   name: string,
   options: MetricOptions,
-  callback?: (observableResult: ObservableResult) => void,
 ): ObservableCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableCounter;
@@ -94,7 +92,7 @@ export function getOrCreateObservableCounter(
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const observableCounter = meter.createObservableCounter(name, options, callback);
+  const observableCounter = meter.createObservableCounter(name, options);
   meterData.set(name, observableCounter);
   return observableCounter;
 }
@@ -102,7 +100,6 @@ export function getOrCreateObservableCounter(
 export function getOrCreateObservableUpDownCounter(
   name: string,
   options: MetricOptions,
-  callback?: (observableResult: ObservableResult) => void,
 ): ObservableUpDownCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableUpDownCounter;
@@ -110,7 +107,7 @@ export function getOrCreateObservableUpDownCounter(
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const observableCounter = meter.createObservableCounter(name, options, callback);
+  const observableCounter = meter.createObservableCounter(name, options);
   meterData.set(name, observableCounter);
   return observableCounter;
 }
