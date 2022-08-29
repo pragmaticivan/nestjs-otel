@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.4...v4.0.0) (2022-08-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* support latest metric sdk
+
+### Features
+
+* **build:** update dependencies ([c2f8b7b](https://www.github.com/pragmaticivan/nestjs-otel/commit/c2f8b7b9fbe116953521fb6b5d7f4648d09d7712))
+* support latest metric sdk ([e8d2e96](https://www.github.com/pragmaticivan/nestjs-otel/commit/e8d2e96da5161cd5c4ee78290244144f5849ec8b))
+* **tracing:** pass options with span decorator ([3424b88](https://www.github.com/pragmaticivan/nestjs-otel/commit/3424b884e949792679dac79f7b3624cc6e67b110))
+* update remaining counters ([d11f6d9](https://www.github.com/pragmaticivan/nestjs-otel/commit/d11f6d98cf25639c01e24c9007a43d3e06c32738))
+
+
+### Bug Fixes
+
+* forRootAsync uses the wrong module and empty options breaks the configure method ([c2dc102](https://www.github.com/pragmaticivan/nestjs-otel/commit/c2dc102d41f2ddc1ca3e8a814e7243fc4cc4b773))
+
 ### [3.0.4](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.3...v3.0.4) (2022-03-29)
 
 
