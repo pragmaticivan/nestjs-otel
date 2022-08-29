@@ -1,5 +1,5 @@
 import { ModuleMetadata, Type, Abstract } from '@nestjs/common';
-import { Attributes } from '@opentelemetry/api-metrics';
+import { MetricAttributes } from '@opentelemetry/api-metrics';
 import { RouteInfo } from '@nestjs/common/interfaces';
 
 export type OpenTelemetryModuleOptions = {
@@ -48,7 +48,7 @@ export type OpenTelemetryMetrics = {
   hostMetrics?: boolean,
   apiMetrics?: {
     enable?: boolean,
-    defaultAttributes?: Attributes,
+    defaultAttributes?: MetricAttributes,
     ignoreRoutes?: (string | RouteInfo)[],
     ignoreUndefinedRoutes?: boolean,
   },
