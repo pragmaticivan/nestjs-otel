@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { SpanStatusCode } from '@opentelemetry/api';
+import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { tracing } from '@opentelemetry/sdk-node';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { SetMetadata } from '@nestjs/common';
@@ -15,6 +15,9 @@ class TestSpan {
   doubleSpan() {
     return this.singleSpan();
   }
+
+  @Span('foo', { kind: SpanKind.PRODUCER })
+  fooProducerSpan() {}
 
   @Span()
   error() {
@@ -62,6 +65,15 @@ describe('Span', () => {
 
     expect(spans).toHaveLength(1);
     expect(spans.map(span => span.name)).toEqual(['TestSpan.singleSpan']);
+  });
+
+  it('should set correct span options', async () => {
+    instance.fooProducerSpan();
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(1);
+    expect(spans.map(span => span.kind)).toEqual([SpanKind.PRODUCER]);
   });
 
   it('should set correct span even when calling other method with Span decorator', async () => {
