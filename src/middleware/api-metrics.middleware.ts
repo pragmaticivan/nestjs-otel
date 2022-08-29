@@ -22,7 +22,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   private httpServerResponseSize: Histogram;
 
-  private httpServerResponseSuccess: Counter;
+  private httpServerResponseSuccessCount: Counter;
 
   private httpServerResponseErrorCount: Counter;
 
@@ -76,7 +76,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     });
 
     // Helpers
-    this.httpServerResponseSuccess = this.metricService.getCounter('http.server.response.success', {
+    this.httpServerResponseSuccessCount = this.metricService.getCounter('http.server.response.success.count', {
       description: 'Total number of all successful responses',
       unit: 'responses',
     });
@@ -125,11 +125,11 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       // eslint-disable-next-line default-case
       switch (codeClass) {
         case 'success':
-          this.httpServerResponseSuccess.add(1);
+          this.httpServerResponseSuccessCount.add(1);
           break;
         case 'redirect':
           // TODO: Review what should be appropriate for redirects.
-          this.httpServerResponseSuccess.add(1);
+          this.httpServerResponseSuccessCount.add(1);
           break;
         case 'client_error':
           this.httpServerResponseErrorCount.add(1);

@@ -157,8 +157,6 @@ describe('Api Metrics Middleware', () => {
         .get('/metrics')
         .expect(200);
 
-      console.log('text', text);
-
       expect(/http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
     });
   });
