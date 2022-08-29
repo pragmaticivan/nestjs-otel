@@ -238,7 +238,7 @@ describe('Api Metrics Middleware', () => {
   describe('metric: http.server.response.size', () => {
   });
 
-  describe('metric: http.server.response.success', () => {
+  describe('metric: http.server.response.success.count', () => {
   });
 
   describe('metric: http.server.response.error.count', () => {
