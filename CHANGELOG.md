@@ -1,5 +1,12 @@
 # Changelog
 
+### [4.0.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v4.0.0...v4.0.1) (2022-08-29)
+
+
+### Bug Fixes
+
+* bump nestjs requirement to 9.x ([24cde7c](https://www.github.com/pragmaticivan/nestjs-otel/commit/24cde7c7da4243288d1b42b6aeddb109b7353aa2))
+
 ## [4.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v3.0.4...v4.0.0) (2022-08-29)
 
 
