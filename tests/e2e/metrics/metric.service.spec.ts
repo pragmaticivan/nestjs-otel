@@ -19,8 +19,7 @@ describe('MetricService', () => {
     });
 
     otelSDK = new NodeSDK({
-      metricExporter: exporter,
-      metricInterval: 100,
+      metricReader: exporter,
     });
 
     await otelSDK.start();
@@ -101,11 +100,10 @@ describe('MetricService', () => {
       const existingCounter = metricService.getCounter('test1');
 
       expect(meterData.has('test1')).toBeTruthy();
-
       // TODO: The metric class does not expose current description
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
-      expect(existingCounter._options.description).toBe('test1 description');
+      expect(existingCounter._descriptor.description).toBe('test1 description');
     });
   });
 
@@ -161,7 +159,7 @@ describe('MetricService', () => {
       // TODO: The metric class does not expose current description
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
-      expect(existingCounter._options.description).toBe('test1 description');
+      expect(existingCounter._descriptor.description).toBe('test1 description');
     });
   });
 
@@ -217,7 +215,7 @@ describe('MetricService', () => {
       // TODO: The metric class does not expose current description
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
-      expect(existingCounter._options.description).toBe('test1 description');
+      expect(existingCounter._descriptor.description).toBe('test1 description');
     });
   });
 

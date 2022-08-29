@@ -1,3 +1,4 @@
+/* eslint-disable import/export */
 export * from './opentelemetry.module';
 export * from './tracing/decorators/span';
 export * from './tracing/trace.service';

@@ -2,13 +2,11 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { NodeSDK } from '@opentelemetry/sdk-node';
 import { metrics } from '@opentelemetry/api-metrics';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { MetricService, OpenTelemetryModule, OTEL_METER_NAME } from '../../../src';
-import { DEFAULT_LONG_RUNNING_REQUEST_BUCKETS, DEFAULT_REQUEST_SIZE_BUCKETS, DEFAULT_RESPONSE_SIZE_BUCKETS } from '../../../src/middleware';
+import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
+import { MetricService, OpenTelemetryModule } from '../../../src';
 import { AppController } from '../../fixture-app/app.controller';
-import { EmptyLogger } from '../../utils';
 import { meterData } from '../../../src/metrics/metric-data';
 
 describe('Api Metrics Middleware', () => {
@@ -18,23 +16,23 @@ describe('Api Metrics Middleware', () => {
     getHistogram: jest.fn(),
   };
 
-  let exporter: PrometheusExporter;
-  let otelSDK: NodeSDK;
+  let promExporter: PrometheusExporter;
+  let meterProvider: MeterProvider;
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    exporter = new PrometheusExporter({
+    promExporter = new PrometheusExporter({
       preventServerStart: true,
     });
 
-    otelSDK = new NodeSDK({
-      metricExporter: exporter,
-      metricInterval: 100,
-    });
+    meterProvider = new MeterProvider();
+    meterProvider.addMetricReader(promExporter);
+
+    metrics.setGlobalMeterProvider(meterProvider);
+
     meterData.clear();
 
-    await otelSDK.start();
-    await exporter.startServer();
+    await promExporter.startServer();
   });
 
   it('does not register api metrics when disabled', async () => {
@@ -72,36 +70,11 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getCounter).toHaveBeenCalledWith('http_request_total', { description: 'Total number of HTTP requests' });
-    expect(metricService.getCounter).toHaveBeenCalledWith('http_response_total', { description: 'Total number of HTTP responses' });
-    expect(metricService.getCounter).toHaveBeenCalledWith('http_response_success_total', { description: 'Total number of all successful responses' });
-
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.request.count', {
+      description: 'Total number of HTTP requests',
+      unit: 'requests',
+    });
     expect(metricService.getHistogram).toHaveBeenCalledTimes(3);
-  });
-
-  it('registers custom boundaries', async () => {
-    const boundaries = [1, 2];
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            requestSizeBuckets: [...boundaries],
-            responseSizeBuckets: [...boundaries],
-            timeBuckets: [...boundaries],
-          },
-        },
-      })],
-    }).overrideProvider(MetricService)
-      .useValue(metricService)
-      .compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries });
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http_request_size_bytes', { description: 'Current total of incoming bytes', boundaries });
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http_response_size_bytes', { description: 'Current total of outgoing bytes', boundaries });
   });
 
   it('uses custom buckets when provided', async () => {
@@ -110,7 +83,6 @@ describe('Api Metrics Middleware', () => {
         metrics: {
           apiMetrics: {
             enable: true,
-            timeBuckets: [1, 2],
           },
         },
       })],
@@ -121,486 +93,288 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getHistogram).toBeCalledWith('http_request_duration_seconds', { description: 'HTTP latency value recorder in seconds', boundaries: [1, 2] });
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', { description: 'The duration of the inbound HTTP request', unit: 'ms' });
   });
 
-  it('registers successful request records', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/4?foo=bar');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_response_success_total 1/.test(text)).toBeTruthy();
-    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
-  });
-
-  it('registers unsuccessful request records', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-          // hostMetrics: true,
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/4/invalid-route?foo=bar');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_client_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_request_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/4\/invalid-route"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-  });
-
-  it('registers server error request records', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-    testingModule.useLogger(new EmptyLogger());
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/internal-error');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_server_error_total 1/.test(text)).toBeTruthy();
-  });
-
-  it('registers requests with custom attributes', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            defaultAttributes: {
-              custom: 'label',
+  describe('metric: http.server.request.count', () => {
+    it('succesfully request records', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
             },
           },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-    testingModule.useLogger(new EmptyLogger());
+        })],
+        controllers: [AppController],
+      }).compile();
 
-    app = testingModule.createNestApplication();
-    await app.init();
+      app = testingModule.createNestApplication();
+      await app.init();
 
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/internal-error');
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4?foo=bar');
 
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
+      expect(/http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+    });
 
-    expect(/custom/.test(text)).toBeTruthy();
-  });
-
-  it('registers successful request records when using Fastify', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-
-    app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await app.init();
-    await app.getHttpAdapter().getInstance().ready();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/4?foo=bar');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_response_success_total 1/.test(text)).toBeTruthy();
-    expect(/http_request_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_total{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/4"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/4"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/4"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/4"[^}]*} 1/.test(text)).toBeTruthy();
-  });
-
-  it('registers unsuccessful request records when using Fastify', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-          // hostMetrics: true,
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-
-    app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await app.init();
-    await app.getHttpAdapter().getInstance().ready();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/4/invalid-route?foo=bar');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_client_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_request_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_total{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/4\/invalid-route"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/4\/invalid-route"[^}]*} 1/.test(text)).toBeTruthy();
-  });
-
-  it('registers server error request records when using Fastify', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-    testingModule.useLogger(new EmptyLogger());
-
-    app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await app.init();
-    await app.getHttpAdapter().getInstance().ready();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/internal-error');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_server_error_total 1/.test(text)).toBeTruthy();
-  });
-
-  it('registers requests with custom attributes when using Fastify', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            defaultAttributes: {
-              custom: 'label',
+    // TODO: Fastify should remove path param and replace it with `:id`
+    it.skip('registers successful request records when using Fastify', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
             },
           },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-    testingModule.useLogger(new EmptyLogger());
+        })],
+        controllers: [AppController],
+      }).compile();
 
-    app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await app.init();
-    await app.getHttpAdapter().getInstance().ready();
+      app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+      await app.init();
+      await app.getHttpAdapter().getInstance().ready();
 
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/internal-error');
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4?foo=bar');
 
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
 
-    expect(/custom/.test(text)).toBeTruthy();
+      expect(/http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+    });
   });
 
-  it('does register non-existing route when ignoreUndefinedRoutes option is disabled', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            ignoreUndefinedRoutes: false,
+  describe('metric: http.server.response.count', () => {
+    it('succesfully request records', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
           },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
+        })],
+        controllers: [AppController],
+      }).compile();
 
-    app = testingModule.createNestApplication();
-    await app.init();
+      app = testingModule.createNestApplication();
+      await app.init();
 
-    const agent = request(app.getHttpServer());
-    await agent.get('/thispathdoesnotexist');
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4?foo=bar');
 
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
+      expect(/http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+    });
 
-    expect(/http_response_error_total 1/.test(text)).toBeTruthy();
-    expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeTruthy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeTruthy();
+    // TODO: Fastify should remove path param and replace it with `:id`
+    it.skip('registers successful request records when using Fastify', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
+          },
+        })],
+        controllers: [AppController],
+      }).compile();
+
+      app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+      await app.init();
+      await app.getHttpAdapter().getInstance().ready();
+
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4?foo=bar');
+
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
+
+      expect(/http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+    });
   });
 
-  it('does not register non-existing route when ignoreUndefinedRoutes option is enabled', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            ignoreUndefinedRoutes: true,
-          },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/thispathdoesnotexist');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_response_error_total 1/.test(text)).toBeFalsy();
-    expect(/http_request_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_total{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/thispathdoesnotexist"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/thispathdoesnotexist"[^}]*} 1/.test(text)).toBeFalsy();
+  describe('metric: http.server.abort.count', () => {
   });
 
-  it('does not register endpoint when listed in ignoreRoutes explicitly', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            ignoreRoutes: ['/example/4'],
-          },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/4?foo=bar');
-
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
-
-    expect(/http_response_success_total 1/.test(text)).toBeFalsy();
-    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+  describe('metric: http.server.duration', () => {
   });
 
-  it('does not register endpoint when listed in ignoreRoutes using wildcards', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-            ignoreRoutes: ['/(.*)'],
+  describe('metric: http.server.request.size', () => {
+  });
+
+  describe('metric: http.server.response.size', () => {
+  });
+
+  describe('metric: http.server.response.success.count', () => {
+  });
+
+  describe('metric: http.server.response.error.count', () => {
+    it('succesfully request records', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
           },
-        },
-      })],
-      controllers: [AppController],
-    }).compile();
+        })],
+        controllers: [AppController],
+      }).compile();
 
-    app = testingModule.createNestApplication();
-    await app.init();
+      app = testingModule.createNestApplication();
+      await app.init();
 
-    const agent = request(app.getHttpServer());
-    await agent.get('/example/4?foo=bar');
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4/invalid-route?foo=bar');
 
-    // Workaround for delay of metrics going to prometheus
-    await new Promise(resolve => setTimeout(resolve, 200));
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-    // TODO: OpenTelemetry exporter does not expose server in a public function.
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    const { text } = await request(exporter._server)
-      .get('/metrics')
-      .expect(200);
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
 
-    expect(/http_response_success_total 1/.test(text)).toBeFalsy();
-    expect(/http_request_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_duration_seconds_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_request_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_count{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_sum{[^}]*path="\/example\/:id"[^}]*}/.test(text)).toBeFalsy();
-    expect(/http_response_size_bytes_bucket{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeFalsy();
+      expect(/http_server_response_error_count_total 1/.test(text)).toBeTruthy();
+    });
+
+    it('succesfully request records when using Fastify', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
+          },
+        })],
+        controllers: [AppController],
+      }).compile();
+
+      app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+      await app.init();
+      await app.getHttpAdapter().getInstance().ready();
+
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4/invalid-route?foo=bar');
+
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
+
+      expect(/http_server_response_error_count_total 1/.test(text)).toBeTruthy();
+    });
+  });
+
+  describe('metric: http.client.request.error.count', () => {
+    it('succesfully request records', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
+          },
+        })],
+        controllers: [AppController],
+      }).compile();
+
+      app = testingModule.createNestApplication();
+      await app.init();
+
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4/invalid-route?foo=bar');
+
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
+
+      expect(/http_client_request_error_count_total 1/.test(text)).toBeTruthy();
+    });
+
+    it('succesfully request records when using Fastify', async () => {
+      const testingModule = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
+          },
+        })],
+        controllers: [AppController],
+      }).compile();
+
+      app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+      await app.init();
+      await app.getHttpAdapter().getInstance().ready();
+
+      const agent = request(app.getHttpServer());
+      await agent.get('/example/4/invalid-route?foo=bar');
+
+      // Workaround for delay of metrics going to prometheus
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // TODO: OpenTelemetry exporter does not expose server in a public function.
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      const { text } = await request(promExporter._server)
+        .get('/metrics')
+        .expect(200);
+
+      expect(/http_client_request_error_count_total 1/.test(text)).toBeTruthy();
+    });
   });
 
   afterEach(async () => {
     metrics.disable();
-    if (exporter) {
-      await exporter.stopServer();
-    }
-    if (otelSDK) {
-      await otelSDK.shutdown();
+    if (promExporter) {
+      await promExporter.stopServer();
     }
     if (app) {
       await app.close();

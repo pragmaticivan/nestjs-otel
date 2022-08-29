@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { metrics } from '@opentelemetry/api-metrics';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import * as request from 'supertest';
 import { OpenTelemetryModule } from '../../../../src';
@@ -19,8 +20,7 @@ describe('Common Decorators', () => {
     });
 
     otelSDK = new NodeSDK({
-      metricExporter: exporter,
-      metricInterval: 100,
+      metricReader: exporter,
     });
 
     await otelSDK.start();

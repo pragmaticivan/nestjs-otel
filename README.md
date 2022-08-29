@@ -118,10 +118,8 @@ bootstrap();
 const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   metrics: {
     hostMetrics: true, // Includes Host Metrics
-    defaultMetrics: true, // Includes Default Metrics
     apiMetrics: {
       enable: true, // Includes api metrics
-      timeBuckets: [], // You can change the default time buckets
       defaultAttributes: {
         // You can set default labels for api metrics
         custom: 'label',
@@ -264,18 +262,17 @@ export class AppController {
 
 ## API Metrics with Middleware
 
-| Impl | Metric                        | Description                               | Labels               | Metric Type |
-| ---- | ----------------------------- | ----------------------------------------- | -------------------- | ----------- |
-| ✅   | http_request_total            | Total number of HTTP requests.            | method, path         | Counter     |
-| ✅   | http_response_total           | Total number of HTTP responses.           | method, status, path | Counter     |
-| ✅   | http_response_success_total   | Total number of all successful responses. | -                    | Counter     |
-| ✅   | http_response_error_total     | Total number of all response errors.      | -                    | Counter     |
-| ✅   | http_request_duration_seconds | HTTP latency value recorder in seconds.   | method, status, path | Histogram   |
-| ✅   | http_client_error_total       | Total number of client error requests.    | -                    | Counter     |
-| ✅   | http_server_error_total       | Total number of server error requests.    | -                    | Counter     |
-| ✅   | http_server_aborts_total      | Total number of data transfers aborted.   | -                    | Counter     |
-| ✅   | http_request_size_bytes       | Current total of incoming bytes.          | -                    | Histogram   |
-| ✅   | http_response_size_bytes      | Current total of outgoing bytes.          | -                    | Histogram   |
+| Impl | Otel Metric                         | Prometheus Metric                         | Description                               | Metric Type |
+| ---- | --------------------------------    | ---------------------------------------   | ----------------------------------------- | ----------- |
+| ✅   | http.server.request.count           | http_server_request_count_total           | Total number of HTTP requests.            | Counter     |
+| ✅   | http.server.response.count          | http_server_response_count_total          | Total number of HTTP responses.           | Counter     |
+| ✅   | http.server.abort.count             | http_server_abort_count_total             | Total number of data transfers aborted.   | Counter     |
+| ✅   | http.server.duration                | http_server_duration                      | The duration of the inbound HTTP request. | Histogram   |
+| ✅   | http.server.request.size            | http_server_request_size                  | Size of incoming bytes.                   | Histogram   |
+| ✅   | http.server.response.size           | http_server_response_size                 | Size of outgoing bytes.                   | Histogram   |
+| ✅   | http.server.response.success.count  | http_server_response_success_count_total  | Total number of all successful responses. | Counter     |
+| ✅   | http.server.response.error.count    | http_server_response_error_count_total    | Total number of all response errors'.     | Counter     |
+| ✅   | http.client.request.error.count     | http_client_request_error_count_total     | Total number of client error requests.    | Counter     |
 
 ## Prometheus Metrics
 
