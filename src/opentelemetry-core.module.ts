@@ -155,7 +155,6 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
       {
         provide: useClass,
         useClass,
-        inject: [...(options.inject || [])],
       },
     ];
   }

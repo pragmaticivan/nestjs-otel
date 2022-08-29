@@ -18,8 +18,6 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   private httpServerDuration: Histogram;
 
-  // private httpServerActiveRequests: UpDownCounter;
-
   private httpServerRequestSize: Histogram;
 
   private httpServerResponseSize: Histogram;
@@ -31,8 +29,6 @@ export class ApiMetricsMiddleware implements NestMiddleware {
   private httpClientRequestErrorCount: Counter;
 
   private httpServerAbortCount: Counter;
-
-  // private httpServerRequestErrorCount: Counter;
 
   private readonly ignoreUndefinedRoutes: boolean;
 
