@@ -38,7 +38,7 @@
   "dependencies": {
     "@opentelemetry/api": "^1.1.0",
     "@opentelemetry/api-metrics": "^0.32.0",
-    "@opentelemetry/host-metrics": "^0.29.0",
+    "@opentelemetry/host-metrics": "^0.30.0",
     "response-time": "^2.3.2"
   },
   "devDependencies": {
