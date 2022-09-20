@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { metrics } from '@opentelemetry/api-metrics';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
+import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { MetricService, OpenTelemetryModule } from '../../../src';
 import { AppController } from '../../fixture-app/app.controller';
 import { meterData } from '../../../src/metrics/metric-data';
