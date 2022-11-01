@@ -56,7 +56,7 @@
     "@types/jest": "^29.1.2",
     "@types/node": "^18.8.5",
     "@types/supertest": "^2.0.12",
-    "@typescript-eslint/eslint-plugin": "5.40.0",
+    "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.40.0",
     "ansi-regex": "",
     "eslint": "^8.25.0",
