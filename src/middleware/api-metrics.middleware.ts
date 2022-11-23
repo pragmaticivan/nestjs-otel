@@ -39,7 +39,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     const {
       defaultAttributes = {},
       ignoreUndefinedRoutes = false,
-    } = options?.metrics?.apiMetrics;
+    } = options?.metrics?.apiMetrics ?? {};
 
     this.defaultMetricAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
