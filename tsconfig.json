@@ -10,7 +10,13 @@
     "sourceMap": true,
     "outDir": "./lib",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "strictNullChecks": true,
   },
-  "exclude": ["node_modules", "lib", "tests", "examples"]
+  "exclude": [
+    "node_modules",
+    "lib",
+    "tests",
+    "examples"
+  ]
 }
