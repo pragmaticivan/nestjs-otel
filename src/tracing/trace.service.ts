@@ -7,7 +7,7 @@ export class TraceService {
     return trace.getTracer('default');
   }
 
-  public getSpan(): Span {
+  public getSpan(): Span | undefined {
     return trace.getSpan(context.active());
   }
 

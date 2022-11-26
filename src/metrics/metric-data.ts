@@ -25,7 +25,7 @@ export const meterData: Map<string, GenericMetric> = new Map();
 
 export function getOrCreateHistogram(
   name: string,
-  options: MetricOptions,
+  options: MetricOptions = {},
 ): Histogram {
   if (meterData.has(name)) {
     return meterData.get(name) as Histogram;
@@ -39,7 +39,7 @@ export function getOrCreateHistogram(
 
 export function getOrCreateCounter(
   name: string,
-  options: MetricOptions,
+  options: MetricOptions = {},
 ): Counter {
   if (meterData.has(name)) {
     return meterData.get(name) as Counter;
@@ -54,7 +54,7 @@ export function getOrCreateCounter(
 
 export function getOrCreateUpDownCounter(
   name: string,
-  options: MetricOptions,
+  options: MetricOptions = {},
 ): UpDownCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as UpDownCounter;
@@ -69,7 +69,7 @@ export function getOrCreateUpDownCounter(
 
 export function getOrCreateObservableGauge(
   name: string,
-  options: MetricOptions,
+  options: MetricOptions = {},
 ): ObservableGauge {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableGauge;
@@ -84,7 +84,7 @@ export function getOrCreateObservableGauge(
 
 export function getOrCreateObservableCounter(
   name: string,
-  options: MetricOptions,
+  options: MetricOptions = {},
 ): ObservableCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableCounter;
@@ -99,7 +99,7 @@ export function getOrCreateObservableCounter(
 
 export function getOrCreateObservableUpDownCounter(
   name: string,
-  options: MetricOptions,
+  options: MetricOptions = {},
 ): ObservableUpDownCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableUpDownCounter;
