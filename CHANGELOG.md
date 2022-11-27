@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v4.0.1...v5.0.0) (2022-11-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* updates to latest metric sdk and drop node-sdk dependency
+
+### Features
+
+* update packages ([163ba38](https://www.github.com/pragmaticivan/nestjs-otel/commit/163ba38a1d231aee66b2c2f53356f2d1fd37d3ee))
+* update packages ([d0f92fb](https://www.github.com/pragmaticivan/nestjs-otel/commit/d0f92fb64e56005537e7a4b06357685fe290baf9))
+* update packages ([28fdc69](https://www.github.com/pragmaticivan/nestjs-otel/commit/28fdc6944901376dcd93037982b52f255799d207))
+* updates to latest metric sdk and drop node-sdk dependency ([46c2df3](https://www.github.com/pragmaticivan/nestjs-otel/commit/46c2df35a99810931f13a689c6e80b6135f4958c))
+
+
+### Bug Fixes
+
+* getSpan returning undefined, enable strict null checks ([#361](https://www.github.com/pragmaticivan/nestjs-otel/issues/361)) ([b7f7cbd](https://www.github.com/pragmaticivan/nestjs-otel/commit/b7f7cbd2fb04d897cc702f02cfac24288fda27f1))
+
 ### [4.0.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v4.0.0...v4.0.1) (2022-08-29)
 
 
