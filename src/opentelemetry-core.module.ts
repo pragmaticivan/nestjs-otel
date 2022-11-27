@@ -4,7 +4,7 @@ import {
   Provider, Type,
 } from '@nestjs/common';
 import { HostMetrics } from '@opentelemetry/host-metrics';
-import { metrics } from '@opentelemetry/api-metrics';
+import { metrics } from '@opentelemetry/api';
 import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions, OpenTelemetryOptionsFactory } from './interfaces';
 import { MetricService } from './metrics/metric.service';
 import { ApiMetricsMiddleware } from './middleware';

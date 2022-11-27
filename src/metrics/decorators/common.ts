@@ -1,4 +1,4 @@
-import { Counter, MetricOptions } from '@opentelemetry/api-metrics';
+import { Counter, MetricOptions } from '@opentelemetry/api';
 import { copyMetadataFromFunctionToFunction } from '../../opentelemetry.utils';
 import { getOrCreateCounter } from '../metric-data';
 

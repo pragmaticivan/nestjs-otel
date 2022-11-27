@@ -1,5 +1,5 @@
 import { createParamDecorator } from '@nestjs/common';
-import { MetricOptions } from '@opentelemetry/api-metrics';
+import { MetricOptions } from '@opentelemetry/api';
 import { getOrCreateObservableCounter, getOrCreateObservableGauge, getOrCreateObservableUpDownCounter } from '../metric-data';
 
 export const OtelObservableGauge = createParamDecorator((name: string, options?: MetricOptions) => {

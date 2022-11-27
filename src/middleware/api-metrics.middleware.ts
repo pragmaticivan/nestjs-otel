@@ -3,7 +3,7 @@ import * as responseTime from 'response-time';
 import * as urlParser from 'url';
 import {
   Counter, MetricAttributes, Histogram, UpDownCounter,
-} from '@opentelemetry/api-metrics';
+} from '@opentelemetry/api';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';

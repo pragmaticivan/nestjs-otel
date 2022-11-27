@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
-  MetricOptions, ObservableResult,
-} from '@opentelemetry/api-metrics';
+  MetricOptions,
+} from '@opentelemetry/api';
 import {
   getOrCreateCounter, getOrCreateHistogram,
   getOrCreateObservableCounter, getOrCreateObservableGauge,

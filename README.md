@@ -182,7 +182,7 @@ export class BookService {
 
 ```ts
 import { MetricService } from 'nestjs-otel';
-import { Counter } from '@opentelemetry/api-metrics';
+import { Counter } from '@opentelemetry/api';
 
 @Injectable()
 export class BookService {
@@ -247,7 +247,7 @@ Example of usage:
 
 ```ts
 import { OtelCounter } from 'nestjs-otel';
-import { Counter } from '@opentelemetry/api-metrics';
+import { Counter } from '@opentelemetry/api';
 
 @Controller()
 export class AppController {

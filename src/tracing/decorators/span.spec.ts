@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
-import { tracing } from '@opentelemetry/sdk-node';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { InMemorySpanExporter, NodeTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { SetMetadata } from '@nestjs/common';
 import { Span } from './span';
 
@@ -31,14 +30,14 @@ class TestSpan {
 
 describe('Span', () => {
   let instance: TestSpan;
-  let traceExporter: tracing.InMemorySpanExporter;
-  let spanProcessor: tracing.SimpleSpanProcessor;
+  let traceExporter: InMemorySpanExporter;
+  let spanProcessor: SimpleSpanProcessor;
   let provider: NodeTracerProvider;
 
   beforeAll(async () => {
     instance = new TestSpan();
-    traceExporter = new tracing.InMemorySpanExporter();
-    spanProcessor = new tracing.SimpleSpanProcessor(traceExporter);
+    traceExporter = new InMemorySpanExporter();
+    spanProcessor = new SimpleSpanProcessor(traceExporter);
 
     provider = new NodeTracerProvider();
     // TODO: figure out why that's failing with new version

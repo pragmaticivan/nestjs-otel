@@ -1,5 +1,5 @@
 import { ModuleMetadata, Type, Abstract } from '@nestjs/common';
-import { MetricAttributes } from '@opentelemetry/api-metrics';
+import { MetricAttributes } from '@opentelemetry/api';
 import { RouteInfo } from '@nestjs/common/interfaces';
 
 export type OpenTelemetryModuleOptions = {

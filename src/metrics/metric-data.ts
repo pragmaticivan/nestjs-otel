@@ -1,7 +1,8 @@
 import {
-  Counter, MetricOptions, metrics, UpDownCounter,
-  Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter, ObservableResult,
-} from '@opentelemetry/api-metrics';
+  Counter, MetricOptions, UpDownCounter,
+  Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter,
+  metrics,
+} from '@opentelemetry/api';
 import { OTEL_METER_NAME } from '../opentelemetry.constants';
 
 export type GenericMetric =

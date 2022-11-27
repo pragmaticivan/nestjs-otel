@@ -1,9 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { metrics } from '@opentelemetry/api-metrics';
+import { metrics } from '@opentelemetry/api';
+import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { NodeSDK } from '@opentelemetry/sdk-node';
 import * as request from 'supertest';
 import { OpenTelemetryModule } from '../../../../src';
 import { meterData } from '../../../../src/metrics/metric-data';
@@ -12,19 +11,27 @@ import { AppController } from '../../../fixture-app/app.controller';
 describe('Common Decorators', () => {
   let app: INestApplication;
   let exporter: PrometheusExporter;
-  let otelSDK: NodeSDK;
+  let meterProvider: MeterProvider;
 
-  beforeEach(async () => {
-    exporter = new PrometheusExporter({
-      preventServerStart: true,
+  beforeEach(done => {
+    exporter = new PrometheusExporter({}, () => {
+      meterProvider = new MeterProvider();
+      meterProvider.addMetricReader(exporter);
+      metrics.setGlobalMeterProvider(meterProvider);
+      done();
     });
+  });
 
-    otelSDK = new NodeSDK({
-      metricReader: exporter,
-    });
-
-    await otelSDK.start();
-    await exporter.startServer();
+  afterEach(async () => {
+    metrics.disable();
+    meterData.clear();
+    if (exporter) {
+      await exporter.stopServer();
+      await exporter.shutdown();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('Instance counter & Method counter', () => {
@@ -46,31 +53,15 @@ describe('Common Decorators', () => {
       const agent = request(app.getHttpServer());
       await agent.get('/example/4?foo=bar');
 
-      // Workaround for delay of metrics going to prometheus
-      await new Promise(resolve => setTimeout(resolve, 200));
-
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
       const { text } = await request(exporter._server)
         .get('/metrics')
         .expect(200);
+
       expect(/app_AppController_instances_total 1/.test(text)).toBeTruthy();
       expect(/app_AppController_example_calls_total 1/.test(text)).toBeTruthy();
     });
-  });
-
-  afterEach(async () => {
-    metrics.disable();
-    meterData.clear();
-    if (exporter) {
-      await exporter.stopServer();
-    }
-    if (otelSDK) {
-      await otelSDK.shutdown();
-    }
-    if (app) {
-      await app.close();
-    }
   });
 });

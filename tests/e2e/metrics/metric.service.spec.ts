@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { metrics } from '@opentelemetry/api-metrics';
+import { metrics } from '@opentelemetry/api';
+import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { OpenTelemetryModule } from '../../../src/opentelemetry.module';
 import { meterData } from '../../../src/metrics/metric-data';
 import { MetricService } from '../../../src/metrics/metric.service';
@@ -11,19 +11,27 @@ describe('MetricService', () => {
   let metricService: MetricService;
   let app: INestApplication;
   let exporter: PrometheusExporter;
-  let otelSDK: NodeSDK;
+  let meterProvider: MeterProvider;
 
-  beforeEach(async () => {
-    exporter = new PrometheusExporter({
-      preventServerStart: true,
+  beforeEach(done => {
+    exporter = new PrometheusExporter({}, () => {
+      meterProvider = new MeterProvider();
+      meterProvider.addMetricReader(exporter);
+      metrics.setGlobalMeterProvider(meterProvider);
+      done();
     });
+  });
 
-    otelSDK = new NodeSDK({
-      metricReader: exporter,
-    });
-
-    await otelSDK.start();
+  afterEach(async () => {
+    metrics.disable();
     meterData.clear();
+    if (exporter) {
+      await exporter.stopServer();
+      await exporter.shutdown();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('instance', () => {
@@ -182,8 +190,7 @@ describe('MetricService', () => {
       // Starts empty
       expect(meterData.size).toBe(0);
 
-      const counter = metricService.getHistogram('test1');
-      // counter.clear();
+      metricService.getHistogram('test1');
 
       // Has new key record
       const data = meterData;
@@ -206,8 +213,7 @@ describe('MetricService', () => {
 
       metricService = moduleRef.get<MetricService>(MetricService);
 
-      const counter = metricService.getHistogram('test1', { description: 'test1 description' });
-      // counter.clear();
+      metricService.getHistogram('test1', { description: 'test1 description' });
 
       const existingCounter = metricService.getHistogram('test1');
       expect(meterData.has('test1')).toBeTruthy();
@@ -217,15 +223,5 @@ describe('MetricService', () => {
       // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
     });
-  });
-
-  afterEach(async () => {
-    metrics.disable();
-    if (otelSDK) {
-      await otelSDK.shutdown();
-    }
-    if (app) {
-      await app.close();
-    }
   });
 });

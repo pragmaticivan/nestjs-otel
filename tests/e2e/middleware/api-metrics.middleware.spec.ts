@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { metrics } from '@opentelemetry/api-metrics';
+import { metrics } from '@opentelemetry/api';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { MetricService, OpenTelemetryModule } from '../../../src';
