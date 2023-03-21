@@ -110,6 +110,7 @@ describe('Span', () => {
     expect(spans[0].events[0]).toEqual({
       name: 'exception',
       attributes: expect.anything(),
+      droppedAttributesCount: 0,
       time: expect.anything(),
     });
   });
