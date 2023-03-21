@@ -4,11 +4,12 @@ updates:
     directory: "/"
     schedule:
       interval: monthly
-      time: "01:00"
-      timezone: America/Chicago
     pull-request-branch-name:
       separator: "-"
     open-pull-requests-limit: 99
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
     target-branch: "main"
     allow:
       - dependency-type: direct
