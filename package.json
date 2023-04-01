@@ -55,7 +55,7 @@
     "@types/node": "^18.15.5",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "5.56.0",
-    "@typescript-eslint/parser": "5.56.0",
+    "@typescript-eslint/parser": "5.57.0",
     "ansi-regex": "",
     "eslint": "^8.36.0",
     "eslint-config-airbnb-base": "^15.0.0",
