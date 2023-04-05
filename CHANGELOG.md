@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.0.0...v5.1.0) (2023-04-05)
+
+
+### Features
+
+* update to stable packages ([76b577c](https://www.github.com/pragmaticivan/nestjs-otel/commit/76b577c754728c19fb5fad6bae382f53e9a4d004))
+
 ## [5.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v4.0.1...v5.0.0) (2022-11-27)
 
 
