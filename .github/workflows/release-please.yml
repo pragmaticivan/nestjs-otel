@@ -3,6 +3,9 @@ on:
     branches:
       - main
 name: release-please
+permissions:
+  contents: read
+  id-token: write
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -14,20 +17,23 @@ jobs:
           release-type: node
           package-name: nestjs-otel
       - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 14.x
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm install
+        run: npm install -g npm
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm ci
       - if: ${{ steps.release.outputs.release_created }}
         run: npm run build
       - id: publish
         if: ${{ steps.release.outputs.release_created }}
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - if: steps.publish.outputs.type != 'none'
         run: |
           echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"
