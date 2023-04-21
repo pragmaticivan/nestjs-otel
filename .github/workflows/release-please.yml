@@ -4,7 +4,8 @@ on:
       - main
 name: release-please
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   id-token: write
 jobs:
   release-please:
