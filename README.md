@@ -319,9 +319,7 @@ export const logger: Logger = Pino(loggerOptions);
 
 A full working examples are available. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo:
 
-* [nestjs-otel-prom-grafana-tempo-otel-collector](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo-otel-collector)
-* [nestjs-otel-fastify-prom-grafana-tempo ](https://github.com/pragmaticivan/nestjs-otel-fastify-prom-grafana-tempo )
-* [nestjs-otel-prom-grafana-tempo ](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
+* [nestjs-otel-prom-grafana-tempo](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/pragmaticivan/nestjs-otel.svg)](https://starchart.cc/pragmaticivan/nestjs-otel)
