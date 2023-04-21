@@ -1,5 +1,13 @@
 # Changelog
 
+### [5.1.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.0...v5.1.1) (2023-04-21)
+
+
+### Bug Fixes
+
+* update packages and remove outdated examples ([7150dcf](https://www.github.com/pragmaticivan/nestjs-otel/commit/7150dcface6c500bbd4c7a8ee5778843d5afa9ba))
+* update release please permissions ([8db8736](https://www.github.com/pragmaticivan/nestjs-otel/commit/8db873692c5dc31f994f7d51f34bfae4fff990da))
+
 ## [5.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.0.0...v5.1.0) (2023-04-05)
 
 
