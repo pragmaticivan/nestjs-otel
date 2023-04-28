@@ -323,3 +323,4 @@ A full working examples are available. This includes a nestjs application fully 
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/pragmaticivan/nestjs-otel.svg)](https://starchart.cc/pragmaticivan/nestjs-otel)
+
