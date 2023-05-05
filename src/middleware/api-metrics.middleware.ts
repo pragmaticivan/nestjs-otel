@@ -132,12 +132,10 @@ export class ApiMetricsMiddleware implements NestMiddleware {
           this.httpServerResponseSuccessCount.add(1);
           break;
         case 'client_error':
-          this.httpServerResponseErrorCount.add(1);
           this.httpClientRequestErrorCount.add(1);
           break;
         case 'server_error':
           this.httpServerResponseErrorCount.add(1);
-          this.httpClientRequestErrorCount.add(1);
           break;
       }
 

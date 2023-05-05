@@ -255,10 +255,12 @@ describe('Api Metrics Middleware', () => {
       }).compile();
 
       app = testingModule.createNestApplication();
+      app.useLogger(false);
+
       await app.init();
 
       const agent = request(app.getHttpServer());
-      await agent.get('/example/4/invalid-route?foo=bar');
+      await agent.get('/example/internal-error');
 
       // Workaround for delay of metrics going to prometheus
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -286,11 +288,13 @@ describe('Api Metrics Middleware', () => {
       }).compile();
 
       app = testingModule.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+      app.useLogger(false);
+
       await app.init();
       await app.getHttpAdapter().getInstance().ready();
 
       const agent = request(app.getHttpServer());
-      await agent.get('/example/4/invalid-route?foo=bar');
+      await agent.get('/example/internal-error');
 
       // Workaround for delay of metrics going to prometheus
       await new Promise(resolve => setTimeout(resolve, 200));

@@ -271,7 +271,7 @@ export class AppController {
 | ✅   | http.server.request.size            | http_server_request_size                  | Size of incoming bytes.                   | Histogram   |
 | ✅   | http.server.response.size           | http_server_response_size                 | Size of outgoing bytes.                   | Histogram   |
 | ✅   | http.server.response.success.count  | http_server_response_success_count_total  | Total number of all successful responses. | Counter     |
-| ✅   | http.server.response.error.count    | http_server_response_error_count_total    | Total number of all response errors'.     | Counter     |
+| ✅   | http.server.response.error.count    | http_server_response_error_count_total    | Total number of server error responses.   | Counter     |
 | ✅   | http.client.request.error.count     | http_client_request_error_count_total     | Total number of client error requests.    | Counter     |
 
 ## Prometheus Metrics
