@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.1.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.1...v5.1.2) (2023-05-05)
+
+
+### Bug Fixes
+
+* invalid values for error count metrics ([7b13c0b](https://www.github.com/pragmaticivan/nestjs-otel/commit/7b13c0bb557b05d20da5e85bf3cd3b946cbc7f0f))
+
 ### [5.1.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.0...v5.1.1) (2023-04-21)
 
 
