@@ -7,7 +7,6 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2020",
-    "sourceMap": true,
     "outDir": "./lib",
     "baseUrl": "./",
     "incremental": true,
