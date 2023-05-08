@@ -5,10 +5,12 @@ node_modules
 src
 tests
 .editorconfig
-.estlintcache
-.estlintignore
-.estlintrc.js
+.eslintcache
+.eslintignore
+.eslintrc.js
 .prettierrc.js
 CHANGELOG.md
 commitlint.config.js
 REFERENCE.md
+*.tsbuildinfo
+tsconfig.json
