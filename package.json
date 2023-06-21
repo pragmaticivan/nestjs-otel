@@ -72,8 +72,8 @@
     "typescript": "5.0.4"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/core": "^9.0.0"
+    "@nestjs/common": "^9.0.0 || ^10.0.0",
+    "@nestjs/core": "^9.0.0 || ^10.0.0"
   },
   "jest": {
     "moduleFileExtensions": [
