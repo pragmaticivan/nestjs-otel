@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.1.3](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.2...v5.1.3) (2023-06-21)
+
+
+### Bug Fixes
+
+* [#231](https://www.github.com/pragmaticivan/nestjs-otel/issues/231) Remove unnecessary files from package bundle ([faa521b](https://www.github.com/pragmaticivan/nestjs-otel/commit/faa521b9ce5895a444008f59022dca6009142121))
+
 ### [5.1.2](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.1...v5.1.2) (2023-05-05)
 
 
