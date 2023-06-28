@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.1.4](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.3...v5.1.4) (2023-06-28)
+
+
+### Bug Fixes
+
+* should support both 9 and 10 versions ([50f2273](https://www.github.com/pragmaticivan/nestjs-otel/commit/50f22736d44c5ce690a55b0c605ff4becc97b5a6))
+
 ### [5.1.3](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.2...v5.1.3) (2023-06-21)
 
 
