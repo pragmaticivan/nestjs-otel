@@ -23,6 +23,6 @@ updates:
       other-dependencies:
         patterns:
           - "*"
-        exclude:
+        exclude-patterns:
           - "@nestjs*"
           - "@opentelemetry*"
