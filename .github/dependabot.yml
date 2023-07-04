@@ -6,10 +6,23 @@ updates:
       interval: monthly
     pull-request-branch-name:
       separator: "-"
-    open-pull-requests-limit: 99
+    open-pull-requests-limit: 50
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
     target-branch: "main"
     allow:
       - dependency-type: direct
+    groups:
+      nestjs-dependencies:
+        patterns:
+          - "@nestjs*"
+```   otel-dependencies:
+        patterns:
+          - "@opentelemetry*"
+      other-dependencies:
+        patterns:
+          - "*"
+        exclude:
+          - "@nestjs*"
+          - "@opentelemetry*"
