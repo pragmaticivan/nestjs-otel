@@ -17,7 +17,7 @@ updates:
       nestjs-dependencies:
         patterns:
           - "@nestjs*"
-```   otel-dependencies:
+      otel-dependencies:
         patterns:
           - "@opentelemetry*"
       other-dependencies:
