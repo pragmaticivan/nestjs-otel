@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.1.5](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.4...v5.1.5) (2023-09-04)
+
+
+### Bug Fixes
+
+* latency buckets are not matching the expected time unit in milliseconds ([c269bac](https://www.github.com/pragmaticivan/nestjs-otel/commit/c269bac0826360e30bde656c9a9f0826a588c813))
+
 ### [5.1.4](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.3...v5.1.4) (2023-06-28)
 
 
