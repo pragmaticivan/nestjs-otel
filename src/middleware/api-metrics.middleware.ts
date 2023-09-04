@@ -118,7 +118,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       this.httpServerResponseSize.record(responseLength, attributes);
 
       this.httpServerResponseCount.add(1, attributes);
-      this.httpServerDuration.record(time / 1000, attributes);
+      this.httpServerDuration.record(time, attributes);
 
       const codeClass = this.getStatusCodeClass(status);
 
