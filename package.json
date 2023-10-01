@@ -37,7 +37,7 @@
   "homepage": "https://github.com/pragmaticivan/nestjs-otel#readme",
   "dependencies": {
     "@opentelemetry/api": "^1.4.1",
-    "@opentelemetry/host-metrics": "^0.32.2",
+    "@opentelemetry/host-metrics": "^0.33.1",
     "response-time": "^2.3.2"
   },
   "devDependencies": {
@@ -48,7 +48,7 @@
     "@nestjs/platform-express": "^10.0.5",
     "@nestjs/platform-fastify": "^10.0.5",
     "@nestjs/testing": "^10.0.5",
-    "@opentelemetry/exporter-prometheus": "^0.40.0",
+    "@opentelemetry/exporter-prometheus": "^0.43.0",
     "@opentelemetry/sdk-metrics": "^1.14.0",
     "@opentelemetry/sdk-trace-node": "^1.14.0",
     "@types/jest": "^29.5.2",
