@@ -28,7 +28,7 @@ Please read this [comprehensive whitepaper](https://github.com/cncf/tag-observab
 ## Installation
 
 ```bash
-$ npm i nestjs-otel @opentelemetry/sdk-node --save
+npm i nestjs-otel @opentelemetry/sdk-node --save
 ```
 
 ## Setup
@@ -58,10 +58,9 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import * as process from 'process';
 
 const otelSDK = new NodeSDK({
-  metricExporter: new PrometheusExporter({
+  metricReader: new PrometheusExporter({
     port: 8081,
   }),
-  metricInterval: 1000,
   spanProcessor: new BatchSpanProcessor(new JaegerExporter()),
   contextManager: new AsyncLocalStorageContextManager(),
   textMapPropagator: new CompositePropagator({
@@ -319,7 +318,8 @@ export const logger: Logger = Pino(loggerOptions);
 
 A full working examples are available. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo:
 
-* [nestjs-otel-prom-grafana-tempo](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
+- [nestjs-otel-prom-grafana-tempo](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
+
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/pragmaticivan/nestjs-otel.svg)](https://starchart.cc/pragmaticivan/nestjs-otel)
