@@ -1,27 +1,26 @@
 module.exports = {
-  extends: ['airbnb-base', 'airbnb-typescript/base'],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './tsconfig.json',
-    createDefaultProgram: true,
+    project: 'tsconfig.json',
+    sourceType: 'module',
   },
-  ignorePatterns: ['**/examples/**/*', 'lib/**/*'],
+  plugins: ['@typescript-eslint/eslint-plugin'],
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+    'plugin:prettier/recommended',
+  ],
+  root: true,
+  env: {
+    node: true,
+    jest: true,
+  },
+  ignorePatterns: [ 'lib/**/*', '.eslintrc.js', 'tests/**/*'],
   rules: {
-    'import/prefer-default-export': 'off',
-    'import/no-cycle': 'off',
-    'no-restricted-syntax': [
-      'error',
-      'ForInStatement',
-      'LabeledStatement',
-      'WithStatement',
-    ],
-    'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': 'off',
-    'arrow-parens': 'off',
-    'import/no-unresolved': 'off',
-    'new-cap': 'off',
-    'class-methods-use-this': 'off',
-    'no-case-declarations': 'off',
-    'no-promise-executor-return': 'off',
-    'no-unsafe-optional-chaining': 'off',
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'no-console': 'error'
   },
 };

@@ -12,17 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: release
-        uses: GoogleCloudPlatform/release-please-action@v2
+        uses: GoogleCloudPlatform/release-please-action@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
+          prerelease: true
           package-name: nestjs-otel
       - if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v3
       - if: ${{ steps.release.outputs.release_created }}
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       - if: ${{ steps.release.outputs.release_created }}
         run: npm install -g npm
