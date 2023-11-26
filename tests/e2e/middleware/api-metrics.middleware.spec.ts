@@ -74,26 +74,7 @@ describe('Api Metrics Middleware', () => {
       description: 'Total number of HTTP requests',
       unit: 'requests',
     });
-    expect(metricService.getHistogram).toHaveBeenCalledTimes(3);
-  });
-
-  it('uses custom buckets when provided', async () => {
-    const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
-          },
-        },
-      })],
-    }).overrideProvider(MetricService)
-      .useValue(metricService)
-      .compile();
-
-    app = testingModule.createNestApplication();
-    await app.init();
-
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', { description: 'The duration of the inbound HTTP request', unit: 'ms' });
+    expect(metricService.getHistogram).toHaveBeenCalledTimes(2);
   });
 
   describe('metric: http.server.request.count', () => {

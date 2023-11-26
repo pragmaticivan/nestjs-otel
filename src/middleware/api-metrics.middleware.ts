@@ -120,9 +120,6 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       this.httpServerResponseSize.record(responseLength, attributes);
       this.httpServerResponseCount.add(1, attributes);
 
-      // eslint-disable-next-line no-console
-      console.log('status -----');
-
       const codeClass = this.getStatusCodeClass(status);
 
       // eslint-disable-next-line default-case
