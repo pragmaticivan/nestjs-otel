@@ -6,6 +6,7 @@ import {
   Module,
   OnApplicationBootstrap,
   Provider,
+  RequestMethod,
   Type,
 } from '@nestjs/common';
 import { HostMetrics } from '@opentelemetry/host-metrics';
@@ -74,9 +75,9 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
         consumer
           .apply(ApiMetricsMiddleware)
           .exclude(...apiMetrics.ignoreRoutes)
-          .forRoutes('*');
+          .forRoutes({ path: '*', method: RequestMethod.ALL });
       } else {
-        consumer.apply(ApiMetricsMiddleware).forRoutes('*');
+        consumer.apply(ApiMetricsMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
       }
     }
   }

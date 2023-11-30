@@ -9,12 +9,9 @@
     "build": "tsc",
     "lint": "eslint . --ext .js,ts",
     "format": "eslint . --ext .js,ts --fix",
-    "test": "npm run test:unit && npm run test:e2e",
+    "test": "jest --runInBand",
     "test:coverage": "jest --coverage",
-    "test:unit": "jest --passWithNoTests",
-    "test:watch": "jest --watch",
-    "test:e2e": "jest --config ./tests/jest-e2e.json --runInBand",
-    "test:e2e:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch"
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -80,11 +77,11 @@
       "ts",
       "node"
     ],
-    "rootDir": "./src",
+    "rootDir": "./",
     "reporters": [
       "default"
     ],
-    "testRegex": ".spec.ts$",
+    "testRegex": ".test.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },

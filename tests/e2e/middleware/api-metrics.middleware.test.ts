@@ -7,6 +7,7 @@ import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { MetricService, OpenTelemetryModule } from '../../../src';
 import { AppController } from '../../fixture-app/app.controller';
 import { meterData } from '../../../src/metrics/metric-data';
+
 describe('Api Metrics Middleware', () => {
   let app: INestApplication;
   const metricService = {
@@ -109,7 +110,7 @@ describe('Api Metrics Middleware', () => {
     });
   });
 
-  describe('metric: http.server.request.body.size', () => {
+  describe.only('metric: http.server.request.body.size', () => {
     it('succesfully request records', async () => {
       const testingModule = await Test.createTestingModule({
         imports: [OpenTelemetryModule.forRoot({
@@ -125,8 +126,7 @@ describe('Api Metrics Middleware', () => {
       app = testingModule.createNestApplication();
       await app.init();
 
-      const agent = request(app.getHttpServer());
-      await agent.get('/example/4?foo=bar');
+      await request(app.getHttpServer()).get('/example/4?foo=bar').expect(200);
 
       const metric = (await promExporter.collect()).resourceMetrics.scopeMetrics[0].metrics.find(el => {
         return el.descriptor.name === 'http.server.request.body.size'
@@ -144,7 +144,6 @@ describe('Api Metrics Middleware', () => {
       });
     });
   });
-
 
   afterEach(async () => {
     metrics.disable();

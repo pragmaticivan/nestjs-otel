@@ -98,6 +98,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
   }
 
   use(mReq: Request, mRes: Response, mNext: NextFunction) {
+    // TODO: Temp, this is a hack to get around NestJS mutating the express request somehow.
     responseTime((req: Request, res: Response) => {
       const protocol = req.protocol || 'http';
       let path;
