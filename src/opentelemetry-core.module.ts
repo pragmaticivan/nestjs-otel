@@ -6,7 +6,6 @@ import {
   Module,
   OnApplicationBootstrap,
   Provider,
-  RequestMethod,
   Type,
 } from '@nestjs/common';
 import { HostMetrics } from '@opentelemetry/host-metrics';
