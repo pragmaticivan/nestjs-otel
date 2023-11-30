@@ -1,7 +1,6 @@
-import {
-  Span as ApiSpan, SpanOptions, SpanStatusCode, trace,
-} from '@opentelemetry/api';
+import { Span as ApiSpan, SpanOptions, SpanStatusCode, trace } from '@opentelemetry/api';
 import { copyMetadataFromFunctionToFunction } from '../../opentelemetry.utils';
+import { TRACER } from '../constants';
 
 const recordException = (span: ApiSpan, error: any) => {
   span.recordException(error);
@@ -12,7 +11,7 @@ export function Span(name?: string, options: SpanOptions = {}) {
   return (target: any, propertyKey: string, propertyDescriptor: PropertyDescriptor) => {
     const originalFunction = propertyDescriptor.value;
     const wrappedFunction = function PropertyDescriptor(...args: any[]) {
-      const tracer = trace.getTracer('default');
+      const tracer = trace.getTracer(TRACER);
       const spanName = name || `${target.constructor.name}.${propertyKey}`;
 
       return tracer.startActiveSpan(spanName, options, span => {

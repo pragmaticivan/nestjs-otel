@@ -1,17 +1,22 @@
 import {
-  Counter, MetricOptions, UpDownCounter,
-  Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter,
+  Counter,
+  MetricOptions,
+  UpDownCounter,
+  Histogram,
+  ObservableGauge,
+  ObservableCounter,
+  ObservableUpDownCounter,
   metrics,
 } from '@opentelemetry/api';
 import { OTEL_METER_NAME } from '../opentelemetry.constants';
 
 export type GenericMetric =
-  Counter |
-  UpDownCounter |
-  Histogram |
-  ObservableGauge |
-  ObservableCounter |
-  ObservableUpDownCounter;
+  | Counter
+  | UpDownCounter
+  | Histogram
+  | ObservableGauge
+  | ObservableCounter
+  | ObservableUpDownCounter;
 
 export enum MetricType {
   'Counter' = 'Counter',
@@ -24,10 +29,7 @@ export enum MetricType {
 
 export const meterData: Map<string, GenericMetric> = new Map();
 
-export function getOrCreateHistogram(
-  name: string,
-  options: MetricOptions = {},
-): Histogram {
+export function getOrCreateHistogram(name: string, options: MetricOptions = {}): Histogram {
   if (meterData.has(name)) {
     return meterData.get(name) as Histogram;
   }
@@ -38,10 +40,7 @@ export function getOrCreateHistogram(
   return histogram;
 }
 
-export function getOrCreateCounter(
-  name: string,
-  options: MetricOptions = {},
-): Counter {
+export function getOrCreateCounter(name: string, options: MetricOptions = {}): Counter {
   if (meterData.has(name)) {
     return meterData.get(name) as Counter;
   }
@@ -53,10 +52,7 @@ export function getOrCreateCounter(
   return counter;
 }
 
-export function getOrCreateUpDownCounter(
-  name: string,
-  options: MetricOptions = {},
-): UpDownCounter {
+export function getOrCreateUpDownCounter(name: string, options: MetricOptions = {}): UpDownCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as UpDownCounter;
   }
@@ -70,7 +66,7 @@ export function getOrCreateUpDownCounter(
 
 export function getOrCreateObservableGauge(
   name: string,
-  options: MetricOptions = {},
+  options: MetricOptions = {}
 ): ObservableGauge {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableGauge;
@@ -85,7 +81,7 @@ export function getOrCreateObservableGauge(
 
 export function getOrCreateObservableCounter(
   name: string,
-  options: MetricOptions = {},
+  options: MetricOptions = {}
 ): ObservableCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableCounter;
@@ -100,7 +96,7 @@ export function getOrCreateObservableCounter(
 
 export function getOrCreateObservableUpDownCounter(
   name: string,
-  options: MetricOptions = {},
+  options: MetricOptions = {}
 ): ObservableUpDownCounter {
   if (meterData.has(name)) {
     return meterData.get(name) as ObservableUpDownCounter;

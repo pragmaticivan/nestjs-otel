@@ -1,14 +1,21 @@
 import { context, trace, Span } from '@opentelemetry/api';
 import { Injectable } from '@nestjs/common';
 
+const TRACER = 'default';
+
 @Injectable()
 export class TraceService {
   public getTracer() {
-    return trace.getTracer('default');
+    return trace.getTracer(TRACER);
   }
 
-  public getSpan(): Span | undefined {
+  public getActiveSpan(): Span | undefined {
     return trace.getSpan(context.active());
+  }
+
+  /** @deprecated use getActiveSpan method instead */
+  public getSpan(): Span | undefined {
+    return this.getActiveSpan();
   }
 
   public startSpan(name: string): Span {
