@@ -7,7 +7,6 @@ import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { MetricService, OpenTelemetryModule } from '../../../src';
 import { AppController } from '../../fixture-app/app.controller';
 import { meterData } from '../../../src/metrics/metric-data';
-
 describe('Api Metrics Middleware', () => {
   let app: INestApplication;
   const metricService = {

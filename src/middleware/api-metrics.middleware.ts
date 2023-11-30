@@ -5,6 +5,7 @@ import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import { Request, Response, NextFunction } from 'express';
+import * as responseTime from 'response-time';
 
 export enum AttributeNames {
   SERVER_ADDRESS = 'server.address',
@@ -96,66 +97,65 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     );
   }
 
-  use(req: Request, res: Response, next: NextFunction) {
-    const protocol = req.protocol || 'http';
-    let path;
-    if (req.route) {
-      path = req.route.path;
-    } else if (this.ignoreUndefinedRoutes) {
-      next();
-      return;
-    } else {
-      const baseURL = `${protocol}://${req.headers.host}/`;
-      const urlObj = new URL(req.url, baseURL);
-      path = urlObj.pathname;
-    }
-    const status = res.statusCode || 500;
-
-    const helperAtributes: Attributes = { ...this.defaultMetricAttributes };
-
-    const baselineAtributes: Attributes = { ...helperAtributes };
-    baselineAtributes[SemanticAttributes.HTTP_SCHEME] = protocol;
-    baselineAtributes[SemanticAttributes.HTTP_METHOD] = req.method;
-    baselineAtributes[AttributeNames.SERVER_ADDRESS] = req.socket.localAddress;
-    baselineAtributes[AttributeNames.SERVER_PORT] = req.socket.localPort;
-
-    this.httpServerActiveRequests.add(1, baselineAtributes);
-
-    const attributes: Attributes = { ...baselineAtributes };
-    attributes[AttributeNames.HTTP_RESPONSE_STATUS_CODE] = status;
-    attributes[SemanticAttributes.HTTP_ROUTE] = path || '/';
-    attributes['network.protocol.name'] = protocol;
-    attributes['network.protocol.version'] = req.httpVersion;
-
-    const codeClass = this.getStatusCodeClass(status);
-    switch (codeClass) {
-      case 'success':
-        this.httpServerResponseSuccessCount.add(1, helperAtributes);
-        break;
-      case 'redirect':
-        this.httpServerResponseSuccessCount.add(1, helperAtributes);
-        break;
-      case 'client_error':
-        this.httpClientRequestErrorCount.add(1, helperAtributes);
-        break;
-      case 'server_error':
-        this.httpServerResponseErrorCount.add(1, helperAtributes);
-        break;
-    }
-
-    req.on('end', () => {
-      const requestLength = parseInt(req.socket.bytesRead, 10) || 0;
-      const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
-      this.httpServerRequestBodySize.record(requestLength, attributes);
-      this.httpServerResponseBodySize.record(responseLength, attributes);
-      this.httpServerActiveRequests.add(-1, baselineAtributes);
-
-      if (req.aborted === true) {
-        this.httpServerAbortCount.add(1, attributes);
+  use(mReq: Request, mRes: Response, mNext: NextFunction) {
+    responseTime((req: Request, res: Response) => {
+      const protocol = req.protocol || 'http';
+      let path;
+      if (req.route) {
+        path = req.route.path;
+      } else if (this.ignoreUndefinedRoutes) {
+        return;
+      } else {
+        const baseURL = `${protocol}://${req.headers.host}/`;
+        const urlObj = new URL(req.url, baseURL);
+        path = urlObj.pathname;
       }
-    });
+      const status = res.statusCode || 500;
 
-    next();
+      const helperAtributes: Attributes = { ...this.defaultMetricAttributes };
+
+      const baselineAtributes: Attributes = { ...helperAtributes };
+      baselineAtributes[SemanticAttributes.HTTP_SCHEME] = protocol;
+      baselineAtributes[SemanticAttributes.HTTP_METHOD] = req.method;
+      baselineAtributes[AttributeNames.SERVER_ADDRESS] = req.socket.localAddress;
+      baselineAtributes[AttributeNames.SERVER_PORT] = req.socket.localPort;
+
+      this.httpServerActiveRequests.add(1, baselineAtributes);
+
+      const attributes: Attributes = { ...baselineAtributes };
+      attributes[AttributeNames.HTTP_RESPONSE_STATUS_CODE] = status;
+      attributes[SemanticAttributes.HTTP_ROUTE] = path || '/';
+      attributes['network.protocol.name'] = protocol;
+      attributes['network.protocol.version'] = req.httpVersion;
+
+      const codeClass = this.getStatusCodeClass(status);
+      switch (codeClass) {
+        case 'success':
+          this.httpServerResponseSuccessCount.add(1, helperAtributes);
+          break;
+        case 'redirect':
+          this.httpServerResponseSuccessCount.add(1, helperAtributes);
+          break;
+        case 'client_error':
+          this.httpClientRequestErrorCount.add(1, helperAtributes);
+          break;
+        case 'server_error':
+          this.httpServerResponseErrorCount.add(1, helperAtributes);
+          break;
+      }
+
+      req.on('end', () => {
+        const requestLength = parseInt(req.socket.bytesRead, 10) || 0;
+        const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
+        this.httpServerRequestBodySize.record(requestLength, attributes);
+        this.httpServerResponseBodySize.record(responseLength, attributes);
+        this.httpServerActiveRequests.add(-1, baselineAtributes);
+
+        if (req.aborted === true) {
+          this.httpServerAbortCount.add(1, attributes);
+        }
+      });
+    })(mReq, mRes, mNext);
   }
 
   private getStatusCodeClass(code: number): string {
