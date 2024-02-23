@@ -9,11 +9,11 @@ const recordException = (span: ApiSpan, error: any) => {
 };
 
 export function Span(name?: string, options: SpanOptions = {}) {
-  return (target: any, propertyKey: string, propertyDescriptor: PropertyDescriptor) => {
+  return (target: any, propertyKey: PropertyKey, propertyDescriptor: PropertyDescriptor) => {
     const originalFunction = propertyDescriptor.value;
     const wrappedFunction = function PropertyDescriptor(...args: any[]) {
       const tracer = trace.getTracer('default');
-      const spanName = name || `${target.constructor.name}.${propertyKey}`;
+      const spanName = name || `${target.constructor.name}.${String(propertyKey)}`;
 
       return tracer.startActiveSpan(spanName, options, span => {
         if (originalFunction.constructor.name === 'AsyncFunction') {
