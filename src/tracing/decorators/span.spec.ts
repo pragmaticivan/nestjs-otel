@@ -6,6 +6,8 @@ import { Span } from './span';
 
 const TestDecoratorThatSetsMetadata = () => SetMetadata('some-metadata', true);
 
+const symbol = Symbol('testSymbol');
+
 class TestSpan {
   @Span()
   singleSpan() { }
@@ -26,6 +28,9 @@ class TestSpan {
   @Span()
   @TestDecoratorThatSetsMetadata()
   metadata() { }
+
+  @Span()
+  [symbol]() { }
 }
 
 describe('Span', () => {
@@ -113,5 +118,14 @@ describe('Span', () => {
       droppedAttributesCount: 0,
       time: expect.anything(),
     });
+  });
+
+  it('should handle symbols', () => {
+    instance[symbol]();
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(1);
+    expect(spans.map(span => span.name)).toEqual(['TestSpan.Symbol(testSymbol)']);
   });
 });
