@@ -48,5 +48,6 @@ export type OpenTelemetryMetrics = {
     defaultAttributes?: Attributes;
     ignoreRoutes?: (string | RouteInfo)[];
     ignoreUndefinedRoutes?: boolean;
+    prefix?: string;
   };
 };

@@ -1,20 +1,22 @@
 import { createParamDecorator } from '@nestjs/common';
-import { MetricOptions } from '@opentelemetry/api';
 import {
   getOrCreateObservableCounter,
   getOrCreateObservableGauge,
   getOrCreateObservableUpDownCounter,
 } from '../metric-data';
+import { OtelMetricOptions } from '../../interfaces/metric-options.interface';
 
-export const OtelObservableGauge = createParamDecorator((name: string, options?: MetricOptions) => {
-  if (!name || name.length === 0) {
-    throw new Error('OtelObservableGauge need a name argument');
+export const OtelObservableGauge = createParamDecorator(
+  (name: string, options?: OtelMetricOptions) => {
+    if (!name || name.length === 0) {
+      throw new Error('OtelObservableGauge need a name argument');
+    }
+    return getOrCreateObservableGauge(name, options);
   }
-  return getOrCreateObservableGauge(name, options);
-});
+);
 
 export const OtelObservableCounter = createParamDecorator(
-  (name: string, options?: MetricOptions) => {
+  (name: string, options?: OtelMetricOptions) => {
     if (!name || name.length === 0) {
       throw new Error('OtelObservableCounter need a name argument');
     }
@@ -23,7 +25,7 @@ export const OtelObservableCounter = createParamDecorator(
 );
 
 export const OtelObservableUpDownCounter = createParamDecorator(
-  (name: string, options?: MetricOptions) => {
+  (name: string, options?: OtelMetricOptions) => {
     if (!name || name.length === 0) {
       throw new Error('OtelObservableUpDownCounter need a name argument');
     }
