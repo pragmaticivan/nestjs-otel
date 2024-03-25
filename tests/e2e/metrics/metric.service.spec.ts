@@ -113,6 +113,32 @@ describe('MetricService', () => {
       // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
     });
+
+    it('uses prefix when provided', async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: false,
+            },
+          },
+        })],
+      }).compile();
+
+      app = moduleRef.createNestApplication();
+      await app.init();
+
+      metricService = moduleRef.get<MetricService>(MetricService);
+      // Starts empty
+      expect(meterData.size).toBe(0);
+
+      const counter = metricService.getCounter('test1', { prefix: 'test_prefix' });
+      counter.add(1);
+
+      // Has new key record
+      const data = meterData;
+      expect(data.has('test_prefix.test1')).toBeTruthy();
+    });
   });
 
   describe('getUpDownCounter', () => {
@@ -169,6 +195,32 @@ describe('MetricService', () => {
       // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
     });
+
+    it('uses prefix when provided', async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: false,
+            },
+          },
+        })],
+      }).compile();
+
+      app = moduleRef.createNestApplication();
+      await app.init();
+
+      metricService = moduleRef.get<MetricService>(MetricService);
+      // Starts empty
+      expect(meterData.size).toBe(0);
+
+      const counter = metricService.getUpDownCounter('test1', { prefix: 'test_prefix' });
+      counter.add(1);
+
+      // Has new key record
+      const data = meterData;
+      expect(data.has('test_prefix.test1')).toBeTruthy();
+    });
   });
 
   describe('getHistogram', () => {
@@ -222,6 +274,31 @@ describe('MetricService', () => {
       // @ts-ignore
       // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
+    });
+
+    it('uses prefix when provided', async () => {
+      const moduleRef = await Test.createTestingModule({
+        imports: [OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: false,
+            },
+          },
+        })],
+      }).compile();
+
+      app = moduleRef.createNestApplication();
+      await app.init();
+
+      metricService = moduleRef.get<MetricService>(MetricService);
+      // Starts empty
+      expect(meterData.size).toBe(0);
+
+      metricService.getHistogram('test1', { prefix: 'test_prefix' });
+
+      // Has new key record
+      const data = meterData;
+      expect(data.has('test_prefix.test1')).toBeTruthy();
     });
   });
 });

@@ -1,8 +1,8 @@
 import { createParamDecorator } from '@nestjs/common';
-import { MetricOptions } from '@opentelemetry/api';
 import { getOrCreateHistogram } from '../metric-data';
+import { OtelMetricOptions } from '../../interfaces/metric-options.interface';
 
-export const OtelHistogram = createParamDecorator((name: string, options?: MetricOptions) => {
+export const OtelHistogram = createParamDecorator((name: string, options?: OtelMetricOptions) => {
   if (!name || name.length === 0) {
     throw new Error('OtelHistogram need a name argument');
   }

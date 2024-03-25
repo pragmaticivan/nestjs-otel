@@ -1,9 +1,10 @@
 import {
-  Counter, MetricOptions, UpDownCounter,
+  Counter, UpDownCounter,
   Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter,
   metrics,
 } from '@opentelemetry/api';
 import { OTEL_METER_NAME } from '../opentelemetry.constants';
+import { OtelMetricOptions } from '../interfaces/metric-options.interface';
 
 export type GenericMetric =
   Counter |
@@ -26,89 +27,95 @@ export const meterData: Map<string, GenericMetric> = new Map();
 
 export function getOrCreateHistogram(
   name: string,
-  options: MetricOptions = {},
+  options: OtelMetricOptions = {},
 ): Histogram {
-  if (meterData.has(name)) {
-    return meterData.get(name) as Histogram;
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  if (meterData.has(nameWithPrefix)) {
+    return meterData.get(nameWithPrefix) as Histogram;
   }
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-  const histogram = meter.createHistogram(name, options);
-  meterData.set(name, histogram);
+  const histogram = meter.createHistogram(nameWithPrefix, options);
+  meterData.set(nameWithPrefix, histogram);
   return histogram;
 }
 
 export function getOrCreateCounter(
   name: string,
-  options: MetricOptions = {},
+  options: OtelMetricOptions = {},
 ): Counter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as Counter;
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  if (meterData.has(nameWithPrefix)) {
+    return meterData.get(nameWithPrefix) as Counter;
   }
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const counter = meter.createCounter(name, options);
-  meterData.set(name, counter);
+  const counter = meter.createCounter(nameWithPrefix, options);
+  meterData.set(nameWithPrefix, counter);
   return counter;
 }
 
 export function getOrCreateUpDownCounter(
   name: string,
-  options: MetricOptions = {},
+  options: OtelMetricOptions = {},
 ): UpDownCounter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as UpDownCounter;
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  if (meterData.has(nameWithPrefix)) {
+    return meterData.get(nameWithPrefix) as UpDownCounter;
   }
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const upDownCounter = meter.createUpDownCounter(name, options);
-  meterData.set(name, upDownCounter);
+  const upDownCounter = meter.createUpDownCounter(nameWithPrefix, options);
+  meterData.set(nameWithPrefix, upDownCounter);
   return upDownCounter;
 }
 
 export function getOrCreateObservableGauge(
   name: string,
-  options: MetricOptions = {},
+  options: OtelMetricOptions = {},
 ): ObservableGauge {
-  if (meterData.has(name)) {
-    return meterData.get(name) as ObservableGauge;
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  if (meterData.has(nameWithPrefix)) {
+    return meterData.get(nameWithPrefix) as ObservableGauge;
   }
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const observableGauge = meter.createObservableGauge(name, options);
-  meterData.set(name, observableGauge);
+  const observableGauge = meter.createObservableGauge(nameWithPrefix, options);
+  meterData.set(nameWithPrefix, observableGauge);
   return observableGauge;
 }
 
 export function getOrCreateObservableCounter(
   name: string,
-  options: MetricOptions = {},
+  options: OtelMetricOptions = {},
 ): ObservableCounter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as ObservableCounter;
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  if (meterData.has(nameWithPrefix)) {
+    return meterData.get(nameWithPrefix) as ObservableCounter;
   }
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const observableCounter = meter.createObservableCounter(name, options);
-  meterData.set(name, observableCounter);
+  const observableCounter = meter.createObservableCounter(nameWithPrefix, options);
+  meterData.set(nameWithPrefix, observableCounter);
   return observableCounter;
 }
 
 export function getOrCreateObservableUpDownCounter(
   name: string,
-  options: MetricOptions = {},
+  options: OtelMetricOptions = {},
 ): ObservableUpDownCounter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as ObservableUpDownCounter;
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  if (meterData.has(nameWithPrefix)) {
+    return meterData.get(nameWithPrefix) as ObservableUpDownCounter;
   }
 
   const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
 
-  const observableCounter = meter.createObservableCounter(name, options);
-  meterData.set(name, observableCounter);
+  const observableCounter = meter.createObservableCounter(nameWithPrefix, options);
+  meterData.set(nameWithPrefix, observableCounter);
   return observableCounter;
 }

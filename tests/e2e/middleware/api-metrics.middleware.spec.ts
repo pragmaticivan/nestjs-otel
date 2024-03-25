@@ -96,6 +96,60 @@ describe('Api Metrics Middleware', () => {
     expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', { description: 'The duration of the inbound HTTP request', unit: 'ms' });
   });
 
+  it('uses prefix when provided', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({
+        metrics: {
+          apiMetrics: {
+            enable: true,
+            prefix: 'test_prefix',
+          },
+        },
+      })],
+    }).overrideProvider(MetricService)
+      .useValue(metricService)
+      .compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.request.count', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.response.count', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.abort.count', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.request.size', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.response.size', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.response.success.count', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.server.response.error.count', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+
+    expect(metricService.getCounter).toHaveBeenCalledWith('http.client.request.error.count', expect.objectContaining({
+      prefix: 'test_prefix',
+    }));
+  });
+
   describe('metric: http.server.request.count', () => {
     it('succesfully request records', async () => {
       const testingModule = await Test.createTestingModule({
