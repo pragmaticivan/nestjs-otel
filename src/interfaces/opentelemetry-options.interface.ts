@@ -51,5 +51,6 @@ export type OpenTelemetryMetrics = {
     defaultAttributes?: MetricAttributes,
     ignoreRoutes?: (string | RouteInfo)[],
     ignoreUndefinedRoutes?: boolean,
+    prefix?: string,
   },
 };

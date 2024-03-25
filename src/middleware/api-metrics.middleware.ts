@@ -39,6 +39,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     const {
       defaultAttributes = {},
       ignoreUndefinedRoutes = false,
+      prefix,
     } = options?.metrics?.apiMetrics ?? {};
 
     this.defaultMetricAttributes = defaultAttributes;
@@ -48,45 +49,54 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     this.httpServerRequestCount = this.metricService.getCounter('http.server.request.count', {
       description: 'Total number of HTTP requests',
       unit: 'requests',
+      prefix,
     });
 
     this.httpServerResponseCount = this.metricService.getCounter('http.server.response.count', {
       description: 'Total number of HTTP responses',
       unit: 'responses',
+      prefix,
     });
 
     this.httpServerAbortCount = this.metricService.getCounter('http.server.abort.count', {
       description: 'Total number of data transfers aborted',
       unit: 'requests',
+      prefix,
     });
 
     this.httpServerDuration = this.metricService.getHistogram('http.server.duration', {
       description: 'The duration of the inbound HTTP request',
       unit: 'ms',
+      prefix,
     });
 
     this.httpServerRequestSize = this.metricService.getHistogram('http.server.request.size', {
       description: 'Size of incoming bytes',
       unit: 'By',
+      prefix,
     });
 
     this.httpServerResponseSize = this.metricService.getHistogram('http.server.response.size', {
       description: 'Size of outgoing bytes',
       unit: 'By',
+      prefix,
     });
 
     // Helpers
     this.httpServerResponseSuccessCount = this.metricService.getCounter('http.server.response.success.count', {
       description: 'Total number of all successful responses',
       unit: 'responses',
+      prefix,
     });
 
     this.httpServerResponseErrorCount = this.metricService.getCounter('http.server.response.error.count', {
       description: 'Total number of all response errors',
+      prefix,
     });
 
     this.httpClientRequestErrorCount = this.metricService.getCounter('http.client.request.error.count', {
       description: 'Total number of client error requests',
+      prefix,
     });
   }
 
