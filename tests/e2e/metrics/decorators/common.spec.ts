@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { metrics } from '@opentelemetry/api';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import * as request from 'supertest';
+import request from 'supertest';
 import { OpenTelemetryModule } from '../../../../src';
 import { meterData } from '../../../../src/metrics/metric-data';
 import { AppController } from '../../../fixture-app/app.controller';
@@ -37,13 +37,15 @@ describe('Common Decorators', () => {
   describe('Instance counter & Method counter', () => {
     it('creates an instance counter and increase counter when new instance is created', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -55,10 +57,7 @@ describe('Common Decorators', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(exporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(exporter._server).get('/metrics').expect(200);
 
       expect(/app_AppController_instances_total 1/.test(text)).toBeTruthy();
       expect(/app_AppController_example_calls_total 1/.test(text)).toBeTruthy();

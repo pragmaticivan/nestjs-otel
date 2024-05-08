@@ -5,7 +5,6 @@ module.exports = {
   arrowParens: 'avoid',
   bracketSpacing: true,
   embeddedLanguageFormatting: 'auto',
-  jsxBracketSameLine: false,
   htmlWhitespaceSensitivity: 'css',
   requirePragma: false,
   insertPragma: false,
@@ -24,13 +23,7 @@ module.exports = {
   overrides: [
     // explicitly keep output consistent with npm
     {
-      files: [
-        '.eslintrc.json',
-        'lerna.json',
-        'package.json',
-        'package-lock.json',
-        'npm-shrinkwrap.json',
-      ],
+      files: ['lerna.json', 'package.json', 'package-lock.json', 'npm-shrinkwrap.json'],
       options: {
         parser: 'json-stringify',
         tabWidth: 2,

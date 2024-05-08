@@ -1,9 +1,7 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
-import * as responseTime from 'response-time';
+import responseTime from 'response-time';
 import * as urlParser from 'url';
-import {
-  Counter, MetricAttributes, Histogram, UpDownCounter,
-} from '@opentelemetry/api';
+import { Counter, MetricAttributes, Histogram, UpDownCounter } from '@opentelemetry/api';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
@@ -34,12 +32,10 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
   constructor(
     @Inject(MetricService) private readonly metricService: MetricService,
-    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
+    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {}
   ) {
-    const {
-      defaultAttributes = {},
-      ignoreUndefinedRoutes = false,
-    } = options?.metrics?.apiMetrics ?? {};
+    const { defaultAttributes = {}, ignoreUndefinedRoutes = false } =
+      options?.metrics?.apiMetrics ?? {};
 
     this.defaultMetricAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
@@ -76,23 +72,31 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     });
 
     // Helpers
-    this.httpServerResponseSuccessCount = this.metricService.getCounter('http.server.response.success.count', {
-      description: 'Total number of all successful responses',
-      unit: 'responses',
-    });
+    this.httpServerResponseSuccessCount = this.metricService.getCounter(
+      'http.server.response.success.count',
+      {
+        description: 'Total number of all successful responses',
+        unit: 'responses',
+      }
+    );
 
-    this.httpServerResponseErrorCount = this.metricService.getCounter('http.server.response.error.count', {
-      description: 'Total number of all response errors',
-    });
+    this.httpServerResponseErrorCount = this.metricService.getCounter(
+      'http.server.response.error.count',
+      {
+        description: 'Total number of all response errors',
+      }
+    );
 
-    this.httpClientRequestErrorCount = this.metricService.getCounter('http.client.request.error.count', {
-      description: 'Total number of client error requests',
-    });
+    this.httpClientRequestErrorCount = this.metricService.getCounter(
+      'http.client.request.error.count',
+      {
+        description: 'Total number of client error requests',
+      }
+    );
   }
 
-  use(req, res, next) {
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    responseTime((req, res, time) => {
+  use(req: any, res: any, next: any) {
+    responseTime((req: any, res: any, time: any) => {
       const { route, url, method } = req;
       let path;
 
@@ -111,7 +115,10 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
       const status = res.statusCode || 500;
       const attributes: MetricAttributes = {
-        method, status, path, ...this.defaultMetricAttributes,
+        method,
+        status,
+        path,
+        ...this.defaultMetricAttributes,
       };
 
       this.httpServerRequestSize.record(requestLength, attributes);
@@ -122,7 +129,6 @@ export class ApiMetricsMiddleware implements NestMiddleware {
 
       const codeClass = this.getStatusCodeClass(status);
 
-      // eslint-disable-next-line default-case
       switch (codeClass) {
         case 'success':
           this.httpServerResponseSuccessCount.add(1);

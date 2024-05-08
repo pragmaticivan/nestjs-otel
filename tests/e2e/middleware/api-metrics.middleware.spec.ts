@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { metrics } from '@opentelemetry/api';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
@@ -37,14 +37,17 @@ describe('Api Metrics Middleware', () => {
 
   it('does not register api metrics when disabled', async () => {
     const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: false,
+      imports: [
+        OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: false,
+            },
           },
-        },
-      })],
-    }).overrideProvider(MetricService)
+        }),
+      ],
+    })
+      .overrideProvider(MetricService)
       .useValue(metricService)
       .compile();
 
@@ -56,14 +59,17 @@ describe('Api Metrics Middleware', () => {
 
   it('registers api metrics when enabled', async () => {
     const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
+      imports: [
+        OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
           },
-        },
-      })],
-    }).overrideProvider(MetricService)
+        }),
+      ],
+    })
+      .overrideProvider(MetricService)
       .useValue(metricService)
       .compile();
 
@@ -79,33 +85,41 @@ describe('Api Metrics Middleware', () => {
 
   it('uses custom buckets when provided', async () => {
     const testingModule = await Test.createTestingModule({
-      imports: [OpenTelemetryModule.forRoot({
-        metrics: {
-          apiMetrics: {
-            enable: true,
+      imports: [
+        OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+            },
           },
-        },
-      })],
-    }).overrideProvider(MetricService)
+        }),
+      ],
+    })
+      .overrideProvider(MetricService)
       .useValue(metricService)
       .compile();
 
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', { description: 'The duration of the inbound HTTP request', unit: 'ms' });
+    expect(metricService.getHistogram).toHaveBeenCalledWith('http.server.duration', {
+      description: 'The duration of the inbound HTTP request',
+      unit: 'ms',
+    });
   });
 
   describe('metric: http.server.request.count', () => {
     it('succesfully request records', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -120,23 +134,24 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
-      expect(/http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
+      expect(
+        /http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)
+      ).toBeTruthy();
     });
 
     // TODO: Fastify should remove path param and replace it with `:id`
     it.skip('registers successful request records when using Fastify', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -152,25 +167,26 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
 
-      expect(/http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+      expect(
+        /http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)
+      ).toBeTruthy();
     });
   });
 
   describe('metric: http.server.response.count', () => {
     it('succesfully request records', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -185,23 +201,24 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
-      expect(/http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
+      expect(
+        /http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)
+      ).toBeTruthy();
     });
 
     // TODO: Fastify should remove path param and replace it with `:id`
     it.skip('registers successful request records when using Fastify', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -217,40 +234,36 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
 
-      expect(/http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)).toBeTruthy();
+      expect(
+        /http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*} 1/.test(text)
+      ).toBeTruthy();
     });
   });
 
-  describe('metric: http.server.abort.count', () => {
-  });
+  describe('metric: http.server.abort.count', () => {});
 
-  describe('metric: http.server.duration', () => {
-  });
+  describe('metric: http.server.duration', () => {});
 
-  describe('metric: http.server.request.size', () => {
-  });
+  describe('metric: http.server.request.size', () => {});
 
-  describe('metric: http.server.response.size', () => {
-  });
+  describe('metric: http.server.response.size', () => {});
 
-  describe('metric: http.server.response.success.count', () => {
-  });
+  describe('metric: http.server.response.success.count', () => {});
 
   describe('metric: http.server.response.error.count', () => {
     it('succesfully request records', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -267,23 +280,22 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
 
       expect(/http_server_response_error_count_total 1/.test(text)).toBeTruthy();
     });
 
     it('succesfully request records when using Fastify', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -301,10 +313,7 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
 
       expect(/http_server_response_error_count_total 1/.test(text)).toBeTruthy();
     });
@@ -313,13 +322,15 @@ describe('Api Metrics Middleware', () => {
   describe('metric: http.client.request.error.count', () => {
     it('succesfully request records', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -334,23 +345,22 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
 
       expect(/http_client_request_error_count_total 1/.test(text)).toBeTruthy();
     });
 
     it('succesfully request records when using Fastify', async () => {
       const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: true,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: true,
+              },
             },
-          },
-        })],
+          }),
+        ],
         controllers: [AppController],
       }).compile();
 
@@ -366,10 +376,7 @@ describe('Api Metrics Middleware', () => {
 
       // TODO: OpenTelemetry exporter does not expose server in a public function.
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
-      const { text } = await request(promExporter._server)
-        .get('/metrics')
-        .expect(200);
+      const { text } = await request(promExporter._server).get('/metrics').expect(200);
 
       expect(/http_client_request_error_count_total 1/.test(text)).toBeTruthy();
     });

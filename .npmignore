@@ -5,9 +5,6 @@ node_modules
 src
 tests
 .editorconfig
-.eslintcache
-.eslintignore
-.eslintrc.js
 .prettierrc.js
 CHANGELOG.md
 commitlint.config.js
