@@ -1,14 +1,14 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import responseTime from 'response-time';
 import * as urlParser from 'url';
-import { Counter, MetricAttributes, Histogram, UpDownCounter } from '@opentelemetry/api';
+import { Counter, Attributes, Histogram, UpDownCounter } from '@opentelemetry/api';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
-  private defaultMetricAttributes: MetricAttributes;
+  private defaultAttributes: Attributes;
 
   private httpServerRequestCount: Counter;
 
@@ -37,7 +37,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     const { defaultAttributes = {}, ignoreUndefinedRoutes = false } =
       options?.metrics?.apiMetrics ?? {};
 
-    this.defaultMetricAttributes = defaultAttributes;
+    this.defaultAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
 
     // Semantic Convention
@@ -114,11 +114,11 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
 
       const status = res.statusCode || 500;
-      const attributes: MetricAttributes = {
+      const attributes: Attributes = {
         method,
         status,
         path,
-        ...this.defaultMetricAttributes,
+        ...this.defaultAttributes,
       };
 
       this.httpServerRequestSize.record(requestLength, attributes);
