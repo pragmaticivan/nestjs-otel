@@ -62,13 +62,15 @@ describe('MetricService', () => {
   describe('getCounter', () => {
     it('creates a new counter on meterData on the first time method is called', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: false,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: false,
+              },
             },
-          },
-        })],
+          }),
+        ],
       }).compile();
 
       app = moduleRef.createNestApplication();
@@ -88,13 +90,15 @@ describe('MetricService', () => {
 
     it('reuses an existing counter on meterData when method is called twice', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: false,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: false,
+              },
             },
-          },
-        })],
+          }),
+        ],
       }).compile();
 
       app = moduleRef.createNestApplication();
@@ -110,7 +114,6 @@ describe('MetricService', () => {
       expect(meterData.has('test1')).toBeTruthy();
       // TODO: The metric class does not expose current description
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
     });
   });
@@ -118,13 +121,15 @@ describe('MetricService', () => {
   describe('getUpDownCounter', () => {
     it('creates a new upDownCounter on meterData on the first time method is called', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: false,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: false,
+              },
             },
-          },
-        })],
+          }),
+        ],
       }).compile();
 
       app = moduleRef.createNestApplication();
@@ -144,13 +149,15 @@ describe('MetricService', () => {
 
     it('reuses an existing upDownCounter on meterData when method is called twice', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: false,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: false,
+              },
             },
-          },
-        })],
+          }),
+        ],
       }).compile();
 
       app = moduleRef.createNestApplication();
@@ -166,7 +173,6 @@ describe('MetricService', () => {
 
       // TODO: The metric class does not expose current description
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
     });
   });
@@ -174,13 +180,15 @@ describe('MetricService', () => {
   describe('getHistogram', () => {
     it('creates a new histogram on meterData on the first time method is called', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: false,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: false,
+              },
             },
-          },
-        })],
+          }),
+        ],
       }).compile();
 
       app = moduleRef.createNestApplication();
@@ -199,13 +207,15 @@ describe('MetricService', () => {
 
     it('reuses an existing histogram on meterData when method is called twice', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({
-          metrics: {
-            apiMetrics: {
-              enable: false,
+        imports: [
+          OpenTelemetryModule.forRoot({
+            metrics: {
+              apiMetrics: {
+                enable: false,
+              },
             },
-          },
-        })],
+          }),
+        ],
       }).compile();
 
       app = moduleRef.createNestApplication();
@@ -220,7 +230,6 @@ describe('MetricService', () => {
 
       // TODO: The metric class does not expose current description
       // @ts-ignore
-      // eslint-disable-next-line no-underscore-dangle
       expect(existingCounter._descriptor.description).toBe('test1 description');
     });
   });

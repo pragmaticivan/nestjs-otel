@@ -1,6 +1,6 @@
 export const copyMetadataFromFunctionToFunction = (
   originalFunction: Function,
-  newFunction: Function,
+  newFunction: Function
 ): void => {
   // Get the current metadata and set onto the wrapper
   // to ensure other decorators ( ie: NestJS EventPattern / RolesGuard )
@@ -9,7 +9,7 @@ export const copyMetadataFromFunctionToFunction = (
     Reflect.defineMetadata(
       metadataKey,
       Reflect.getMetadata(metadataKey, originalFunction),
-      newFunction,
+      newFunction
     );
   });
 };

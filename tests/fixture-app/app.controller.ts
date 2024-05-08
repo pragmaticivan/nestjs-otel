@@ -1,6 +1,4 @@
-import {
-  Get, Controller,
-} from '@nestjs/common';
+import { Get, Controller } from '@nestjs/common';
 import { OtelInstanceCounter, OtelMethodCounter } from '../../src/metrics/decorators/common';
 
 @OtelInstanceCounter()
