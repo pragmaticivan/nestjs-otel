@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.5...v6.0.0) (2024-05-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* Too many changes since I last commited to this project.
+
+### Features
+
+* bumps major version ([fc9aacb](https://www.github.com/pragmaticivan/nestjs-otel/commit/fc9aacb39a8f3340ec4b4a22ad6c5eb61c9dc71e))
+
+
+### Bug Fixes
+
+* `Span` being incompatible with `MethodDecorator` type ([75dbf0e](https://www.github.com/pragmaticivan/nestjs-otel/commit/75dbf0ece685f5b9d466769368985618828a40a5))
+
 ### [5.1.5](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.4...v5.1.5) (2023-09-04)
 
 
