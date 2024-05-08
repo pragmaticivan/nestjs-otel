@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { HostMetrics } from '@opentelemetry/host-metrics';
 import { metrics } from '@opentelemetry/api';
+import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import {
   OpenTelemetryModuleAsyncOptions,
   OpenTelemetryModuleOptions,
@@ -92,11 +93,9 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
         this.options.metrics.hostMetrics !== undefined ? this.options.metrics.hostMetrics : false;
     }
 
-    const meterProvider = metrics.getMeterProvider();
+    const meterProvider = metrics.getMeterProvider() as MeterProvider;
 
     if (hostMetrics) {
-      // For some reason meterProvider type does not match here.
-      // @ts-ignore
       const host = new HostMetrics({ meterProvider, name: 'host-metrics' });
       host.start();
     }

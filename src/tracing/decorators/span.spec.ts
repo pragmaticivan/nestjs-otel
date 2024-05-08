@@ -49,8 +49,6 @@ describe('Span', () => {
     spanProcessor = new SimpleSpanProcessor(traceExporter);
 
     provider = new NodeTracerProvider();
-    // TODO: figure out why that's failing with new version
-    // @ts-ignore
     provider.addSpanProcessor(spanProcessor);
     provider.register();
   });
