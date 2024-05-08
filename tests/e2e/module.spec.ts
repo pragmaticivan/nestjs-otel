@@ -25,9 +25,11 @@ describe('OpenTelemetryModule', () => {
   describe('#forRootAsync', () => {
     describe('default options with factory', () => {
       beforeEach(async () => {
-        ({ app } = await createOpenTelemetryModule(OpenTelemetryModule.forRootAsync({
-          useFactory: () => ({}),
-        })));
+        ({ app } = await createOpenTelemetryModule(
+          OpenTelemetryModule.forRootAsync({
+            useFactory: () => ({}),
+          })
+        ));
       });
 
       it('should load module with default configs', async () => {
@@ -47,9 +49,11 @@ describe('OpenTelemetryModule', () => {
           }
         }
 
-        ({ app } = await createOpenTelemetryModule(OpenTelemetryModule.forRootAsync({
-          useClass: OpenTelemetryService,
-        })));
+        ({ app } = await createOpenTelemetryModule(
+          OpenTelemetryModule.forRootAsync({
+            useClass: OpenTelemetryService,
+          })
+        ));
       });
 
       it('should load module with default configs', async () => {
