@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.1.6](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.5...v5.1.6) (2024-05-08)
+
+
+### Bug Fixes
+
+* `Span` being incompatible with `MethodDecorator` type ([75dbf0e](https://www.github.com/pragmaticivan/nestjs-otel/commit/75dbf0ece685f5b9d466769368985618828a40a5))
+
 ### [5.1.5](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.4...v5.1.5) (2023-09-04)
 
 
