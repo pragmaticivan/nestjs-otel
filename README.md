@@ -25,6 +25,14 @@ Please read this [comprehensive whitepaper](https://github.com/cncf/tag-observab
 
 ![observability-signals](https://user-images.githubusercontent.com/24193764/121773601-55f86b80-cb53-11eb-8c8b-262a5aad781f.png)
 
+
+## Examples
+
+A full working examples are available. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo:
+
+- [nestjs-otel-prom-grafana-tempo](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
+
+
 ## Installation
 
 ```bash
@@ -313,12 +321,6 @@ export const loggerOptions: LoggerOptions = {
 
 export const logger: Logger = Pino(loggerOptions);
 ```
-
-## Examples
-
-A full working examples are available. This includes a nestjs application fully integrated with prometheus, grafana, loki and tempo:
-
-- [nestjs-otel-prom-grafana-tempo](https://github.com/pragmaticivan/nestjs-otel-prom-grafana-tempo )
 
 ## Stargazers over time
 
