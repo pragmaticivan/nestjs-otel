@@ -34,8 +34,11 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     @Inject(MetricService) private readonly metricService: MetricService,
     @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {}
   ) {
-    const { defaultAttributes = {}, ignoreUndefinedRoutes = false } =
-      options?.metrics?.apiMetrics ?? {};
+    const {
+      defaultAttributes = {},
+      ignoreUndefinedRoutes = false,
+      prefix,
+    } = options?.metrics?.apiMetrics ?? {};
 
     this.defaultAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
@@ -44,31 +47,37 @@ export class ApiMetricsMiddleware implements NestMiddleware {
     this.httpServerRequestCount = this.metricService.getCounter('http.server.request.count', {
       description: 'Total number of HTTP requests',
       unit: 'requests',
+      prefix,
     });
 
     this.httpServerResponseCount = this.metricService.getCounter('http.server.response.count', {
       description: 'Total number of HTTP responses',
       unit: 'responses',
+      prefix,
     });
 
     this.httpServerAbortCount = this.metricService.getCounter('http.server.abort.count', {
       description: 'Total number of data transfers aborted',
       unit: 'requests',
+      prefix,
     });
 
     this.httpServerDuration = this.metricService.getHistogram('http.server.duration', {
       description: 'The duration of the inbound HTTP request',
       unit: 'ms',
+      prefix,
     });
 
     this.httpServerRequestSize = this.metricService.getHistogram('http.server.request.size', {
       description: 'Size of incoming bytes',
       unit: 'By',
+      prefix,
     });
 
     this.httpServerResponseSize = this.metricService.getHistogram('http.server.response.size', {
       description: 'Size of outgoing bytes',
       unit: 'By',
+      prefix,
     });
 
     // Helpers
@@ -77,6 +86,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       {
         description: 'Total number of all successful responses',
         unit: 'responses',
+        prefix,
       }
     );
 
@@ -84,6 +94,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       'http.server.response.error.count',
       {
         description: 'Total number of all response errors',
+        prefix,
       }
     );
 
@@ -91,6 +102,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       'http.client.request.error.count',
       {
         description: 'Total number of client error requests',
+        prefix,
       }
     );
   }

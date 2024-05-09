@@ -1,6 +1,7 @@
-import { Counter, MetricOptions } from '@opentelemetry/api';
+import { Counter } from '@opentelemetry/api';
 import { copyMetadataFromFunctionToFunction } from '../../opentelemetry.utils';
 import { getOrCreateCounter } from '../metric-data';
+import { OtelMetricOptions } from '../../interfaces/metric-options.interface';
 
 /**
  * Create and increment a counter when a new instance is created
@@ -8,7 +9,7 @@ import { getOrCreateCounter } from '../metric-data';
  * @param originalClass
  */
 export const OtelInstanceCounter =
-  (options?: MetricOptions) =>
+  (options?: OtelMetricOptions) =>
   <T extends { new (...args: any[]): {} }>(originalClass: T) => {
     const name = `app_${originalClass.name}_instances_total`;
     const description = `app_${originalClass.name} object instances total`;
@@ -34,7 +35,7 @@ export const OtelInstanceCounter =
  * Create and increment a counter when the method is called
  */
 export const OtelMethodCounter =
-  (options?: MetricOptions) =>
+  (options?: OtelMetricOptions) =>
   (
     target: Object,
     propertyKey: string | symbol,

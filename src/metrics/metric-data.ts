@@ -1,6 +1,5 @@
 import {
   Counter,
-  MetricOptions,
   UpDownCounter,
   Histogram,
   ObservableGauge,
@@ -9,6 +8,7 @@ import {
   metrics,
 } from '@opentelemetry/api';
 import { OTEL_METER_NAME } from '../opentelemetry.constants';
+import { OtelMetricOptions } from '../interfaces/metric-options.interface';
 
 export type GenericMetric =
   | Counter
@@ -29,82 +29,53 @@ export enum MetricType {
 
 export const meterData: Map<string, GenericMetric> = new Map();
 
-export function getOrCreateHistogram(name: string, options: MetricOptions = {}): Histogram {
-  if (meterData.has(name)) {
-    return meterData.get(name) as Histogram;
+function getOrCreate(
+  name: string,
+  options: OtelMetricOptions = {},
+  type: MetricType
+): GenericMetric | undefined {
+  const nameWithPrefix = options.prefix ? `${options.prefix}.${name}` : name;
+  let metric = meterData.get(nameWithPrefix);
+  if (metric === undefined) {
+    const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
+    metric = meter[`create${type}`](nameWithPrefix, options);
+    meterData.set(nameWithPrefix, metric);
   }
-
-  const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-  const histogram = meter.createHistogram(name, options);
-  meterData.set(name, histogram);
-  return histogram;
+  return metric;
 }
 
-export function getOrCreateCounter(name: string, options: MetricOptions = {}): Counter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as Counter;
-  }
-
-  const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-
-  const counter = meter.createCounter(name, options);
-  meterData.set(name, counter);
-  return counter;
+export function getOrCreateHistogram(name: string, options: OtelMetricOptions = {}): Histogram {
+  return getOrCreate(name, options, MetricType.Histogram) as Histogram;
 }
 
-export function getOrCreateUpDownCounter(name: string, options: MetricOptions = {}): UpDownCounter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as UpDownCounter;
-  }
+export function getOrCreateCounter(name: string, options: OtelMetricOptions = {}): Counter {
+  return getOrCreate(name, options, MetricType.Counter) as Counter;
+}
 
-  const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-
-  const upDownCounter = meter.createUpDownCounter(name, options);
-  meterData.set(name, upDownCounter);
-  return upDownCounter;
+export function getOrCreateUpDownCounter(
+  name: string,
+  options: OtelMetricOptions = {}
+): UpDownCounter {
+  return getOrCreate(name, options, MetricType.UpDownCounter) as UpDownCounter;
 }
 
 export function getOrCreateObservableGauge(
   name: string,
-  options: MetricOptions = {}
+  options: OtelMetricOptions = {}
 ): ObservableGauge {
-  if (meterData.has(name)) {
-    return meterData.get(name) as ObservableGauge;
-  }
-
-  const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-
-  const observableGauge = meter.createObservableGauge(name, options);
-  meterData.set(name, observableGauge);
-  return observableGauge;
+  return getOrCreate(name, options, MetricType.ObservableGauge) as ObservableGauge;
 }
 
 export function getOrCreateObservableCounter(
   name: string,
-  options: MetricOptions = {}
+  options: OtelMetricOptions = {}
 ): ObservableCounter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as ObservableCounter;
-  }
-
-  const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-
-  const observableCounter = meter.createObservableCounter(name, options);
-  meterData.set(name, observableCounter);
-  return observableCounter;
+  return getOrCreate(name, options, MetricType.ObservableCounter) as ObservableCounter;
 }
 
 export function getOrCreateObservableUpDownCounter(
   name: string,
-  options: MetricOptions = {}
+  options: OtelMetricOptions = {}
 ): ObservableUpDownCounter {
-  if (meterData.has(name)) {
-    return meterData.get(name) as ObservableUpDownCounter;
-  }
-
-  const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-
-  const observableCounter = meter.createObservableCounter(name, options);
-  meterData.set(name, observableCounter);
-  return observableCounter;
+  return getOrCreate(name, options, MetricType.ObservableUpDownCounter) as ObservableUpDownCounter;
 }
