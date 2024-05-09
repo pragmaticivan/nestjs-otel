@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v6.0.0...v6.1.0) (2024-05-09)
+
+
+### Features
+
+* metric prefixes ([7b6928a](https://www.github.com/pragmaticivan/nestjs-otel/commit/7b6928ab7ff4146fdb95a928b5babcb1d0490de8))
+
 ## [6.0.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v5.1.5...v6.0.0) (2024-05-08)
 
 
