@@ -15,8 +15,9 @@ describe('Common Decorators', () => {
 
   beforeEach(done => {
     exporter = new PrometheusExporter({}, () => {
-      meterProvider = new MeterProvider();
-      meterProvider.addMetricReader(exporter);
+      meterProvider = new MeterProvider({
+        readers: [exporter],
+      });
       metrics.setGlobalMeterProvider(meterProvider);
       done();
     });
