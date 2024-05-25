@@ -13,7 +13,7 @@ export class AppController {
 
   @Get(':id')
   @OtelMethodCounter()
-  example(@OtelCounter('example_counter') counter: Counter) {
+  example(@OtelCounter('example_counter', { description: 'An example counter' }) counter: Counter) {
     counter.add(1);
     return 'example';
   }

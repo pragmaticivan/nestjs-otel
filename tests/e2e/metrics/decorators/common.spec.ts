@@ -62,6 +62,8 @@ describe('Common Decorators', () => {
 
       expect(/app_AppController_instances_total 1/.test(text)).toBeTruthy();
       expect(/app_AppController_example_calls_total 1/.test(text)).toBeTruthy();
+
+      expect(/# HELP example_counter_total An example counter/.test(text)).toBeTruthy();
       expect(/example_counter_total 1/.test(text)).toBeTruthy();
     });
   });
