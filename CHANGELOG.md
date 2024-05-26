@@ -1,5 +1,13 @@
 # Changelog
 
+### [6.1.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v6.1.0...v6.1.1) (2024-05-26)
+
+
+### Bug Fixes
+
+* removed MeterProvider.addMetricReader deprecation ([17d348d](https://www.github.com/pragmaticivan/nestjs-otel/commit/17d348d530f1803500771dfd0b6f1f87f0001c76))
+* rework param decorators to get correct type ([3ba9fe9](https://www.github.com/pragmaticivan/nestjs-otel/commit/3ba9fe91f5615e95fe32b517c99ebaa865348461))
+
 ## [6.1.0](https://www.github.com/pragmaticivan/nestjs-otel/compare/v6.0.0...v6.1.0) (2024-05-09)
 
 
