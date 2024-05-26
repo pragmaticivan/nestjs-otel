@@ -15,8 +15,9 @@ describe('Common Decorators', () => {
 
   beforeEach(done => {
     exporter = new PrometheusExporter({}, () => {
-      meterProvider = new MeterProvider();
-      meterProvider.addMetricReader(exporter);
+      meterProvider = new MeterProvider({
+        readers: [exporter],
+      });
       metrics.setGlobalMeterProvider(meterProvider);
       done();
     });
@@ -34,7 +35,7 @@ describe('Common Decorators', () => {
     }
   });
 
-  describe('Instance counter & Method counter', () => {
+  describe('Instance counter, method counter & param counter', () => {
     it('creates an instance counter and increase counter when new instance is created', async () => {
       const testingModule = await Test.createTestingModule({
         imports: [
@@ -61,6 +62,9 @@ describe('Common Decorators', () => {
 
       expect(/app_AppController_instances_total 1/.test(text)).toBeTruthy();
       expect(/app_AppController_example_calls_total 1/.test(text)).toBeTruthy();
+
+      expect(/# HELP example_counter_total An example counter/.test(text)).toBeTruthy();
+      expect(/example_counter_total 1/.test(text)).toBeTruthy();
     });
   });
 });

@@ -1,5 +1,7 @@
 import { Get, Controller } from '@nestjs/common';
+import { Counter } from '@opentelemetry/api';
 import { OtelInstanceCounter, OtelMethodCounter } from '../../src/metrics/decorators/common';
+import { OtelCounter } from '../../src/metrics/decorators/param';
 
 @OtelInstanceCounter()
 @Controller('example')
@@ -11,7 +13,8 @@ export class AppController {
 
   @Get(':id')
   @OtelMethodCounter()
-  example() {
+  example(@OtelCounter('example_counter', { description: 'An example counter' }) counter: Counter) {
+    counter.add(1);
     return 'example';
   }
 }
