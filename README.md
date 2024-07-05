@@ -1,6 +1,5 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+![nestjs-otel](https://github.com/pragmaticivan/nestjs-otel/assets/301291/40aaad82-82f9-48e5-b204-0e3cef532813)
+
 
 # NestJS OpenTelemetry (OTEL)
 
