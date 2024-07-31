@@ -124,7 +124,9 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         path = urlParser.parse(url).pathname;
       }
 
-      this.httpServerRequestCount.add(1, { method, path });
+      const dynamicAttributes = this.getDynamicAttributes(req, res);
+
+      this.httpServerRequestCount.add(1, { method, path, ...dynamicAttributes });
 
       const requestLength = parseInt(req.headers['content-length'], 10) || 0;
       const responseLength: number = parseInt(res.getHeader('Content-Length'), 10) || 0;
@@ -135,7 +137,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         status,
         path,
         ...this.defaultAttributes,
-        ...this.getDynamicAttributes(req, res),
+        ...dynamicAttributes,
       };
 
       this.httpServerRequestSize.record(requestLength, attributes);
