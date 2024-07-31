@@ -2,12 +2,14 @@ import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import responseTime from 'response-time';
 import * as urlParser from 'url';
 import { Counter, Attributes, Histogram, UpDownCounter } from '@opentelemetry/api';
-import { OpenTelemetryModuleOptions } from '../interfaces';
+import { DynamicAttributesCallback, OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
+  private dynamicAttributes?: DynamicAttributesCallback;
+
   private defaultAttributes: Attributes;
 
   private httpServerRequestCount: Counter;
@@ -38,8 +40,10 @@ export class ApiMetricsMiddleware implements NestMiddleware {
       defaultAttributes = {},
       ignoreUndefinedRoutes = false,
       prefix,
+      dynamicAttributes,
     } = options?.metrics?.apiMetrics ?? {};
 
+    this.dynamicAttributes = dynamicAttributes;
     this.defaultAttributes = defaultAttributes;
     this.ignoreUndefinedRoutes = ignoreUndefinedRoutes;
 
@@ -131,6 +135,7 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         status,
         path,
         ...this.defaultAttributes,
+        ...this.getDynamicAttributes(req, res),
       };
 
       this.httpServerRequestSize.record(requestLength, attributes);
@@ -163,6 +168,10 @@ export class ApiMetricsMiddleware implements NestMiddleware {
         }
       });
     })(req, res, next);
+  }
+
+  private getDynamicAttributes(req: unknown, res: unknown): Attributes {
+    return this.dynamicAttributes?.(req, res) ?? {};
   }
 
   private getStatusCodeClass(code: number): string {
