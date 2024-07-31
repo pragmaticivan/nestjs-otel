@@ -41,11 +41,14 @@ export interface OpenTelemetryModuleAsyncOptions extends Pick<ModuleMetadata, 'i
   inject?: (string | symbol | Function | Type<any> | Abstract<any>)[];
 }
 
+export type DynamicAttributesCallback = (req: unknown, res: unknown) => Attributes;
+
 export type OpenTelemetryMetrics = {
   hostMetrics?: boolean;
   apiMetrics?: {
     enable?: boolean;
     defaultAttributes?: Attributes;
+    dynamicAttributes?: DynamicAttributesCallback;
     ignoreRoutes?: (string | RouteInfo)[];
     ignoreUndefinedRoutes?: boolean;
     prefix?: string;
