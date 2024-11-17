@@ -6,7 +6,6 @@
   "typings": "lib/index",
   "scripts": {
     "prebuild": "rimraf lib",
-    "prepare": "husky install",
     "build": "tsc",
     "lint": "prettier --check ./**/*.{js,json,ts}",
     "format": "prettier --write ./**/*.{js,json,ts}",
@@ -15,7 +14,8 @@
     "test:unit": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:e2e": "jest --config ./tests/jest-e2e.json --runInBand --forceExit",
-    "test:e2e:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch"
+    "test:e2e:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -55,7 +55,6 @@
     "@types/node": "^22.9.0",
     "@types/response-time": "^2.3.8",
     "@types/supertest": "^6.0.2",
-    "ansi-regex": "",
     "husky": "^9.1.6",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.10",
@@ -92,11 +91,6 @@
   "lint-staged": {
     "**/*.{js,ts,json}": [
       "prettier --write"
-    ]
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
     ]
   }
 }
