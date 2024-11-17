@@ -83,6 +83,46 @@ describe('Api Metrics Middleware', () => {
     expect(metricService.getHistogram).toHaveBeenCalledTimes(3);
   });
 
+  it('registers api request and response metrics with dynamic attributes when has callback', async () => {
+    const testingModule = await Test.createTestingModule({
+      imports: [
+        OpenTelemetryModule.forRoot({
+          metrics: {
+            apiMetrics: {
+              enable: true,
+              dynamicAttributes: () => ({ dynamicLabel: 'dynamicLabelValue' }),
+            },
+          },
+        }),
+      ],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
+
+    const agent = request(app.getHttpServer());
+    await agent.get('/example/4?foo=bar');
+
+    // Workaround for delay of metrics going to prometheus
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // TODO: OpenTelemetry exporter does not expose server in a public function.
+    // @ts-ignore
+    const { text } = await request(promExporter._server).get('/metrics').expect(200);
+
+    expect(
+      /http_server_request_count_total{[^}]*path="\/example\/:id"[^}]*dynamicLabel="dynamicLabelValue"[^}]*} 1/.test(
+        text
+      )
+    ).toBeTruthy();
+    expect(
+      /http_server_response_count_total{[^}]*path="\/example\/:id"[^}]*dynamicLabel="dynamicLabelValue"[^}]*} 1/.test(
+        text
+      )
+    ).toBeTruthy();
+  });
+
   it('uses custom buckets when provided', async () => {
     const testingModule = await Test.createTestingModule({
       imports: [
