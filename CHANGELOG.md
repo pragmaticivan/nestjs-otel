@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.2](https://github.com/pragmaticivan/nestjs-otel/compare/v6.1.1...v6.1.2) (2025-01-17)
+
+
+### Bug Fixes
+
+* support nestjs 11 ([229ca4f](https://github.com/pragmaticivan/nestjs-otel/commit/229ca4fd9ebf2af897588ac48c5cb4f569e85455))
+
 ### [6.1.1](https://www.github.com/pragmaticivan/nestjs-otel/compare/v6.1.0...v6.1.1) (2024-05-26)
 
 
