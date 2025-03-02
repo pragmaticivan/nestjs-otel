@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.0](https://github.com/pragmaticivan/nestjs-otel/compare/v6.1.2...v6.2.0) (2025-03-02)
+
+
+### Features
+
+* **middleware:** backward compatibility for nestjs v10 and proper support for v11 middleware ([f22d1e5](https://github.com/pragmaticivan/nestjs-otel/commit/f22d1e5b03271c8f5d34831054eb1a6bdcd93682))
+
 ## [6.1.2](https://github.com/pragmaticivan/nestjs-otel/compare/v6.1.1...v6.1.2) (2025-01-17)
 
 
