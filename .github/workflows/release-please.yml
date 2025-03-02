@@ -27,7 +27,7 @@ jobs:
       - if: ${{ steps.release.outputs.release_created }}
         run: npm install -g npm
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - if: ${{ steps.release.outputs.release_created }}
         run: npm run build
       - id: publish

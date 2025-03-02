@@ -21,6 +21,8 @@ import { MetricService } from './metrics/metric.service';
 import { ApiMetricsMiddleware } from './middleware';
 import { OPENTELEMETRY_MODULE_OPTIONS } from './opentelemetry.constants';
 import { TraceService } from './tracing/trace.service';
+import { HttpAdapterHost } from '@nestjs/core';
+import { getMiddlewareMountPoint } from './middleware.utils';
 
 /**
  * The internal OpenTelemetry Module which handles the integration
@@ -34,7 +36,8 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
   private readonly logger = new Logger('OpenTelemetryModule');
 
   constructor(
-    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {}
+    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
+    private readonly adapterHost: HttpAdapterHost
   ) {}
 
   /**
@@ -74,13 +77,15 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
     const { apiMetrics = { enable: false } } = this.options?.metrics ?? {};
 
     if (apiMetrics.enable === true) {
+      const adapter = this.adapterHost.httpAdapter;
+      const mountPoint = getMiddlewareMountPoint(adapter);
       if (apiMetrics?.ignoreRoutes && apiMetrics?.ignoreRoutes.length > 0) {
         consumer
           .apply(ApiMetricsMiddleware)
           .exclude(...apiMetrics.ignoreRoutes)
-          .forRoutes('*');
+          .forRoutes(mountPoint);
       } else {
-        consumer.apply(ApiMetricsMiddleware).forRoutes('*');
+        consumer.apply(ApiMetricsMiddleware).forRoutes(mountPoint);
       }
     }
   }
