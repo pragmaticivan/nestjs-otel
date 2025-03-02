@@ -10,10 +10,6 @@
 
 [OpenTelemetry](https://opentelemetry.io/) module for [Nest](https://github.com/nestjs/nest).
 
-## Questions
-
-For questions and support please use the official [Discord channel](https://discord.gg/ju8C2zJgBJ).
-
 ## Why
 
 Setting up observability metrics with nestjs requires multiple libraries and patterns. OpenTelemetry has support for multiple exporters and types of metrics such as Prometheus Metrics.
