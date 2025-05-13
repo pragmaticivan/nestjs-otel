@@ -24,6 +24,9 @@ class TestSpan {
   @Span('foo', { kind: SpanKind.PRODUCER })
   fooProducerSpan() {}
 
+  @Span({ kind: SpanKind.PRODUCER })
+  implicitSpanNameWithOptions() {}
+
   @Span()
   error() {
     throw new Error('hello world');
@@ -82,6 +85,16 @@ describe('Span', () => {
 
     expect(spans).toHaveLength(1);
     expect(spans.map(span => span.kind)).toEqual([SpanKind.PRODUCER]);
+  });
+
+  it('should set correct span options with implicit span name', async () => {
+    instance.implicitSpanNameWithOptions();
+
+    const spans = traceExporter.getFinishedSpans();
+
+    expect(spans).toHaveLength(1);
+    expect(spans[0].name).toEqual('TestSpan.implicitSpanNameWithOptions');
+    expect(spans[0].kind).toEqual(SpanKind.PRODUCER);
   });
 
   it('should set correct span even when calling other method with Span decorator', async () => {
