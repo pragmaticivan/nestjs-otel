@@ -66,6 +66,11 @@ describe('Span', () => {
     expect(Reflect.getMetadata('some-metadata', instance.metadata)).toEqual(true);
   });
 
+  it('should preserve the original method name', () => {
+    const originalFunctionName = instance.singleSpan.name;
+    expect(originalFunctionName).toEqual('singleSpan');
+  });
+
   it('should set correct span', async () => {
     instance.singleSpan();
 
