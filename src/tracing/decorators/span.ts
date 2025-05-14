@@ -6,33 +6,65 @@ const recordException = (span: ApiSpan, error: any) => {
   span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
 };
 
-export function Span(name?: string, options: SpanOptions = {}) {
-  return (target: any, propertyKey: PropertyKey, propertyDescriptor: PropertyDescriptor) => {
-    const originalFunction = propertyDescriptor.value;
-    const wrappedFunction = function PropertyDescriptor(...args: any[]) {
-      const tracer = trace.getTracer('default');
-      const spanName = name || `${target.constructor.name}.${String(propertyKey)}`;
+export function Span<T extends any[]>(
+  options?: SpanOptions
+): (
+  target: any,
+  propertyKey: PropertyKey,
+  propertyDescriptor: TypedPropertyDescriptor<(...args: T) => any>
+) => void;
+export function Span<T extends any[]>(
+  name?: string,
+  options?: SpanOptions
+): (
+  target: any,
+  propertyKey: PropertyKey,
+  propertyDescriptor: TypedPropertyDescriptor<(...args: T) => any>
+) => void;
+export function Span<T extends any[]>(
+  nameOrOptions?: string | SpanOptions,
+  maybeOptions?: SpanOptions
+) {
+  return (
+    target: any,
+    propertyKey: PropertyKey,
+    propertyDescriptor: TypedPropertyDescriptor<(...args: T) => any>
+  ) => {
+    let name: string;
+    let options: SpanOptions | undefined;
+    if (typeof nameOrOptions === 'string') {
+      name = nameOrOptions;
+      options = maybeOptions ?? {};
+    } else {
+      name = `${target.constructor.name}.${String(propertyKey)}`;
+      options = nameOrOptions ?? {};
+    }
 
-      return tracer.startActiveSpan(spanName, options, span => {
+    const originalFunction = propertyDescriptor.value;
+
+    if (typeof originalFunction !== 'function') {
+      throw new Error(
+        `The @Span decorator can be only used on functions, but ${propertyKey.toString()} is not a function.`
+      );
+    }
+
+    const wrappedFunction = function PropertyDescriptor(this: any, ...args: T) {
+      const tracer = trace.getTracer('default');
+      return tracer.startActiveSpan(name, options, span => {
         if (originalFunction.constructor.name === 'AsyncFunction') {
-          return (
-            originalFunction
-              // @ts-ignore
-              .apply(this, args)
-              // @ts-ignore
-              .catch(error => {
-                recordException(span, error);
-                // Throw error to propagate it further
-                throw error;
-              })
-              .finally(() => {
-                span.end();
-              })
-          );
+          return originalFunction
+            .apply(this, args)
+            .catch((error: any) => {
+              recordException(span, error);
+              // Throw error to propagate it further
+              throw error;
+            })
+            .finally(() => {
+              span.end();
+            });
         }
 
         try {
-          // @ts-ignore
           return originalFunction.apply(this, args);
         } catch (error) {
           recordException(span, error);

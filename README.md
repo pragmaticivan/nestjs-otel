@@ -141,16 +141,28 @@ export class AppModule {}
 
 ## Span Decorator
 
-If you need, you can define a custom Tracing Span for a method. It works async or sync. Span takes its name from the parameter; but by default, it is the same as the method's name
+If you need, you can define a custom Tracing Span for a method. It works async or sync. Span takes its name from the parameter; but by default, it is derived as `<class-name>.<method-name>`.
 
 ```ts
 import { Span } from 'nestjs-otel';
 
-@Span('CRITICAL_SECTION')
-async getBooks() {
-    return [`Harry Potter and the Philosopher's Stone`];
+export class BooksService {
+
+  // span.name == 'CRITICAL_SECTION'
+  @Span('CRITICAL_SECTION')
+  async getBooks() {
+      return [`Harry Potter and the Philosopher's Stone`];
+  }
+
+  // span.name == 'BooksService.getBooksAgain'
+  @Span()
+  async getBooksAgain() {
+      return [`Harry Potter and the Philosopher's Stone`];
+  }
 }
 ```
+
+The second parameter (or first, if name is omitted) is `SpanOptions` from opentelemetry.
 
 ## Tracing Service
 
