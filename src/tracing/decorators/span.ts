@@ -6,8 +6,10 @@ const recordException = (span: ApiSpan, error: any) => {
   span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
 };
 
+type SpanDecoratorOptions<T extends any[]> = SpanOptions | ((...args: T) => SpanOptions);
+
 export function Span<T extends any[]>(
-  options?: SpanOptions
+  options?: SpanDecoratorOptions<T>
 ): (
   target: any,
   propertyKey: PropertyKey,
@@ -15,15 +17,15 @@ export function Span<T extends any[]>(
 ) => void;
 export function Span<T extends any[]>(
   name?: string,
-  options?: SpanOptions
+  options?: SpanDecoratorOptions<T>
 ): (
   target: any,
   propertyKey: PropertyKey,
   propertyDescriptor: TypedPropertyDescriptor<(...args: T) => any>
 ) => void;
 export function Span<T extends any[]>(
-  nameOrOptions?: string | SpanOptions,
-  maybeOptions?: SpanOptions
+  nameOrOptions?: string | SpanDecoratorOptions<T>,
+  maybeOptions?: SpanDecoratorOptions<T>
 ) {
   return (
     target: any,
@@ -31,7 +33,7 @@ export function Span<T extends any[]>(
     propertyDescriptor: TypedPropertyDescriptor<(...args: T) => any>
   ) => {
     let name: string;
-    let options: SpanOptions | undefined;
+    let options: SpanDecoratorOptions<T>;
     if (typeof nameOrOptions === 'string') {
       name = nameOrOptions;
       options = maybeOptions ?? {};
@@ -50,7 +52,10 @@ export function Span<T extends any[]>(
 
     const wrappedFunction = function PropertyDescriptor(this: any, ...args: T) {
       const tracer = trace.getTracer('default');
-      return tracer.startActiveSpan(name, options, span => {
+
+      const spanOptions = typeof options === 'function' ? options(...args) : options;
+
+      return tracer.startActiveSpan(name, spanOptions, span => {
         if (originalFunction.constructor.name === 'AsyncFunction') {
           return originalFunction
             .apply(this, args)

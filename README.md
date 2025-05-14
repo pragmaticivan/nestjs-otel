@@ -177,7 +177,14 @@ export class OtelConfigService implements OpenTelemetryOptionsFactory {
 
 ## Span Decorator
 
-If you need, you can define a custom Tracing Span for a method. It works async or sync. Span takes its name from the parameter; but by default, it is derived as `<class-name>.<method-name>`.
+If you need, you can define a custom Tracing Span for a method. It works async or sync.
+
+Span optionally takes one or both of the following parameters:
+  * `name` - explicit name of the span; if omitted, it is derived as `<class-name>.<method-name>`.
+  * `options` - `SpanOptions` to customize the span options.
+
+You can also supply a function as the `options` argument. It will be called with the decorated method's arguments, so you can dynamically customize the span options.
+
 
 ```ts
 import { Span } from 'nestjs-otel';
@@ -195,10 +202,27 @@ export class BooksService {
   async getBooksAgain() {
       return [`Harry Potter and the Philosopher's Stone`];
   }
-}
-```
 
-The second parameter (or first, if name is omitted) is `SpanOptions` from opentelemetry.
+  // explicitly set span options
+  @Span('getBook', { kind: SpanKind.SERVER })
+  async getBook(id: number) {
+    // ...
+  }
+
+  // options are set dynamically based on the id parameter
+  @Span('getBook', (id) => ({ attributes: { bookId: id } }))
+  async getBookAgain(id: number) {
+    // ...
+  }
+
+  // same as above, but span name is omitted and inferred automatically
+  @Span((id) => ({ attributes: { bookId: id } }))
+  async getBookOnceMore(id: number) {
+    // ...
+  }
+}
+
+```
 
 ## Tracing Service
 
