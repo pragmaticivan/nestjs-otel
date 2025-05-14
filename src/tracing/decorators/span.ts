@@ -44,8 +44,15 @@ export function Span(name?: string, options: SpanOptions = {}) {
       });
     };
 
-    propertyDescriptor.value = wrappedFunction;
+    // Wrap the original function in a proxy to ensure that the function name is preserved.
+    // This should also preserve parameters for OpenAPI and other libraries
+    // that rely on the function name as metadata key.
+    propertyDescriptor.value = new Proxy(originalFunction, {
+      apply: (_, thisArg, args: any[]) => {
+        return wrappedFunction.apply(thisArg, args);
+      },
+    });
 
-    copyMetadataFromFunctionToFunction(originalFunction, wrappedFunction);
+    copyMetadataFromFunctionToFunction(originalFunction, propertyDescriptor.value);
   };
 }
