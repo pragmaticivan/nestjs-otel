@@ -116,6 +116,8 @@ bootstrap();
 
 3. Configure nest-otel:
 
+3.1. With `forRoot`:
+
 ```ts
 const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   metrics: {
@@ -137,6 +139,40 @@ const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   imports: [OpenTelemetryModuleConfig],
 })
 export class AppModule {}
+```
+
+3.2. With `forRootAsync`:
+
+```ts
+OpenTelemetryModule.forRootAsync({
+  useClass: OtelConfigService
+});
+```
+
+```ts
+import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { OpenTelemetryOptionsFactory, OpenTelemetryModuleOptions } from 'nestjs-otel';
+
+@Injectable()
+export class OtelConfigService implements OpenTelemetryOptionsFactory {
+  private readonly logger = new Logger(OtelConfigService.name)
+
+  constructor(private configService: ConfigService) {}
+
+  createOpenTelemetryOptions(): Promise<OpenTelemetryModuleOptions> | OpenTelemetryModuleOptions {
+    const { hostMetrics, apiMetrics } = this.configService.get('otel')
+
+    return {
+      metrics: {
+        hostMetrics: hostMetrics.enabled,
+        apiMetrics: {
+          enable: apiMetrics.enabled,
+        },
+      },
+    };
+  }
+}
 ```
 
 ## Span Decorator

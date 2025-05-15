@@ -80,7 +80,7 @@ export function Span<T extends any[]>(
     // This should also preserve parameters for OpenAPI and other libraries
     // that rely on the function name as metadata key.
     propertyDescriptor.value = new Proxy(originalFunction, {
-      apply: (_, thisArg, args: any[]) => {
+      apply: (_, thisArg, args: T) => {
         return wrappedFunction.apply(thisArg, args);
       },
     });

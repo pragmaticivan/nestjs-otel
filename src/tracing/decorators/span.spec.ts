@@ -51,8 +51,9 @@ describe('Span', () => {
     traceExporter = new InMemorySpanExporter();
     spanProcessor = new SimpleSpanProcessor(traceExporter);
 
-    provider = new NodeTracerProvider();
-    provider.addSpanProcessor(spanProcessor);
+    provider = new NodeTracerProvider({
+      spanProcessors: [spanProcessor],
+    });
     provider.register();
   });
 
