@@ -56,7 +56,11 @@ export const OtelMethodCounter =
       // @ts-ignore
       return originalFunction.apply(this, args);
     };
-    descriptor.value = wrappedFunction;
+    descriptor.value = new Proxy(originalFunction, {
+      apply: (_, thisArg, args: any[]) => {
+        return wrappedFunction.apply(thisArg, args);
+      },
+    });
 
-    copyMetadataFromFunctionToFunction(originalFunction, wrappedFunction);
+    copyMetadataFromFunctionToFunction(originalFunction, descriptor.value);
   };

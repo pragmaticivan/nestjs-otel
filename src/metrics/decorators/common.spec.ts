@@ -34,4 +34,8 @@ describe('OtelMethodCounter', () => {
   it('should maintain reflect metadata', async () => {
     expect(Reflect.getMetadata('some-metadata', instance.method)).toEqual(true);
   });
+
+  it('should preserve the original method name', async () => {
+    expect(instance.method.name).toEqual('method');
+  });
 });
