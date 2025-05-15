@@ -25,6 +25,7 @@ export const OtelInstanceCounter =
         super(...args);
       }
     };
+    Object.defineProperty(wrappedClass, 'name', { value: originalClass.name });
 
     copyMetadataFromFunctionToFunction(originalClass, wrappedClass);
 
@@ -56,7 +57,11 @@ export const OtelMethodCounter =
       // @ts-ignore
       return originalFunction.apply(this, args);
     };
-    descriptor.value = wrappedFunction;
+    descriptor.value = new Proxy(originalFunction, {
+      apply: (_, thisArg, args: any[]) => {
+        return wrappedFunction.apply(thisArg, args);
+      },
+    });
 
-    copyMetadataFromFunctionToFunction(originalFunction, wrappedFunction);
+    copyMetadataFromFunctionToFunction(originalFunction, descriptor.value);
   };
