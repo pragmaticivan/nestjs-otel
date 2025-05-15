@@ -22,6 +22,10 @@ describe('OtelInstanceCounter', () => {
   it('should maintain reflect metadata', async () => {
     expect(Reflect.getMetadata('some-metadata', instance.constructor)).toEqual(true);
   });
+
+  it('should preserve the original class name', async () => {
+    expect(instance.constructor.name).toEqual('TestClass');
+  });
 });
 
 describe('OtelMethodCounter', () => {

@@ -25,6 +25,7 @@ export const OtelInstanceCounter =
         super(...args);
       }
     };
+    Object.defineProperty(wrappedClass, 'name', { value: originalClass.name });
 
     copyMetadataFromFunctionToFunction(originalClass, wrappedClass);
 
