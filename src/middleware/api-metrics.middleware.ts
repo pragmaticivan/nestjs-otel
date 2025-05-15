@@ -1,32 +1,32 @@
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import responseTime from 'response-time';
 import * as urlParser from 'url';
-import { Counter, Attributes, Histogram, UpDownCounter } from '@opentelemetry/api';
+import { Counter, Attributes, Histogram } from '@opentelemetry/api';
 import { OpenTelemetryModuleOptions } from '../interfaces';
 import { MetricService } from '../metrics/metric.service';
 import { OPENTELEMETRY_MODULE_OPTIONS } from '../opentelemetry.constants';
 
 @Injectable()
 export class ApiMetricsMiddleware implements NestMiddleware {
-  private defaultAttributes: Attributes;
+  private readonly defaultAttributes: Attributes;
 
-  private httpServerRequestCount: Counter;
+  private readonly httpServerRequestCount: Counter;
 
-  private httpServerResponseCount: Counter;
+  private readonly httpServerResponseCount: Counter;
 
-  private httpServerDuration: Histogram;
+  private readonly httpServerDuration: Histogram;
 
-  private httpServerRequestSize: Histogram;
+  private readonly httpServerRequestSize: Histogram;
 
-  private httpServerResponseSize: Histogram;
+  private readonly httpServerResponseSize: Histogram;
 
-  private httpServerResponseSuccessCount: Counter;
+  private readonly httpServerResponseSuccessCount: Counter;
 
-  private httpServerResponseErrorCount: Counter;
+  private readonly httpServerResponseErrorCount: Counter;
 
-  private httpClientRequestErrorCount: Counter;
+  private readonly httpClientRequestErrorCount: Counter;
 
-  private httpServerAbortCount: Counter;
+  private readonly httpServerAbortCount: Counter;
 
   private readonly ignoreUndefinedRoutes: boolean;
 
