@@ -311,6 +311,7 @@ You have the following decorators:
 - `@OtelCounter()`
 - `@OtelUpDownCounter()`
 - `@OtelHistogram()`
+- `@OtelGauge()`
 - `@OtelObservableGauge()`
 - `@OtelObservableCounter()`
 - `@OtelObservableUpDownCounter()`

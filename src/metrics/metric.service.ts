@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   getOrCreateCounter,
   getOrCreateHistogram,
+  getOrCreateGauge,
   getOrCreateObservableCounter,
   getOrCreateObservableGauge,
   getOrCreateObservableUpDownCounter,
@@ -21,6 +22,10 @@ export class MetricService {
 
   getHistogram(name: string, options?: OtelMetricOptions) {
     return getOrCreateHistogram(name, options);
+  }
+
+  getGauge(name: string, options?: OtelMetricOptions) {
+    return getOrCreateGauge(name, options);
   }
 
   getObservableCounter(name: string, options?: OtelMetricOptions) {
