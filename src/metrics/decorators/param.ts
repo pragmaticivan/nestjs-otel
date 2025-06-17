@@ -2,6 +2,7 @@ import { createParamDecorator } from '@nestjs/common';
 import { OtelMetricOptions } from '../../interfaces/metric-options.interface';
 import {
   getOrCreateCounter,
+  getOrCreateGauge,
   getOrCreateHistogram,
   getOrCreateObservableCounter,
   getOrCreateObservableGauge,
@@ -32,6 +33,7 @@ export const OtelUpDownCounter = createMetricParamDecorator(
   'OtelUpDownCounter',
   getOrCreateCounter
 );
+export const OtelGauge = createMetricParamDecorator('OtelGauge', getOrCreateGauge);
 
 export const OtelHistogram = createMetricParamDecorator('OtelHistogram', getOrCreateHistogram);
 

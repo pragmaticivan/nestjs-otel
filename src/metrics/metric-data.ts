@@ -1,4 +1,5 @@
 import {
+  Gauge,
   Counter,
   UpDownCounter,
   Histogram,
@@ -14,6 +15,7 @@ export type GenericMetric =
   | Counter
   | UpDownCounter
   | Histogram
+  | Gauge
   | ObservableGauge
   | ObservableCounter
   | ObservableUpDownCounter;
@@ -22,6 +24,7 @@ export enum MetricType {
   'Counter' = 'Counter',
   'UpDownCounter' = 'UpDownCounter',
   'Histogram' = 'Histogram',
+  'Gauge' = 'Gauge',
   'ObservableGauge' = 'ObservableGauge',
   'ObservableCounter' = 'ObservableCounter',
   'ObservableUpDownCounter' = 'ObservableUpDownCounter',
@@ -50,6 +53,10 @@ export function getOrCreateHistogram(name: string, options: OtelMetricOptions = 
 
 export function getOrCreateCounter(name: string, options: OtelMetricOptions = {}): Counter {
   return getOrCreate(name, options, MetricType.Counter) as Counter;
+}
+
+export function getOrCreateGauge(name: string, options: OtelMetricOptions = {}): Gauge {
+  return getOrCreate(name, options, MetricType.Gauge) as Gauge;
 }
 
 export function getOrCreateUpDownCounter(

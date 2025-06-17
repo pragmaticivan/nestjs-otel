@@ -65,6 +65,18 @@ describe('Common Decorators', () => {
 
       expect(/# HELP example_counter_total An example counter/.test(text)).toBeTruthy();
       expect(/example_counter_total 1/.test(text)).toBeTruthy();
+
+      expect(/# HELP example_gauge An example gauge/.test(text)).toBeTruthy();
+      expect(/example_gauge 5/.test(text)).toBeTruthy();
+
+      expect(/# HELP example_up_down_total An example up-down counter/.test(text)).toBeTruthy();
+      expect(/example_up_down_total 2/.test(text)).toBeTruthy();
+
+      expect(/# HELP example_histogram An example histogram/.test(text)).toBeTruthy();
+      expect(/example_histogram_count 1/.test(text)).toBeTruthy();
+      expect(/example_histogram_sum 8/.test(text)).toBeTruthy();
+      expect(/example_histogram_bucket{le="5"} 0/.test(text)).toBeTruthy();
+      expect(/example_histogram_bucket{le="10"} 1/.test(text)).toBeTruthy();
     });
   });
 });
