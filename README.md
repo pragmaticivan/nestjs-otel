@@ -119,7 +119,7 @@ bootstrap();
 const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   metrics: {
     hostMetrics: true, // Includes Host Metrics
-    apiMetrics: {
+    apiMetrics: { // @deprecated - will be removed in 8.0 - you should start using the semcov from opentelemetry metrics instead
       enable: true, // Includes api metrics
       defaultAttributes: {
         // You can set default labels for api metrics
@@ -334,6 +334,8 @@ export class AppController {
 ```
 
 ## API Metrics with Middleware
+
+> @deprecated - this will be removed in 8.0 - you should start using the semcov from opentelemetry metrics instead
 
 | Impl | Otel Metric                         | Prometheus Metric                         | Description                               | Metric Type |
 | ---- | --------------------------------    | ---------------------------------------   | ----------------------------------------- | ----------- |

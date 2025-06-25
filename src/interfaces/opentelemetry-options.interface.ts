@@ -43,6 +43,9 @@ export interface OpenTelemetryModuleAsyncOptions extends Pick<ModuleMetadata, 'i
 
 export type OpenTelemetryMetrics = {
   hostMetrics?: boolean;
+  /**
+   * @deprecated apiMetrics is deprecated. Use semcov from opentelemetry metrics instead.
+   */
   apiMetrics?: {
     enable?: boolean;
     defaultAttributes?: Attributes;
