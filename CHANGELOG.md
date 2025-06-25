@@ -1,5 +1,30 @@
 # Changelog
 
+## [7.0.0](https://github.com/pragmaticivan/nestjs-otel/compare/v6.2.0...v7.0.0) (2025-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* 
+
+### Features
+
+* add overloads to Span decorator ([665753b](https://github.com/pragmaticivan/nestjs-otel/commit/665753b73b6750e4b06e4a7cd468f2b0455b43ac))
+* allow passing options to Span decorator without explicit name ([b73a213](https://github.com/pragmaticivan/nestjs-otel/commit/b73a213b75d6d293dc2c3aeac1b1a8a813dfa4a0))
+* **metrics:** added Gauge metric to service and decorators ([a1aced4](https://github.com/pragmaticivan/nestjs-otel/commit/a1aced4d6096e5881b0eec5108dad3605690118e))
+* span decorator can use method params ([57f105d](https://github.com/pragmaticivan/nestjs-otel/commit/57f105dba039982057f17129f7847f4f337482cf))
+* span decorator has access to function params ([c653dc7](https://github.com/pragmaticivan/nestjs-otel/commit/c653dc7ce4f28d1ca8df9009aa7601f054d39a96))
+* support otel 2.x and drop support for nestjs10 ([5eaa042](https://github.com/pragmaticivan/nestjs-otel/commit/5eaa0426a9b348ba0cc631e0cc3c6d1024c89739))
+
+
+### Bug Fixes
+
+* preserve class name decorated with OtelInstanceCounter ([b44fa37](https://github.com/pragmaticivan/nestjs-otel/commit/b44fa37fe8a30bbebbc443699cec5b7717dae259))
+* preserve method and class name decorated with OtelXxxCounter ([4019981](https://github.com/pragmaticivan/nestjs-otel/commit/40199819c5b154a7d270f80d08de6173077aad16))
+* preserve method name decorated with OtelMethodCounter ([9164a87](https://github.com/pragmaticivan/nestjs-otel/commit/9164a8799b0d023e5bc7e4022c750a6c88157fdd))
+* span decorator preserves original method name ([b8784c5](https://github.com/pragmaticivan/nestjs-otel/commit/b8784c5b102f9e1b88d6a2e7cf6b395245657aed))
+* span decorator preserves original method name ([84de475](https://github.com/pragmaticivan/nestjs-otel/commit/84de475e8ac41a61684c31b35d61889fb6206fbe))
+
 ## [6.2.0](https://github.com/pragmaticivan/nestjs-otel/compare/v6.1.2...v6.2.0) (2025-03-02)
 
 
