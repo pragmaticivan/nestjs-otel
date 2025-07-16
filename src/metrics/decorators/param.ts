@@ -7,6 +7,7 @@ import {
   getOrCreateObservableCounter,
   getOrCreateObservableGauge,
   getOrCreateObservableUpDownCounter,
+  getOrCreateUpDownCounter,
 } from '../metric-data';
 
 export type MetricParamDecorator = (
@@ -31,7 +32,7 @@ function createMetricParamDecorator<T>(
 export const OtelCounter = createMetricParamDecorator('OtelCounter', getOrCreateCounter);
 export const OtelUpDownCounter = createMetricParamDecorator(
   'OtelUpDownCounter',
-  getOrCreateCounter
+  getOrCreateUpDownCounter
 );
 export const OtelGauge = createMetricParamDecorator('OtelGauge', getOrCreateGauge);
 
