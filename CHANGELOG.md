@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.1](https://github.com/pragmaticivan/nestjs-otel/compare/v7.0.0...v7.0.1) (2025-08-05)
+
+
+### Bug Fixes
+
+* add chatmodes and fix updown decorator bug ([b16d7b8](https://github.com/pragmaticivan/nestjs-otel/commit/b16d7b83da1d872c171a681587a6866b25e6e72e))
+
 ## [7.0.0](https://github.com/pragmaticivan/nestjs-otel/compare/v6.2.0...v7.0.0) (2025-06-25)
 
 
