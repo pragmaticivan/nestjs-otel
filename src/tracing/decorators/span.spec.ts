@@ -137,11 +137,11 @@ describe('Span', () => {
   });
 
   it('should propagate errors', () => {
-    expect(instance.error).toThrowError('hello world');
+    expect(instance.error).toThrow('hello world');
   });
 
   it('should set setStatus to ERROR and message to error message', async () => {
-    expect(instance.error).toThrowError('hello world');
+    expect(instance.error).toThrow('hello world');
 
     const spans = traceExporter.getFinishedSpans();
 
@@ -150,7 +150,7 @@ describe('Span', () => {
   });
 
   it('should set recordException with error', () => {
-    expect(instance.error).toThrowError('hello world');
+    expect(instance.error).toThrow('hello world');
 
     const spans = traceExporter.getFinishedSpans();
 
