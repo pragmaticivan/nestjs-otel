@@ -55,7 +55,7 @@ describe('Api Metrics Middleware', () => {
     app = testingModule.createNestApplication();
     await app.init();
 
-    expect(metricService.getCounter).not.toBeCalled();
+    expect(metricService.getCounter).not.toHaveBeenCalled();
   });
 
   it('registers api metrics when enabled', async () => {
