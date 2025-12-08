@@ -119,16 +119,6 @@ bootstrap();
 const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   metrics: {
     hostMetrics: true, // Includes Host Metrics
-    apiMetrics: { // @deprecated - will be removed in 8.0 - you should start using the semcov from opentelemetry metrics instead
-      enable: true, // Includes api metrics
-      defaultAttributes: {
-        // You can set default labels for api metrics
-        custom: 'label',
-      },
-      ignoreRoutes: ['/favicon.ico'], // You can ignore specific routes (See https://docs.nestjs.com/middleware#excluding-routes for options)
-      ignoreUndefinedRoutes: false, //Records metrics for all URLs, even undefined ones
-      prefix: 'my_prefix', // Add a custom prefix to all API metrics
-    },
   },
 });
 
@@ -158,14 +148,11 @@ export class OtelConfigService implements OpenTelemetryOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createOpenTelemetryOptions(): Promise<OpenTelemetryModuleOptions> | OpenTelemetryModuleOptions {
-    const { hostMetrics, apiMetrics } = this.configService.get('otel')
+    const { hostMetrics } = this.configService.get('otel')
 
     return {
       metrics: {
         hostMetrics: hostMetrics.enabled,
-        apiMetrics: {
-          enable: apiMetrics.enabled,
-        },
       },
     };
   }
@@ -332,22 +319,6 @@ export class AppController {
   }
 }
 ```
-
-## API Metrics with Middleware
-
-> @deprecated - this will be removed in 8.0 - you should start using the semcov from opentelemetry metrics instead
-
-| Impl | Otel Metric                         | Prometheus Metric                         | Description                               | Metric Type |
-| ---- | --------------------------------    | ---------------------------------------   | ----------------------------------------- | ----------- |
-| ✅   | http.server.request.count           | http_server_request_count_total           | Total number of HTTP requests.            | Counter     |
-| ✅   | http.server.response.count          | http_server_response_count_total          | Total number of HTTP responses.           | Counter     |
-| ✅   | http.server.abort.count             | http_server_abort_count_total             | Total number of data transfers aborted.   | Counter     |
-| ✅   | http.server.duration                | http_server_duration                      | The duration of the inbound HTTP request. | Histogram   |
-| ✅   | http.server.request.size            | http_server_request_size                  | Size of incoming bytes.                   | Histogram   |
-| ✅   | http.server.response.size           | http_server_response_size                 | Size of outgoing bytes.                   | Histogram   |
-| ✅   | http.server.response.success.count  | http_server_response_success_count_total  | Total number of all successful responses. | Counter     |
-| ✅   | http.server.response.error.count    | http_server_response_error_count_total    | Total number of server error responses.   | Counter     |
-| ✅   | http.client.request.error.count     | http_client_request_error_count_total     | Total number of client error requests.    | Counter     |
 
 ## Prometheus Metrics
 

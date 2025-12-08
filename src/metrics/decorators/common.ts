@@ -1,7 +1,7 @@
-import { Counter } from '@opentelemetry/api';
-import { copyMetadataFromFunctionToFunction } from '../../opentelemetry.utils';
-import { getOrCreateCounter } from '../metric-data';
-import { OtelMetricOptions } from '../../interfaces/metric-options.interface';
+import type { Counter } from "@opentelemetry/api";
+import type { OtelMetricOptions } from "../../interfaces/metric-options.interface";
+import { copyMetadataFromFunctionToFunction } from "../../opentelemetry.utils";
+import { getOrCreateCounter } from "../metric-data";
 
 /**
  * Create and increment a counter when a new instance is created
@@ -25,7 +25,7 @@ export const OtelInstanceCounter =
         super(...args);
       }
     };
-    Object.defineProperty(wrappedClass, 'name', { value: originalClass.name });
+    Object.defineProperty(wrappedClass, "name", { value: originalClass.name });
 
     copyMetadataFromFunctionToFunction(originalClass, wrappedClass);
 
@@ -54,13 +54,11 @@ export const OtelMethodCounter =
         counterMetric = getOrCreateCounter(name, { description, ...options });
       }
       counterMetric.add(1);
-      // @ts-ignore
+      // @ts-expect-error
       return originalFunction.apply(this, args);
     };
     descriptor.value = new Proxy(originalFunction, {
-      apply: (_, thisArg, args: any[]) => {
-        return wrappedFunction.apply(thisArg, args);
-      },
+      apply: (_, thisArg, args: any[]) => wrappedFunction.apply(thisArg, args),
     });
 
     copyMetadataFromFunctionToFunction(originalFunction, descriptor.value);

@@ -1,15 +1,15 @@
 import {
-  Gauge,
-  Counter,
-  UpDownCounter,
-  Histogram,
-  ObservableGauge,
-  ObservableCounter,
-  ObservableUpDownCounter,
+  type Counter,
+  type Gauge,
+  type Histogram,
   metrics,
-} from '@opentelemetry/api';
-import { OTEL_METER_NAME } from '../opentelemetry.constants';
-import { OtelMetricOptions } from '../interfaces/metric-options.interface';
+  type ObservableCounter,
+  type ObservableGauge,
+  type ObservableUpDownCounter,
+  type UpDownCounter,
+} from "@opentelemetry/api";
+import type { OtelMetricOptions } from "../interfaces/metric-options.interface";
+import { OTEL_METER_NAME } from "../opentelemetry.constants";
 
 export type GenericMetric =
   | Counter
@@ -21,19 +21,20 @@ export type GenericMetric =
   | ObservableUpDownCounter;
 
 export enum MetricType {
-  'Counter' = 'Counter',
-  'UpDownCounter' = 'UpDownCounter',
-  'Histogram' = 'Histogram',
-  'Gauge' = 'Gauge',
-  'ObservableGauge' = 'ObservableGauge',
-  'ObservableCounter' = 'ObservableCounter',
-  'ObservableUpDownCounter' = 'ObservableUpDownCounter',
+  Counter = "Counter",
+  UpDownCounter = "UpDownCounter",
+  Histogram = "Histogram",
+  Gauge = "Gauge",
+  ObservableGauge = "ObservableGauge",
+  ObservableCounter = "ObservableCounter",
+  ObservableUpDownCounter = "ObservableUpDownCounter",
 }
 
 export const meterData: Map<string, GenericMetric> = new Map();
 
 function getOrCreate(
   name: string,
+  // biome-ignore lint/style/useDefaultParameterLast: backward compatibility
   options: OtelMetricOptions = {},
   type: MetricType
 ): GenericMetric | undefined {
@@ -47,15 +48,24 @@ function getOrCreate(
   return metric;
 }
 
-export function getOrCreateHistogram(name: string, options: OtelMetricOptions = {}): Histogram {
+export function getOrCreateHistogram(
+  name: string,
+  options: OtelMetricOptions = {}
+): Histogram {
   return getOrCreate(name, options, MetricType.Histogram) as Histogram;
 }
 
-export function getOrCreateCounter(name: string, options: OtelMetricOptions = {}): Counter {
+export function getOrCreateCounter(
+  name: string,
+  options: OtelMetricOptions = {}
+): Counter {
   return getOrCreate(name, options, MetricType.Counter) as Counter;
 }
 
-export function getOrCreateGauge(name: string, options: OtelMetricOptions = {}): Gauge {
+export function getOrCreateGauge(
+  name: string,
+  options: OtelMetricOptions = {}
+): Gauge {
   return getOrCreate(name, options, MetricType.Gauge) as Gauge;
 }
 
@@ -70,19 +80,31 @@ export function getOrCreateObservableGauge(
   name: string,
   options: OtelMetricOptions = {}
 ): ObservableGauge {
-  return getOrCreate(name, options, MetricType.ObservableGauge) as ObservableGauge;
+  return getOrCreate(
+    name,
+    options,
+    MetricType.ObservableGauge
+  ) as ObservableGauge;
 }
 
 export function getOrCreateObservableCounter(
   name: string,
   options: OtelMetricOptions = {}
 ): ObservableCounter {
-  return getOrCreate(name, options, MetricType.ObservableCounter) as ObservableCounter;
+  return getOrCreate(
+    name,
+    options,
+    MetricType.ObservableCounter
+  ) as ObservableCounter;
 }
 
 export function getOrCreateObservableUpDownCounter(
   name: string,
   options: OtelMetricOptions = {}
 ): ObservableUpDownCounter {
-  return getOrCreate(name, options, MetricType.ObservableUpDownCounter) as ObservableUpDownCounter;
+  return getOrCreate(
+    name,
+    options,
+    MetricType.ObservableUpDownCounter
+  ) as ObservableUpDownCounter;
 }

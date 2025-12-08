@@ -1,6 +1,9 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { OpenTelemetryCoreModule } from './opentelemetry-core.module';
-import { OpenTelemetryModuleAsyncOptions, OpenTelemetryModuleOptions } from './interfaces';
+import { type DynamicModule, Module } from "@nestjs/common";
+import type {
+  OpenTelemetryModuleAsyncOptions,
+  OpenTelemetryModuleOptions,
+} from "./interfaces";
+import { OpenTelemetryCoreModule } from "./opentelemetry-core.module";
 
 /**
  * The NestJS module for OpenTelemetry

@@ -1,4 +1,4 @@
-import { MetricOptions } from '@opentelemetry/api';
+import type { MetricOptions } from "@opentelemetry/api";
 
 export interface OtelMetricOptions extends MetricOptions {
   /**

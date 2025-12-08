@@ -1,12 +1,19 @@
-import { Span as ApiSpan, SpanOptions, SpanStatusCode, trace } from '@opentelemetry/api';
-import { copyMetadataFromFunctionToFunction } from '../../opentelemetry.utils';
+import {
+  type Span as ApiSpan,
+  type SpanOptions,
+  SpanStatusCode,
+  trace,
+} from "@opentelemetry/api";
+import { copyMetadataFromFunctionToFunction } from "../../opentelemetry.utils";
 
 const recordException = (span: ApiSpan, error: any) => {
   span.recordException(error);
   span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
 };
 
-type SpanDecoratorOptions<T extends any[]> = SpanOptions | ((...args: T) => SpanOptions);
+type SpanDecoratorOptions<T extends any[]> =
+  | SpanOptions
+  | ((...args: T) => SpanOptions);
 
 export function Span<T extends any[]>(
   options?: SpanDecoratorOptions<T>
@@ -34,7 +41,7 @@ export function Span<T extends any[]>(
   ) => {
     let name: string;
     let options: SpanDecoratorOptions<T>;
-    if (typeof nameOrOptions === 'string') {
+    if (typeof nameOrOptions === "string") {
       name = nameOrOptions;
       options = maybeOptions ?? {};
     } else {
@@ -44,19 +51,20 @@ export function Span<T extends any[]>(
 
     const originalFunction = propertyDescriptor.value;
 
-    if (typeof originalFunction !== 'function') {
+    if (typeof originalFunction !== "function") {
       throw new Error(
         `The @Span decorator can be only used on functions, but ${propertyKey.toString()} is not a function.`
       );
     }
 
     const wrappedFunction = function PropertyDescriptor(this: any, ...args: T) {
-      const tracer = trace.getTracer('default');
+      const tracer = trace.getTracer("default");
 
-      const spanOptions = typeof options === 'function' ? options(...args) : options;
+      const spanOptions =
+        typeof options === "function" ? options(...args) : options;
 
-      return tracer.startActiveSpan(name, spanOptions, span => {
-        if (originalFunction.constructor.name === 'AsyncFunction') {
+      return tracer.startActiveSpan(name, spanOptions, (span) => {
+        if (originalFunction.constructor.name === "AsyncFunction") {
           return originalFunction
             .apply(this, args)
             .catch((error: any) => {
@@ -85,11 +93,12 @@ export function Span<T extends any[]>(
     // This should also preserve parameters for OpenAPI and other libraries
     // that rely on the function name as metadata key.
     propertyDescriptor.value = new Proxy(originalFunction, {
-      apply: (_, thisArg, args: T) => {
-        return wrappedFunction.apply(thisArg, args);
-      },
+      apply: (_, thisArg, args: T) => wrappedFunction.apply(thisArg, args),
     });
 
-    copyMetadataFromFunctionToFunction(originalFunction, propertyDescriptor.value);
+    copyMetadataFromFunctionToFunction(
+      originalFunction,
+      propertyDescriptor.value
+    );
   };
 }

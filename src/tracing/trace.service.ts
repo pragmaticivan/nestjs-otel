@@ -1,10 +1,10 @@
-import { context, trace, Span } from '@opentelemetry/api';
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
+import { context, type Span, trace } from "@opentelemetry/api";
 
 @Injectable()
 export class TraceService {
   public getTracer() {
-    return trace.getTracer('default');
+    return trace.getTracer("default");
   }
 
   public getSpan(): Span | undefined {

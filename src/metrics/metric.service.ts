@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
+import type { OtelMetricOptions } from "../interfaces/metric-options.interface";
 import {
   getOrCreateCounter,
-  getOrCreateHistogram,
   getOrCreateGauge,
+  getOrCreateHistogram,
   getOrCreateObservableCounter,
   getOrCreateObservableGauge,
   getOrCreateObservableUpDownCounter,
   getOrCreateUpDownCounter,
-} from './metric-data';
-import { OtelMetricOptions } from '../interfaces/metric-options.interface';
+} from "./metric-data";
 
 @Injectable()
 export class MetricService {

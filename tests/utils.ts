@@ -1,17 +1,23 @@
-import { DynamicModule, INestApplication, LoggerService } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
-import TestAgent from 'supertest/lib/agent';
+import type {
+  DynamicModule,
+  INestApplication,
+  LoggerService,
+} from "@nestjs/common";
+import { Test, type TestingModule } from "@nestjs/testing";
+import request from "supertest";
+import type TestAgent from "supertest/lib/agent";
 
 export type App = INestApplication;
 
-export interface TestHarness {
+export type TestHarness = {
   testingModule: TestingModule;
   app: App;
   agent: TestAgent<request.Test>;
-}
+};
 
-export async function createOpenTelemetryModule(module: DynamicModule): Promise<TestHarness> {
+export async function createOpenTelemetryModule(
+  module: DynamicModule
+): Promise<TestHarness> {
   const testingModule = await Test.createTestingModule({
     imports: [module],
   }).compile();
@@ -29,13 +35,13 @@ export async function createOpenTelemetryModule(module: DynamicModule): Promise<
 }
 
 export class EmptyLogger implements LoggerService {
-  log(message: string): any {}
+  log(_message: string): any {}
 
-  error(message: string, trace: string): any {}
+  error(_message: string, _trace: string): any {}
 
-  warn(message: string): any {}
+  warn(_message: string): any {}
 
-  debug(message: string): any {}
+  debug(_message: string): any {}
 
-  verbose(message: string): any {}
+  verbose(_message: string): any {}
 }

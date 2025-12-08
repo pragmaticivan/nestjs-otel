@@ -5,13 +5,13 @@
   "main": "lib/index.js",
   "typings": "lib/index",
   "engines": {
-    "node": ">= 20"
+    "node": ">= 22"
   },
   "scripts": {
     "prebuild": "rimraf lib",
     "build": "tsc",
-    "lint": "prettier --check ./**/*.{js,json,ts}",
-    "format": "prettier --write ./**/*.{js,json,ts}",
+    "lint": "ultracite check",
+    "format": "ultracite fix",
     "test": "npm run test:unit && npm run test:e2e",
     "test:coverage": "jest --coverage",
     "test:unit": "jest",
@@ -39,34 +39,33 @@
   "homepage": "https://github.com/pragmaticivan/nestjs-otel#readme",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/host-metrics": "^0.37.0",
-    "response-time": "^2.3.4"
+    "@opentelemetry/host-metrics": "^0.37.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
-    "@nestjs/common": "^11.1.8",
-    "@nestjs/core": "^11.1.8",
-    "@nestjs/platform-express": "^11.1.8",
-    "@nestjs/platform-fastify": "^11.1.8",
-    "@nestjs/testing": "^11.1.8",
+    "@biomejs/biome": "^2.3.8",
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/platform-fastify": "^11.1.9",
+    "@nestjs/testing": "^11.1.9",
     "@opentelemetry/exporter-prometheus": "^0.208.0",
     "@opentelemetry/sdk-metrics": "^2.2.0",
     "@opentelemetry/sdk-trace-node": "^2.2.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
-    "@types/response-time": "^2.3.9",
     "@types/supertest": "^6.0.3",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
-    "lint-staged": "^16.2.6",
-    "prettier": "^3.6.2",
+    "lint-staged": "^16.2.7",
     "reflect-metadata": "^0.2.2",
-    "rimraf": "^6.1.0",
+    "rimraf": "^6.1.2",
     "rxjs": "^7.8.2",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.5",
-    "typescript": "5.9.3"
+    "ts-jest": "^29.4.6",
+    "typescript": "5.9.3",
+    "ultracite": "^6.3.10"
   },
   "peerDependencies": {
     "@nestjs/common": ">= 11 < 12",
@@ -91,8 +90,8 @@
     "testEnvironment": "node"
   },
   "lint-staged": {
-    "**/*.{js,ts,json}": [
-      "prettier --write"
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "npx ultracite fix"
     ]
   }
 }
