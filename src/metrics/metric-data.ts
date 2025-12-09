@@ -42,8 +42,34 @@ function getOrCreate(
   let metric = meterData.get(nameWithPrefix);
   if (metric === undefined) {
     const meter = metrics.getMeterProvider().getMeter(OTEL_METER_NAME);
-    metric = meter[`create${type}`](nameWithPrefix, options);
-    meterData.set(nameWithPrefix, metric);
+    switch (type) {
+      case MetricType.Counter:
+        metric = meter.createCounter(nameWithPrefix, options);
+        break;
+      case MetricType.UpDownCounter:
+        metric = meter.createUpDownCounter(nameWithPrefix, options);
+        break;
+      case MetricType.Histogram:
+        metric = meter.createHistogram(nameWithPrefix, options);
+        break;
+      case MetricType.Gauge:
+        metric = meter.createGauge(nameWithPrefix, options);
+        break;
+      case MetricType.ObservableGauge:
+        metric = meter.createObservableGauge(nameWithPrefix, options);
+        break;
+      case MetricType.ObservableCounter:
+        metric = meter.createObservableCounter(nameWithPrefix, options);
+        break;
+      case MetricType.ObservableUpDownCounter:
+        metric = meter.createObservableUpDownCounter(nameWithPrefix, options);
+        break;
+      default:
+        break;
+    }
+    if (metric) {
+      meterData.set(nameWithPrefix, metric);
+    }
   }
   return metric;
 }

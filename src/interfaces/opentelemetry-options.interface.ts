@@ -14,7 +14,7 @@ export type OpenTelemetryOptionsFactory = {
 };
 
 /**
- * The options for the asynchronous Terminus module creation
+ * The options for the asynchronous OpenTelemetry module creation
  *
  * @publicApi
  */
@@ -25,7 +25,7 @@ export interface OpenTelemetryModuleAsyncOptions
    */
   name?: string;
   /**
-   * The class which should be used to provide the Terminus options
+   * The class which should be used to provide the OpenTelemetry options
    */
   useClass?: Type<OpenTelemetryOptionsFactory>;
   /**
@@ -33,7 +33,7 @@ export interface OpenTelemetryModuleAsyncOptions
    */
   useExisting?: Type<OpenTelemetryOptionsFactory>;
   /**
-   * The factory which should be used to provide the Terminus options
+   * The factory which should be used to provide the OpenTelemetry options
    */
   useFactory?: (
     ...args: any[]

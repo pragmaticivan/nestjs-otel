@@ -1,35 +1,31 @@
 import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { metrics } from "@opentelemetry/api";
-import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
-import { MeterProvider } from "@opentelemetry/sdk-metrics";
+import type { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 import request from "supertest";
 import { OpenTelemetryModule } from "../../../../src";
-import { meterData } from "../../../../src/metrics/metric-data";
 import { AppController } from "../../../fixture-app/app.controller";
+import {
+  setupPrometheusExporter,
+  teardownPrometheusExporter,
+} from "../../../utils";
 
 describe("Common Decorators", () => {
   let app: INestApplication;
   let exporter: PrometheusExporter;
-  let meterProvider: MeterProvider;
 
-  beforeEach((done) => {
-    exporter = new PrometheusExporter({}, () => {
-      meterProvider = new MeterProvider({
-        readers: [exporter],
-      });
-      metrics.setGlobalMeterProvider(meterProvider);
-      done();
-    });
+  beforeEach(async () => {
+    ({ exporter } = await setupPrometheusExporter());
+    const testingModule = await Test.createTestingModule({
+      imports: [OpenTelemetryModule.forRoot({})],
+      controllers: [AppController],
+    }).compile();
+
+    app = testingModule.createNestApplication();
+    await app.init();
   });
 
   afterEach(async () => {
-    metrics.disable();
-    meterData.clear();
-    if (exporter) {
-      await exporter.stopServer();
-      await exporter.shutdown();
-    }
+    await teardownPrometheusExporter(exporter);
     if (app) {
       await app.close();
     }
@@ -37,20 +33,12 @@ describe("Common Decorators", () => {
 
   describe("Instance counter, method counter & param counter", () => {
     it("creates an instance counter and increase counter when new instance is created", async () => {
-      const testingModule = await Test.createTestingModule({
-        imports: [OpenTelemetryModule.forRoot({})],
-        controllers: [AppController],
-      }).compile();
-
-      app = testingModule.createNestApplication();
-      await app.init();
-
       const agent = request(app.getHttpServer());
       await agent.get("/example/4?foo=bar");
 
-      // TODO: OpenTelemetry exporter does not expose server in a public function.
-      // @ts-expect-error
-      const { text } = await request(exporter._server)
+      const { text } = await request(
+        exporter.getMetricsRequestHandler.bind(exporter)
+      )
         .get("/metrics")
         .expect(200);
 

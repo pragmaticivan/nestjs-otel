@@ -4,6 +4,7 @@ import {
   SpanStatusCode,
   trace,
 } from "@opentelemetry/api";
+import { OTEL_TRACER_NAME } from "../../opentelemetry.constants";
 import { copyMetadataFromFunctionToFunction } from "../../opentelemetry.utils";
 
 const recordException = (span: ApiSpan, error: any) => {
@@ -58,33 +59,38 @@ export function Span<T extends any[]>(
     }
 
     const wrappedFunction = function PropertyDescriptor(this: any, ...args: T) {
-      const tracer = trace.getTracer("default");
+      const tracer = trace.getTracer(OTEL_TRACER_NAME);
 
       const spanOptions =
         typeof options === "function" ? options(...args) : options;
 
       return tracer.startActiveSpan(name, spanOptions, (span) => {
-        if (originalFunction.constructor.name === "AsyncFunction") {
-          return originalFunction
-            .apply(this, args)
-            .catch((error: any) => {
-              recordException(span, error);
-              // Throw error to propagate it further
-              throw error;
-            })
-            .finally(() => {
-              span.end();
-            });
-        }
-
         try {
-          return originalFunction.apply(this, args);
+          const result = originalFunction.apply(this, args);
+
+          if (
+            result &&
+            typeof result.then === "function" &&
+            typeof result.catch === "function"
+          ) {
+            return result
+              .catch((error: any) => {
+                recordException(span, error);
+                // Throw error to propagate it further
+                throw error;
+              })
+              .finally(() => {
+                span.end();
+              });
+          }
+
+          span.end();
+          return result;
         } catch (error) {
           recordException(span, error);
+          span.end();
           // Throw error to propagate it further
           throw error;
-        } finally {
-          span.end();
         }
       });
     };
