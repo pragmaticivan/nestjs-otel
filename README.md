@@ -208,6 +208,69 @@ export class BooksService {
 
 ```
 
+## Traceable Decorator
+
+If you want to trace all methods in a class, you can use the `@Traceable` decorator.
+
+```ts
+import { Traceable } from 'nestjs-otel';
+
+@Injectable()
+@Traceable()
+export class UsersService {
+  findAll() {
+    // This method will be automatically traced
+    return [];
+  }
+
+  findOne(id: string) {
+    // This method will also be automatically traced
+    return {};
+  }
+}
+```
+
+## Current Span Decorator
+
+You can access the current span in your controllers using the `@CurrentSpan` decorator.
+
+> **Note:** This decorator only works in Controllers, Resolvers, and Gateways where NestJS handles argument injection. It does **not** work in standard service-to-service calls.
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { Span } from '@opentelemetry/api';
+import { CurrentSpan } from 'nestjs-otel';
+
+@Controller('cats')
+export class CatsController {
+  @Get()
+  findAll(@CurrentSpan() span: Span) {
+    if (span) {
+      span.setAttribute('custom.attribute', 'value');
+    }
+    return 'This action returns all cats';
+  }
+}
+```
+
+## Baggage Decorator
+
+You can access the OpenTelemetry Baggage (Distributed Context) in your controllers using the `@Baggage` decorator.
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { Baggage } from 'nestjs-otel';
+
+@Controller('cats')
+export class CatsController {
+  @Get()
+  findAll(@Baggage('tenant-id') tenantId: string) {
+    console.log('Tenant ID:', tenantId);
+    return 'This action returns all cats';
+  }
+}
+```
+
 ## Tracing Service
 
 In case you need to access native span methods for special logics in the method block:

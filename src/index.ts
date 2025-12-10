@@ -4,5 +4,8 @@ export * from "./metrics/injector";
 export * from "./metrics/metric.service";
 export * from "./opentelemetry.constants";
 export * from "./opentelemetry.module";
+export * from "./tracing/decorators/baggage";
+export * from "./tracing/decorators/current-span";
 export * from "./tracing/decorators/span";
+export * from "./tracing/decorators/traceable";
 export * from "./tracing/trace.service";
