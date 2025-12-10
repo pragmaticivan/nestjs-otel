@@ -44,6 +44,29 @@ class TestSpan {
 
   @Span()
   [symbol]() {}
+
+  @Span({
+    onResult: (result) => ({ attributes: { result } }),
+  })
+  syncMethod() {
+    return "success";
+  }
+
+  @Span({
+    onResult: (result) => ({ attributes: { result } }),
+  })
+  async asyncMethod() {
+    return "async success";
+  }
+
+  @Span({
+    onResult: (_result) => {
+      throw new Error("onResult error");
+    },
+  })
+  errorInOnResult() {
+    return "success";
+  }
 }
 
 describe("Span", () => {
@@ -182,5 +205,37 @@ describe("Span", () => {
     expect(spans.map((span) => span.name)).toEqual([
       "TestSpan.Symbol(testSymbol)",
     ]);
+  });
+
+  it("should set attributes from onResult in sync method", async () => {
+    const result = instance.syncMethod();
+    expect(result).toBe("success");
+
+    const spans = traceExporter.getFinishedSpans();
+    expect(spans).toHaveLength(1);
+    expect(spans[0].attributes).toEqual({ result: "success" });
+  });
+
+  it("should set attributes from onResult in async method", async () => {
+    const result = await instance.asyncMethod();
+    expect(result).toBe("async success");
+
+    const spans = traceExporter.getFinishedSpans();
+    expect(spans).toHaveLength(1);
+    expect(spans[0].attributes).toEqual({ result: "async success" });
+  });
+
+  it("should record exception if onResult throws", async () => {
+    const result = instance.errorInOnResult();
+    expect(result).toBe("success");
+
+    const spans = traceExporter.getFinishedSpans();
+    expect(spans).toHaveLength(1);
+    // Should have error status
+    expect(spans[0].status.code).toBe(SpanStatusCode.ERROR);
+    expect(spans[0].status.message).toBe("onResult error");
+    // Should have exception event
+    expect(spans[0].events).toHaveLength(1);
+    expect(spans[0].events[0].name).toBe("exception");
   });
 });

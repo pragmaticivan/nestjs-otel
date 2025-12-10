@@ -12,9 +12,36 @@ const recordException = (span: ApiSpan, error: any) => {
   span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
 };
 
+const handleOnResult = (
+  span: ApiSpan,
+  onResult: ExtendedSpanOptions["onResult"],
+  result: any
+) => {
+  if (onResult) {
+    try {
+      const attrs = onResult(result);
+      if (attrs?.attributes) {
+        span.setAttributes(attrs.attributes);
+      }
+    } catch (error) {
+      recordException(span, error);
+    }
+  }
+};
+
+export interface ExtendedSpanOptions extends SpanOptions {
+  /**
+   * Callback to run when the method returns successfully.
+   * Allows setting attributes based on the return value.
+   */
+  onResult?: (
+    result: any
+  ) => { attributes?: SpanOptions["attributes"] } | undefined;
+}
+
 type SpanDecoratorOptions<T extends any[]> =
-  | SpanOptions
-  | ((...args: T) => SpanOptions);
+  | ExtendedSpanOptions
+  | ((...args: T) => ExtendedSpanOptions);
 
 export function Span<T extends any[]>(
   options?: SpanDecoratorOptions<T>
@@ -64,7 +91,9 @@ export function Span<T extends any[]>(
       const spanOptions =
         typeof options === "function" ? options(...args) : options;
 
-      return tracer.startActiveSpan(name, spanOptions, (span) => {
+      const { onResult, ...otelOptions } = spanOptions || {};
+
+      return tracer.startActiveSpan(name, otelOptions, (span) => {
         try {
           const result = originalFunction.apply(this, args);
 
@@ -74,6 +103,10 @@ export function Span<T extends any[]>(
             typeof result.catch === "function"
           ) {
             return result
+              .then((res: any) => {
+                handleOnResult(span, onResult, res);
+                return res;
+              })
               .catch((error: any) => {
                 recordException(span, error);
                 // Throw error to propagate it further
@@ -83,6 +116,8 @@ export function Span<T extends any[]>(
                 span.end();
               });
           }
+
+          handleOnResult(span, onResult, result);
 
           span.end();
           return result;

@@ -204,6 +204,15 @@ export class BooksService {
   async getBookOnceMore(id: number) {
     // ...
   }
+
+  // Capture return value as attribute
+  // Note: Explicitly type the result to ensure type safety
+  @Span({
+    onResult: (result: string[]) => ({ attributes: { 'book.count': result.length } }),
+  })
+  async getBooks() {
+    return ['Book 1', 'Book 2'];
+  }
 }
 
 ```
