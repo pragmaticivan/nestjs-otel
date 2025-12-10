@@ -30,9 +30,11 @@ OpenTelemetryModule.forRootAsync({
 ```
 
 ### Decorator Patterns
-- **Span decorator**: Auto-wraps methods in OpenTelemetry spans, supports both sync/async functions
+- **Span decorator**: Auto-wraps methods in OpenTelemetry spans, supports both sync/async functions. Now supports `onResult` callback for capturing return values.
+- **Traceable decorator**: Class-level decorator (`@Traceable`) that automatically applies `@Span` to all methods in a class.
+- **Context decorators**: `@CurrentSpan` and `@Baggage` for accessing OpenTelemetry context (active span, baggage items) in NestJS controllers/resolvers.
 - **Metric decorators**: Parameter injection decorators (`@OtelCounter`) and method/class decorators (`@OtelMethodCounter`, `@OtelInstanceCounter`)
-- **Naming convention**: Auto-generated metric names follow `app_ClassName_methodName_type_total` pattern
+- **Naming convention**: Auto-generated metric names follow `app.ClassName.methodName.calls.total` pattern
 
 ## Development Workflow
 

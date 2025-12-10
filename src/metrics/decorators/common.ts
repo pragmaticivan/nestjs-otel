@@ -11,10 +11,10 @@ import { getOrCreateCounter } from "../metric-data";
 export const OtelInstanceCounter =
   (options?: OtelMetricOptions & { name?: string }) =>
   <T extends { new (...args: any[]): {} }>(originalClass: T) => {
-    const name = options?.name || `app_${originalClass.name}_instances_total`;
+    const name = options?.name || `app.${originalClass.name}.instances.total`;
     const description =
       options?.description ||
-      `app_${originalClass.name} object instances total`;
+      `app.${originalClass.name} object instances total`;
     let counterMetric: Counter;
 
     const wrappedClass = class extends originalClass {
@@ -46,10 +46,10 @@ export const OtelMethodCounter =
   ) => {
     const className = target.constructor.name;
     const name =
-      options?.name || `app_${className}_${propertyKey.toString()}_calls_total`;
+      options?.name || `app.${className}.${propertyKey.toString()}.calls.total`;
     const description =
       options?.description ||
-      `app_${className}#${propertyKey.toString()} called total`;
+      `app.${className}#${propertyKey.toString()} called total`;
     let counterMetric: Counter;
 
     const originalFunction = descriptor.value;
