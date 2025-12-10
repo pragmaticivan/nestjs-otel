@@ -1,6 +1,10 @@
-/** biome-ignore-all lint/style/useImportType: backward compatibility */
 import { Controller, Get } from "@nestjs/common";
-import { Counter, Gauge, Histogram, UpDownCounter } from "@opentelemetry/api";
+import type {
+  Counter,
+  Gauge,
+  Histogram,
+  UpDownCounter,
+} from "@opentelemetry/api";
 import {
   OtelInstanceCounter,
   OtelMethodCounter,
