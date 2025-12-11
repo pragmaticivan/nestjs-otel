@@ -1,28 +1,24 @@
+/** biome-ignore-all lint/style/useImportType: backward compatibility */
 import {
   DynamicModule,
   Global,
   Inject,
-  Logger,
-  MiddlewareConsumer,
   Module,
   OnApplicationBootstrap,
   Provider,
   Type,
-} from '@nestjs/common';
-import { HostMetrics } from '@opentelemetry/host-metrics';
-import { metrics } from '@opentelemetry/api';
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
+} from "@nestjs/common";
+import { metrics } from "@opentelemetry/api";
+import { HostMetrics } from "@opentelemetry/host-metrics";
+import { MeterProvider } from "@opentelemetry/sdk-metrics";
 import {
   OpenTelemetryModuleAsyncOptions,
   OpenTelemetryModuleOptions,
   OpenTelemetryOptionsFactory,
-} from './interfaces';
-import { MetricService } from './metrics/metric.service';
-import { ApiMetricsMiddleware } from './middleware';
-import { OPENTELEMETRY_MODULE_OPTIONS } from './opentelemetry.constants';
-import { TraceService } from './tracing/trace.service';
-import { HttpAdapterHost } from '@nestjs/core';
-import { getMiddlewareMountPoint } from './middleware.utils';
+} from "./interfaces";
+import { MetricService } from "./metrics/metric.service";
+import { OPENTELEMETRY_MODULE_OPTIONS } from "./opentelemetry.constants";
+import { TraceService } from "./tracing/trace.service";
 
 /**
  * The internal OpenTelemetry Module which handles the integration
@@ -33,11 +29,9 @@ import { getMiddlewareMountPoint } from './middleware.utils';
 @Global()
 @Module({})
 export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
-  private readonly logger = new Logger('OpenTelemetryModule');
-
   constructor(
-    @Inject(OPENTELEMETRY_MODULE_OPTIONS) private readonly options: OpenTelemetryModuleOptions = {},
-    private readonly adapterHost: HttpAdapterHost
+    @Inject(OPENTELEMETRY_MODULE_OPTIONS)
+    private readonly options: OpenTelemetryModuleOptions = {}
   ) {}
 
   /**
@@ -64,7 +58,8 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
    * @param options The options to bootstrap the module
    */
   static forRootAsync(options: OpenTelemetryModuleAsyncOptions): DynamicModule {
-    const asyncProviders = this.createAsyncProviders(options);
+    const asyncProviders =
+      OpenTelemetryCoreModule.createAsyncProviders(options);
     return {
       module: OpenTelemetryCoreModule,
       imports: [...(options.imports || [])],
@@ -73,35 +68,20 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
     };
   }
 
-  configure(consumer: MiddlewareConsumer) {
-    const { apiMetrics = { enable: false } } = this.options?.metrics ?? {};
-
-    if (apiMetrics.enable === true) {
-      const adapter = this.adapterHost.httpAdapter;
-      const mountPoint = getMiddlewareMountPoint(adapter);
-      if (apiMetrics?.ignoreRoutes && apiMetrics?.ignoreRoutes.length > 0) {
-        consumer
-          .apply(ApiMetricsMiddleware)
-          .exclude(...apiMetrics.ignoreRoutes)
-          .forRoutes(mountPoint);
-      } else {
-        consumer.apply(ApiMetricsMiddleware).forRoutes(mountPoint);
-      }
-    }
-  }
-
   async onApplicationBootstrap() {
-    let hostMetrics: boolean = false;
+    let hostMetrics = false;
 
     if (this.options?.metrics) {
       hostMetrics =
-        this.options.metrics.hostMetrics !== undefined ? this.options.metrics.hostMetrics : false;
+        this.options.metrics.hostMetrics !== undefined
+          ? this.options.metrics.hostMetrics
+          : false;
     }
 
     const meterProvider = metrics.getMeterProvider() as MeterProvider;
 
     if (hostMetrics) {
-      const host = new HostMetrics({ meterProvider, name: 'host-metrics' });
+      const host = new HostMetrics({ meterProvider, name: "host-metrics" });
       host.start();
     }
   }
@@ -111,7 +91,9 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
    * given module options
    * @param options Options for the asynchrnous OpenTelemetry module
    */
-  private static createAsyncOptionsProvider(options: OpenTelemetryModuleAsyncOptions): Provider {
+  private static createAsyncOptionsProvider(
+    options: OpenTelemetryModuleAsyncOptions
+  ): Provider {
     if (options.useFactory) {
       return {
         provide: OPENTELEMETRY_MODULE_OPTIONS,
@@ -122,7 +104,8 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
 
     if (options.useClass || options.useExisting) {
       const inject = [
-        (options.useClass || options.useExisting) as Type<OpenTelemetryOptionsFactory>,
+        (options.useClass ||
+          options.useExisting) as Type<OpenTelemetryOptionsFactory>,
       ];
       return {
         provide: OPENTELEMETRY_MODULE_OPTIONS,
@@ -132,7 +115,9 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
       };
     }
 
-    throw new Error();
+    throw new Error(
+      "Invalid OpenTelemetry module options: either 'useFactory', 'useClass', or 'useExisting' must be provided."
+    );
   }
 
   /**
@@ -140,13 +125,15 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
    * options
    * @param options Options for the asynchrnous OpenTelemetry module
    */
-  private static createAsyncProviders(options: OpenTelemetryModuleAsyncOptions): Provider[] {
+  private static createAsyncProviders(
+    options: OpenTelemetryModuleAsyncOptions
+  ): Provider[] {
     if (options.useFactory || options.useExisting) {
-      return [this.createAsyncOptionsProvider(options)];
+      return [OpenTelemetryCoreModule.createAsyncOptionsProvider(options)];
     }
     const useClass = options.useClass as Type<OpenTelemetryOptionsFactory>;
     return [
-      this.createAsyncOptionsProvider(options),
+      OpenTelemetryCoreModule.createAsyncOptionsProvider(options),
       {
         provide: useClass,
         useClass,

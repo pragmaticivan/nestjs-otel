@@ -1,5 +1,5 @@
-import { createParamDecorator } from '@nestjs/common';
-import { OtelMetricOptions } from '../../interfaces/metric-options.interface';
+import { createParamDecorator } from "@nestjs/common";
+import type { OtelMetricOptions } from "../../interfaces/metric-options.interface";
 import {
   getOrCreateCounter,
   getOrCreateGauge,
@@ -8,7 +8,7 @@ import {
   getOrCreateObservableGauge,
   getOrCreateObservableUpDownCounter,
   getOrCreateUpDownCounter,
-} from '../metric-data';
+} from "../metric-data";
 
 export type MetricParamDecorator = (
   name: string,
@@ -19,34 +19,42 @@ function createMetricParamDecorator<T>(
   type: string,
   getOrCreateMetric: (name: string, options?: OtelMetricOptions) => T
 ): MetricParamDecorator {
-  return (name: string, options?: OtelMetricOptions): ParameterDecorator => {
-    return createParamDecorator(() => {
+  return (name: string, options?: OtelMetricOptions): ParameterDecorator =>
+    createParamDecorator(() => {
       if (!name || name.length === 0) {
         throw new Error(`${type} need a name argument`);
       }
       return getOrCreateMetric(name, options);
     })();
-  };
 }
 
-export const OtelCounter = createMetricParamDecorator('OtelCounter', getOrCreateCounter);
+export const OtelCounter = createMetricParamDecorator(
+  "OtelCounter",
+  getOrCreateCounter
+);
 export const OtelUpDownCounter = createMetricParamDecorator(
-  'OtelUpDownCounter',
+  "OtelUpDownCounter",
   getOrCreateUpDownCounter
 );
-export const OtelGauge = createMetricParamDecorator('OtelGauge', getOrCreateGauge);
+export const OtelGauge = createMetricParamDecorator(
+  "OtelGauge",
+  getOrCreateGauge
+);
 
-export const OtelHistogram = createMetricParamDecorator('OtelHistogram', getOrCreateHistogram);
+export const OtelHistogram = createMetricParamDecorator(
+  "OtelHistogram",
+  getOrCreateHistogram
+);
 
 export const OtelObservableGauge = createMetricParamDecorator(
-  'OtelObservableGauge',
+  "OtelObservableGauge",
   getOrCreateObservableGauge
 );
 export const OtelObservableCounter = createMetricParamDecorator(
-  'OtelObservableCounter',
+  "OtelObservableCounter",
   getOrCreateObservableCounter
 );
 export const OtelObservableUpDownCounter = createMetricParamDecorator(
-  'OtelObservableUpDownCounter',
+  "OtelObservableUpDownCounter",
   getOrCreateObservableUpDownCounter
 );

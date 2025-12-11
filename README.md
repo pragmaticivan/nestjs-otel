@@ -119,16 +119,6 @@ bootstrap();
 const OpenTelemetryModuleConfig = OpenTelemetryModule.forRoot({
   metrics: {
     hostMetrics: true, // Includes Host Metrics
-    apiMetrics: { // @deprecated - will be removed in 8.0 - you should start using the semcov from opentelemetry metrics instead
-      enable: true, // Includes api metrics
-      defaultAttributes: {
-        // You can set default labels for api metrics
-        custom: 'label',
-      },
-      ignoreRoutes: ['/favicon.ico'], // You can ignore specific routes (See https://docs.nestjs.com/middleware#excluding-routes for options)
-      ignoreUndefinedRoutes: false, //Records metrics for all URLs, even undefined ones
-      prefix: 'my_prefix', // Add a custom prefix to all API metrics
-    },
   },
 });
 
@@ -158,14 +148,11 @@ export class OtelConfigService implements OpenTelemetryOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createOpenTelemetryOptions(): Promise<OpenTelemetryModuleOptions> | OpenTelemetryModuleOptions {
-    const { hostMetrics, apiMetrics } = this.configService.get('otel')
+    const { hostMetrics } = this.configService.get('otel')
 
     return {
       metrics: {
         hostMetrics: hostMetrics.enabled,
-        apiMetrics: {
-          enable: apiMetrics.enabled,
-        },
       },
     };
   }
@@ -217,8 +204,80 @@ export class BooksService {
   async getBookOnceMore(id: number) {
     // ...
   }
+
+  // Capture return value as attribute
+  // Note: Explicitly type the result to ensure type safety
+  @Span({
+    onResult: (result: string[]) => ({ attributes: { 'book.count': result.length } }),
+  })
+  async getBooks() {
+    return ['Book 1', 'Book 2'];
+  }
 }
 
+```
+
+## Traceable Decorator
+
+If you want to trace all methods in a class, you can use the `@Traceable` decorator.
+
+```ts
+import { Traceable } from 'nestjs-otel';
+
+@Injectable()
+@Traceable()
+export class UsersService {
+  findAll() {
+    // This method will be automatically traced
+    return [];
+  }
+
+  findOne(id: string) {
+    // This method will also be automatically traced
+    return {};
+  }
+}
+```
+
+## Current Span Decorator
+
+You can access the current span in your controllers using the `@CurrentSpan` decorator.
+
+> **Note:** This decorator only works in Controllers, Resolvers, and Gateways where NestJS handles argument injection. It does **not** work in standard service-to-service calls.
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { Span } from '@opentelemetry/api';
+import { CurrentSpan } from 'nestjs-otel';
+
+@Controller('cats')
+export class CatsController {
+  @Get()
+  findAll(@CurrentSpan() span: Span) {
+    if (span) {
+      span.setAttribute('custom.attribute', 'value');
+    }
+    return 'This action returns all cats';
+  }
+}
+```
+
+## Baggage Decorator
+
+You can access the OpenTelemetry Baggage (Distributed Context) in your controllers using the `@Baggage` decorator.
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { Baggage } from 'nestjs-otel';
+
+@Controller('cats')
+export class CatsController {
+  @Get()
+  findAll(@Baggage('tenant-id') tenantId: string) {
+    console.log('Tenant ID:', tenantId);
+    return 'This action returns all cats';
+  }
+}
 ```
 
 ## Tracing Service
@@ -332,22 +391,6 @@ export class AppController {
   }
 }
 ```
-
-## API Metrics with Middleware
-
-> @deprecated - this will be removed in 8.0 - you should start using the semcov from opentelemetry metrics instead
-
-| Impl | Otel Metric                         | Prometheus Metric                         | Description                               | Metric Type |
-| ---- | --------------------------------    | ---------------------------------------   | ----------------------------------------- | ----------- |
-| ✅   | http.server.request.count           | http_server_request_count_total           | Total number of HTTP requests.            | Counter     |
-| ✅   | http.server.response.count          | http_server_response_count_total          | Total number of HTTP responses.           | Counter     |
-| ✅   | http.server.abort.count             | http_server_abort_count_total             | Total number of data transfers aborted.   | Counter     |
-| ✅   | http.server.duration                | http_server_duration                      | The duration of the inbound HTTP request. | Histogram   |
-| ✅   | http.server.request.size            | http_server_request_size                  | Size of incoming bytes.                   | Histogram   |
-| ✅   | http.server.response.size           | http_server_response_size                 | Size of outgoing bytes.                   | Histogram   |
-| ✅   | http.server.response.success.count  | http_server_response_success_count_total  | Total number of all successful responses. | Counter     |
-| ✅   | http.server.response.error.count    | http_server_response_error_count_total    | Total number of server error responses.   | Counter     |
-| ✅   | http.client.request.error.count     | http_client_request_error_count_total     | Total number of client error requests.    | Counter     |
 
 ## Prometheus Metrics
 
