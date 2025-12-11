@@ -1,5 +1,20 @@
 # Changelog
 
+## [8.0.0](https://github.com/pragmaticivan/nestjs-otel/compare/v7.0.1...v8.0.0) (2025-12-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* making metric decorators to comply with otel naming convention standard
+* major cleanup, removing temporary middleware features
+
+### Features
+
+* add  current span, traceable and baggage decorators ([0d4039b](https://github.com/pragmaticivan/nestjs-otel/commit/0d4039b63793c1e8617878c60447c310bafbf99e))
+* add support for capturing method return values in span decorator ([09c8eea](https://github.com/pragmaticivan/nestjs-otel/commit/09c8eea288fd93ef9a273f86952cb258ee2c59a6))
+* major cleanup, removing temporary middleware features ([68deeee](https://github.com/pragmaticivan/nestjs-otel/commit/68deeeef64243067ac7a300edece115cefddfc90))
+* making metric decorators to comply with otel naming convention standard ([39f3778](https://github.com/pragmaticivan/nestjs-otel/commit/39f37789462843c3256ddfa840b9b9471fe3524d))
+
 ## [7.0.1](https://github.com/pragmaticivan/nestjs-otel/compare/v7.0.0...v7.0.1) (2025-08-05)
 
 
