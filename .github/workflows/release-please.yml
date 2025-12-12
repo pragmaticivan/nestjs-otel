@@ -31,7 +31,7 @@ jobs:
         run: npm run build
       - id: publish
         if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance --access public
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - if: steps.publish.outputs.type != 'none'
