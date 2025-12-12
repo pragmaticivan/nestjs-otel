@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.0.1](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.0...v8.0.1) (2025-12-12)
+
+
+### Bug Fixes
+
+* properly configure provenance for build & update dev packages ([5b8b5b7](https://github.com/pragmaticivan/nestjs-otel/commit/5b8b5b71815ddaddad64a905ab2b140f08b2432d))
+* properly configure provenance for build & update dev packages ([19657ba](https://github.com/pragmaticivan/nestjs-otel/commit/19657ba4f7e827af75ee0bf4f961af42cf009bd4))
+
 ## [8.0.0](https://github.com/pragmaticivan/nestjs-otel/compare/v7.0.1...v8.0.0) (2025-12-11)
 
 
