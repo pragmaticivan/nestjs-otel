@@ -1,6 +1,5 @@
 ![nestjs-otel](https://github.com/pragmaticivan/nestjs-otel/assets/301291/40aaad82-82f9-48e5-b204-0e3cef532813)
 
-
 # NestJS OpenTelemetry (OTEL)
 
 ![Build Status](https://github.com/pragmaticivan/nestjs-otel/actions/workflows/nodejs.yml/badge.svg)
