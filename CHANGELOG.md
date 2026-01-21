@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.0.2](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.1...v8.0.2) (2026-01-21)
+
+
+### Bug Fixes
+
+* update readme and trigger vulnerabilities fixes ([a85c429](https://github.com/pragmaticivan/nestjs-otel/commit/a85c429552d7b25aa70961c454c7c9ee86302ba4))
+* update readme and trigger vulnerabilities fixes ([6a698b1](https://github.com/pragmaticivan/nestjs-otel/commit/6a698b117630dd98d60e31b1a88082e4bd346371))
+
 ## [8.0.1](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.0...v8.0.1) (2025-12-12)
 
 
