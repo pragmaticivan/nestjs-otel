@@ -67,6 +67,45 @@ class TestSpan {
   errorInOnResult() {
     return "success";
   }
+
+  lastLazyThenable?: LazyThenable<string>;
+
+  @Span()
+  returnsLazyThenable() {
+    this.lastLazyThenable = makeLazyThenable("lazy result");
+    return this.lastLazyThenable;
+  }
+}
+
+/**
+ * Builds a "lazy" thenable in the style of query builders such as Knex,
+ * Mongoose Query, or Drizzle: it only performs work when a consumer
+ * actually subscribes via `.then()`. The `triggered` flag flips true
+ * the moment `.then()` is invoked.
+ */
+type LazyThenable<T> = PromiseLike<T> & {
+  triggered: boolean;
+  catch: (onRejected?: (e: unknown) => unknown) => PromiseLike<unknown>;
+};
+
+function makeLazyThenable<T>(value: T): LazyThenable<T> {
+  const thenable: LazyThenable<T> = {
+    triggered: false,
+    then(onFulfilled, onRejected) {
+      thenable.triggered = true;
+      try {
+        const result = onFulfilled ? onFulfilled(value) : (value as never);
+        return Promise.resolve(result);
+      } catch (error) {
+        if (onRejected) return Promise.resolve(onRejected(error)) as never;
+        return Promise.reject(error) as never;
+      }
+    },
+    catch(onRejected) {
+      return thenable.then(undefined, onRejected);
+    },
+  };
+  return thenable;
 }
 
 describe("Span", () => {
@@ -237,5 +276,16 @@ describe("Span", () => {
     // Should have exception event
     expect(spans[0].events).toHaveLength(1);
     expect(spans[0].events[0].name).toBe("exception");
+  });
+
+  it("should not trigger a lazy thenable returned by the wrapped method", () => {
+    const returned = instance.returnsLazyThenable();
+
+    // The decorator must hand the lazy thenable back to the caller untouched.
+    // It must NOT subscribe via .then(), which would force-execute query
+    // builders such as Knex, Mongoose Query, or Drizzle queries that the
+    // caller intended to defer (or compose further) before awaiting.
+    expect(instance.lastLazyThenable?.triggered).toBe(false);
+    expect(returned).toBe(instance.lastLazyThenable);
   });
 });
