@@ -85,6 +85,13 @@ class TestSpan {
   returnsFailingLazyThenable() {
     return makeFailingLazyThenable(new Error("lazy rejection"));
   }
+
+  @Span({
+    onResult: (_result) => ({ attributes: { count: _result.rows.length } }),
+  })
+  lazyThenableOnResult() {
+    return makeLazyThenable({ rows: [1, 2, 3] });
+  }
 }
 
 /**
@@ -309,6 +316,27 @@ describe("Span", () => {
     // Should have exception event
     expect(spans[0].events).toHaveLength(1);
     expect(spans[0].events[0].name).toBe("exception");
+  });
+
+  it("should call onResult with the thenable (not resolved value) for lazy thenables", () => {
+    // The decorator hands the lazy thenable to onResult untouched (it cannot
+    // know it is a deferred query). Accessing fields on the resolved shape
+    // (e.g. `.rows`) therefore throws synchronously, and the decorator records
+    // that as an exception on the span.
+    const returned = instance.lazyThenableOnResult();
+
+    // Caller still receives the untouched thenable.
+    expect(returned.triggered).toBe(false);
+
+    const spans = traceExporter.getFinishedSpans();
+    expect(spans).toHaveLength(1);
+    expect(spans[0].status.code).toBe(SpanStatusCode.ERROR);
+    expect(spans[0].status.message).toMatch(
+      "Cannot read properties of undefined (reading 'length')"
+    );
+    expect(spans[0].events).toHaveLength(1);
+    expect(spans[0].events[0].name).toBe("exception");
+    expect(spans[0].events[0].attributes?.["exception.type"]).toBe("TypeError");
   });
 
   it("should not trigger a lazy thenable returned by the wrapped method", () => {
