@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.0.3](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.2...v8.0.3) (2026-05-15)
+
+
+### Bug Fixes
+
+* dont eagerly trigger on functions that return thennable objects ([811c3be](https://github.com/pragmaticivan/nestjs-otel/commit/811c3be67b1f445edebddf17a934638829610943))
+* dont eagerly trigger on functions that return thennable objects ([afee4ff](https://github.com/pragmaticivan/nestjs-otel/commit/afee4ff7df733ca381fe6a2de1910e106330f006))
+
 ## [8.0.2](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.1...v8.0.2) (2026-01-21)
 
 
