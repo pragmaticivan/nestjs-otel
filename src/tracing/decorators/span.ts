@@ -97,11 +97,7 @@ export function Span<T extends any[]>(
         try {
           const result = originalFunction.apply(this, args);
 
-          if (
-            result &&
-            typeof result.then === "function" &&
-            typeof result.catch === "function"
-          ) {
+          if (result instanceof Promise) {
             return result
               .then((res: any) => {
                 handleOnResult(span, onResult, res);
