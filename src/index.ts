@@ -9,3 +9,7 @@ export * from "./tracing/decorators/current-span";
 export * from "./tracing/decorators/span";
 export * from "./tracing/decorators/traceable";
 export * from "./tracing/trace.service";
+export * from "./wide-events/wide-event.context";
+export * from "./wide-events/wide-event.interceptor";
+export * from "./wide-events/wide-event.service";
+export * from "./wide-events/wide-event-field.decorator";

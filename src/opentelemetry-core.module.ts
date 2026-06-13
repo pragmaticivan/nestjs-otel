@@ -19,6 +19,8 @@ import {
 import { MetricService } from "./metrics/metric.service";
 import { OPENTELEMETRY_MODULE_OPTIONS } from "./opentelemetry.constants";
 import { TraceService } from "./tracing/trace.service";
+import { WideEventInterceptor } from "./wide-events/wide-event.interceptor";
+import { WideEventService } from "./wide-events/wide-event.service";
 
 /**
  * The internal OpenTelemetry Module which handles the integration
@@ -47,8 +49,20 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
 
     return {
       module: OpenTelemetryCoreModule,
-      providers: [openTelemetryModuleOptions, TraceService, MetricService],
-      exports: [TraceService, MetricService],
+      providers: [
+        openTelemetryModuleOptions,
+        TraceService,
+        MetricService,
+        WideEventService,
+        WideEventInterceptor,
+      ],
+      exports: [
+        OPENTELEMETRY_MODULE_OPTIONS,
+        TraceService,
+        MetricService,
+        WideEventService,
+        WideEventInterceptor,
+      ],
     };
   }
 
@@ -63,8 +77,20 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
     return {
       module: OpenTelemetryCoreModule,
       imports: [...(options.imports || [])],
-      providers: [...asyncProviders, TraceService, MetricService],
-      exports: [TraceService, MetricService],
+      providers: [
+        ...asyncProviders,
+        TraceService,
+        MetricService,
+        WideEventService,
+        WideEventInterceptor,
+      ],
+      exports: [
+        OPENTELEMETRY_MODULE_OPTIONS,
+        TraceService,
+        MetricService,
+        WideEventService,
+        WideEventInterceptor,
+      ],
     };
   }
 
