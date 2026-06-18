@@ -7,8 +7,10 @@ import {
 } from "@opentelemetry/sdk-trace-node";
 import { defer, lastValueFrom, Observable, of, throwError } from "rxjs";
 import type { OpenTelemetryModuleOptions } from "../interfaces";
+import { WIDE_EVENT_ROOT_SPAN } from "./wide-event.context";
 import { WideEventInterceptor } from "./wide-event.interceptor";
 import { WideEventService } from "./wide-event.service";
+import { WideEventSpanProcessor } from "./wide-event.span-processor";
 
 class CatsController {
   findAll() {}
@@ -79,6 +81,48 @@ describe("WideEventInterceptor", () => {
     expect(span.attributes["code.function.name"]).toBe(
       "CatsController.findAll"
     );
+  });
+
+  it("should mark the span as a wide event on flush", async () => {
+    await interceptWithRootSpan(() => of("ok"));
+
+    const [span] = traceExporter.getFinishedSpans();
+    expect(span.attributes["nestjs_otel.wide_event"]).toBe(true);
+  });
+
+  it("should not let a handler-set field override the wide event marker", async () => {
+    const service = new WideEventService();
+
+    await interceptWithRootSpan(() =>
+      defer(() => {
+        service.set("nestjs_otel.wide_event", false);
+        return of("ok");
+      })
+    );
+
+    const [span] = traceExporter.getFinishedSpans();
+    expect(span.attributes["nestjs_otel.wide_event"]).toBe(true);
+  });
+
+  it("should not mark the span when the observable is unsubscribed before completion", async () => {
+    const span = trace.getTracer("test").startSpan("http_request");
+    const neverCompletes = new Observable((s) => {
+      s.next("partial");
+    });
+
+    const obs$ = context.with(trace.setSpan(context.active(), span), () =>
+      interceptor.intercept(
+        executionContext,
+        callHandler(() => neverCompletes)
+      )
+    );
+
+    const sub = obs$.subscribe();
+    sub.unsubscribe();
+    span.end();
+
+    const [finished] = traceExporter.getFinishedSpans();
+    expect(finished.attributes["nestjs_otel.wide_event"]).toBeUndefined();
   });
 
   it("should flush attributes set by the service during the request", async () => {
@@ -201,6 +245,150 @@ describe("WideEventInterceptor", () => {
     expect(result).toBe("ok");
     const [span] = traceExporter.getFinishedSpans();
     expect(span.attributes["wide_event.seed.error"]).toBeUndefined();
+  });
+
+  it("should flush onto the request root span instead of the nested active span", async () => {
+    // #given
+    const tracer = trace.getTracer("test");
+    const rootSpan = tracer.startSpan("http_request");
+    const req: Record<symbol, unknown> = {
+      [WIDE_EVENT_ROOT_SPAN]: rootSpan,
+    };
+    const httpExecutionContext = {
+      getClass: () => CatsController,
+      getHandler: () => CatsController.prototype.findAll,
+      getType: () => "http",
+      switchToHttp: () => ({ getRequest: () => req }),
+    } as unknown as ExecutionContext;
+
+    // #when: run the interceptor inside a DIFFERENT (nested) active span
+    const nestedSpan = tracer.startSpan("nested_interceptor_span");
+    await context.with(trace.setSpan(context.active(), nestedSpan), async () =>
+      lastValueFrom(
+        interceptor.intercept(
+          httpExecutionContext,
+          callHandler(() => of("ok"))
+        )
+      )
+    );
+    nestedSpan.end();
+    rootSpan.end();
+
+    // #then: marker + metadata land on the root span, not the nested one
+    const finished = traceExporter.getFinishedSpans();
+    const root = finished.find((s) => s.name === "http_request");
+    const nested = finished.find((s) => s.name === "nested_interceptor_span");
+    expect(root?.attributes["nestjs_otel.wide_event"]).toBe(true);
+    expect(root?.attributes["code.function.name"]).toBe(
+      "CatsController.findAll"
+    );
+    expect(nested?.attributes["nestjs_otel.wide_event"]).toBeUndefined();
+  });
+
+  it("should read the root span from request.raw (Fastify) when absent on the request", async () => {
+    // #given: Fastify middie sets the span on the raw IncomingMessage, while
+    // switchToHttp().getRequest() returns the FastifyRequest wrapper.
+    const tracer = trace.getTracer("test");
+    const rootSpan = tracer.startSpan("http_request");
+    const fastifyRequest = { raw: { [WIDE_EVENT_ROOT_SPAN]: rootSpan } };
+    const httpExecutionContext = {
+      getClass: () => CatsController,
+      getHandler: () => CatsController.prototype.findAll,
+      getType: () => "http",
+      switchToHttp: () => ({ getRequest: () => fastifyRequest }),
+    } as unknown as ExecutionContext;
+
+    // #when: run inside a different nested active span
+    const nestedSpan = tracer.startSpan("nested_span");
+    await context.with(trace.setSpan(context.active(), nestedSpan), async () =>
+      lastValueFrom(
+        interceptor.intercept(
+          httpExecutionContext,
+          callHandler(() => of("ok"))
+        )
+      )
+    );
+    nestedSpan.end();
+    rootSpan.end();
+
+    // #then
+    const finished = traceExporter.getFinishedSpans();
+    const root = finished.find((s) => s.name === "http_request");
+    const nested = finished.find((s) => s.name === "nested_span");
+    expect(root?.attributes["nestjs_otel.wide_event"]).toBe(true);
+    expect(nested?.attributes["nestjs_otel.wide_event"]).toBeUndefined();
+  });
+
+  it("should fall back to the active span when the request root span already ended", async () => {
+    // #given: an ephemeral root span (e.g. @fastify/otel phase span) that ends
+    // before the flush runs, plus a live nested active span.
+    const tracer = trace.getTracer("test");
+    const endedRootSpan = tracer.startSpan("ephemeral_phase_span");
+    endedRootSpan.end();
+    const fastifyRequest = { raw: { [WIDE_EVENT_ROOT_SPAN]: endedRootSpan } };
+    const httpExecutionContext = {
+      getClass: () => CatsController,
+      getHandler: () => CatsController.prototype.findAll,
+      getType: () => "http",
+      switchToHttp: () => ({ getRequest: () => fastifyRequest }),
+    } as unknown as ExecutionContext;
+
+    const activeSpan = tracer.startSpan("handler_span");
+    await context.with(trace.setSpan(context.active(), activeSpan), async () =>
+      lastValueFrom(
+        interceptor.intercept(
+          httpExecutionContext,
+          callHandler(() => of("ok"))
+        )
+      )
+    );
+    activeSpan.end();
+
+    // #then: marker lands on the live active span, not the ended root span
+    const finished = traceExporter.getFinishedSpans();
+    const active = finished.find((s) => s.name === "handler_span");
+    const ended = finished.find((s) => s.name === "ephemeral_phase_span");
+    expect(active?.attributes["nestjs_otel.wide_event"]).toBe(true);
+    expect(active?.attributes["code.function.name"]).toBe(
+      "CatsController.findAll"
+    );
+    expect(ended?.attributes["nestjs_otel.wide_event"]).toBeUndefined();
+  });
+
+  it("should prefer the processor's local-root span over the active span", async () => {
+    // #given: a registered local-root span plus a nested active span in the
+    // same trace (as instrumentation-nestjs-core would create).
+    const processor = new WideEventSpanProcessor();
+    const tracer = trace.getTracer("test");
+    const rootSpan = tracer.startSpan("GET /actors");
+    processor.onStart(rootSpan as never, {} as never);
+    const childContext = trace.setSpan(context.active(), rootSpan);
+    const nestedSpan = tracer.startSpan(
+      "ActorController.findAll",
+      undefined,
+      childContext
+    );
+
+    await context.with(trace.setSpan(context.active(), nestedSpan), async () =>
+      lastValueFrom(
+        interceptor.intercept(
+          executionContext,
+          callHandler(() => of("ok"))
+        )
+      )
+    );
+    nestedSpan.end();
+    rootSpan.end();
+
+    // #then: marker lands on the local-root span, not the nested span
+    const finished = traceExporter.getFinishedSpans();
+    const root = finished.find((s) => s.name === "GET /actors");
+    const nested = finished.find((s) => s.name === "ActorController.findAll");
+    expect(root?.attributes["nestjs_otel.wide_event"]).toBe(true);
+    expect(root?.attributes["code.function.name"]).toBe(
+      "CatsController.findAll"
+    );
+    expect(nested?.attributes["nestjs_otel.wide_event"]).toBeUndefined();
   });
 
   it("should propagate the handler result untouched when no span is active", async () => {

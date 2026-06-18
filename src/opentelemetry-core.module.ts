@@ -3,7 +3,9 @@ import {
   DynamicModule,
   Global,
   Inject,
+  MiddlewareConsumer,
   Module,
+  NestModule,
   OnApplicationBootstrap,
   Provider,
   Type,
@@ -20,6 +22,7 @@ import { MetricService } from "./metrics/metric.service";
 import { OPENTELEMETRY_MODULE_OPTIONS } from "./opentelemetry.constants";
 import { TraceService } from "./tracing/trace.service";
 import { WideEventInterceptor } from "./wide-events/wide-event.interceptor";
+import { WideEventMiddleware } from "./wide-events/wide-event.middleware";
 import { WideEventService } from "./wide-events/wide-event.service";
 
 /**
@@ -30,7 +33,9 @@ import { WideEventService } from "./wide-events/wide-event.service";
  */
 @Global()
 @Module({})
-export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
+export class OpenTelemetryCoreModule
+  implements OnApplicationBootstrap, NestModule
+{
   constructor(
     @Inject(OPENTELEMETRY_MODULE_OPTIONS)
     private readonly options: OpenTelemetryModuleOptions = {}
@@ -55,6 +60,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
         MetricService,
         WideEventService,
         WideEventInterceptor,
+        WideEventMiddleware,
       ],
       exports: [
         OPENTELEMETRY_MODULE_OPTIONS,
@@ -62,6 +68,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
         MetricService,
         WideEventService,
         WideEventInterceptor,
+        WideEventMiddleware,
       ],
     };
   }
@@ -83,6 +90,7 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
         MetricService,
         WideEventService,
         WideEventInterceptor,
+        WideEventMiddleware,
       ],
       exports: [
         OPENTELEMETRY_MODULE_OPTIONS,
@@ -90,8 +98,13 @@ export class OpenTelemetryCoreModule implements OnApplicationBootstrap {
         MetricService,
         WideEventService,
         WideEventInterceptor,
+        WideEventMiddleware,
       ],
     };
+  }
+
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(WideEventMiddleware).forRoutes("*");
   }
 
   async onApplicationBootstrap() {

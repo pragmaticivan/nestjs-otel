@@ -1,6 +1,6 @@
 {
   "name": "nestjs-otel",
-  "version": "8.0.3",
+  "version": "8.0.4-alpha.8",
   "description": "NestJS OpenTelemetry Library",
   "main": "lib/index.js",
   "typings": "lib/index",

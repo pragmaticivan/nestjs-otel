@@ -310,7 +310,9 @@ export class BookService {
 
 Wide events (also known as canonical log lines) emit one context-rich event per request, with attributes accumulated across the whole request lifecycle. See [A Practitioner's Guide to Wide Events](https://jeremymorrell.dev/blog/a-practitioners-guide-to-wide-events/) for the pattern.
 
-This library implements the pattern on top of OpenTelemetry: the `WideEventInterceptor` opens an attribute bag per request and, when the request finishes, flushes everything onto the span that was active when the request entered the interceptor (usually the root HTTP span created by your instrumentation). The `WideEventService` lets any provider enrich that bag from anywhere in the request's async call chain — no request-scoped injection needed.
+This library implements the pattern on top of OpenTelemetry: the `WideEventInterceptor` opens an attribute bag per request and, when the request finishes, flushes everything onto a single span — marking it with `nestjs_otel.wide_event = true` so you can filter wide-event spans in your backend. The `WideEventService` lets any provider enrich that bag from anywhere in the request's async call chain — no request-scoped injection needed.
+
+By default the attributes land on the best-available recording span at flush time (the HTTP root on Express / plain Fastify, or the active handler span when an instrumentation such as `@opentelemetry/instrumentation-nestjs-core` or `@fastify/otel` nests a span per request phase). To guarantee they land on the **trace root span** regardless of instrumentation nesting, register the [`WideEventSpanProcessor`](#targeting-the-root-span-wideeventspanprocessor).
 
 1. Register the interceptor globally:
 
@@ -368,10 +370,11 @@ export class CheckoutService {
 }
 ```
 
-All accumulated attributes land on the root span as a single wide event:
+All accumulated attributes land on a single span as one wide event:
 
 ```
-http_request
+GET /checkout
+├── nestjs_otel.wide_event: true
 ├── code.function.name: CheckoutController.checkout
 ├── user.id: u-123
 ├── cart.items: 3
@@ -384,7 +387,8 @@ http_request
 
 Notes:
 
-- The interceptor seeds `code.function.name` (`<Controller>.<handler>`) automatically and records `error.type`/`error.message` when the handler throws.
+- The flushed span is marked `nestjs_otel.wide_event = true`. This marker is set last, so a handler-provided field can never overwrite it.
+- The interceptor seeds `code.function.name` (`<Controller>.<handler>`) automatically and records `error.type`/`error.message` (plus `error.stack` when present) when the handler throws.
 - `WideEventService` methods are safe no-ops outside a request handled by the interceptor.
 - An async-context-aware context manager is required (the default with `NodeSDK` / `AsyncLocalStorageContextManager`), same as for tracing in general.
 
@@ -424,6 +428,28 @@ export class BooksService {
   }
 }
 ```
+
+### Targeting the root span (`WideEventSpanProcessor`)
+
+Instrumentations like `@opentelemetry/instrumentation-nestjs-core` and `@fastify/otel` wrap each request phase (middleware, guard, handler) in its own span. As a result, the span active when the interceptor runs is a nested child, not the trace root — so by default the wide event lands on that child span (e.g. `AppController.handler`) rather than on the root `GET /route`.
+
+Register the `WideEventSpanProcessor` on your `NodeSDK` to make the interceptor flush onto the **local-root span** (the span with no in-process parent — normally the HTTP server span) instead:
+
+```ts
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { WideEventSpanProcessor } from 'nestjs-otel';
+
+export const otelSDK = new NodeSDK({
+  spanProcessors: [
+    new WideEventSpanProcessor(),
+    new BatchSpanProcessor(traceExporter),
+  ],
+  // ...instrumentations, contextManager, etc.
+});
+```
+
+The processor only tracks which span is the local root per trace; it never exports spans, so keep your existing exporting processor in the list. It is optional — without it, wide events still flush onto the best-available recording span (see above), just not necessarily the trace root.
 
 ## Metric Service
 
