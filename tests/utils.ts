@@ -13,11 +13,11 @@ import { meterData } from "../src/metrics/metric-data";
 
 export type App = INestApplication;
 
-export type TestHarness = {
+export interface TestHarness {
   testingModule: TestingModule;
   app: App;
   agent: TestAgent<request.Test>;
-};
+}
 
 export async function createOpenTelemetryModule(
   module: DynamicModule

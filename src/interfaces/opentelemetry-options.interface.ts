@@ -1,17 +1,27 @@
-import type { Abstract, ModuleMetadata, Type } from "@nestjs/common";
+import type {
+  Abstract,
+  ExecutionContext,
+  ModuleMetadata,
+  Type,
+} from "@nestjs/common";
+import type { Attributes } from "@opentelemetry/api";
 
-export type OpenTelemetryModuleOptions = {
+export interface OpenTelemetryModuleOptions {
   /**
    * OpenTelemetry Metrics Setup
    */
   metrics?: OpenTelemetryMetrics;
-};
+  /**
+   * Wide Events Setup, used by the WideEventInterceptor
+   */
+  wideEvents?: OpenTelemetryWideEvents;
+}
 
-export type OpenTelemetryOptionsFactory = {
+export interface OpenTelemetryOptionsFactory {
   createOpenTelemetryOptions():
     | Promise<OpenTelemetryModuleOptions>
     | OpenTelemetryModuleOptions;
-};
+}
 
 /**
  * The options for the asynchronous OpenTelemetry module creation
@@ -44,6 +54,14 @@ export interface OpenTelemetryModuleAsyncOptions
   inject?: (string | symbol | Function | Type<any> | Abstract<any>)[];
 }
 
-export type OpenTelemetryMetrics = {
+export interface OpenTelemetryMetrics {
   hostMetrics?: boolean;
-};
+}
+
+export interface OpenTelemetryWideEvents {
+  /**
+   * Called at the start of each request to seed baseline attributes
+   * (e.g. user/tenant ids derived from the request).
+   */
+  seed?: (context: ExecutionContext) => Attributes;
+}

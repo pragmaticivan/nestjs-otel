@@ -33,3 +33,6 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/mcp.json
+
+# AI
+graphify-out
