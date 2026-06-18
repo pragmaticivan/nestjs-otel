@@ -43,6 +43,11 @@ class TestService {
   metadata() {
     return 1;
   }
+
+  @WideEventField("items")
+  createInvalidArray() {
+    return [{ id: 1 }];
+  }
 }
 
 describe("WideEventField", () => {
@@ -100,6 +105,13 @@ describe("WideEventField", () => {
 
     expect(result).toEqual({ total: 42.5 });
     expect(bag.has("order")).toBe(false);
+  });
+
+  it("should skip arrays containing non-primitive elements", () => {
+    const result = withBag(() => instance.createInvalidArray());
+
+    expect(result).toEqual([{ id: 1 }]);
+    expect(bag.has("items")).toBe(false);
   });
 
   it("should be a no-op outside a wide event request", () => {

@@ -1,11 +1,11 @@
 import type { CallHandler, ExecutionContext } from "@nestjs/common";
-import { context, trace } from "@opentelemetry/api";
+import { context, SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   InMemorySpanExporter,
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from "@opentelemetry/sdk-trace-node";
-import { defer, lastValueFrom, of, throwError } from "rxjs";
+import { defer, lastValueFrom, Observable, of, throwError } from "rxjs";
 import type { OpenTelemetryModuleOptions } from "../interfaces";
 import { WideEventInterceptor } from "./wide-event.interceptor";
 import { WideEventService } from "./wide-event.service";
@@ -98,13 +98,30 @@ describe("WideEventInterceptor", () => {
   });
 
   it("should record error attributes when the handler throws", async () => {
+    const error = new Error("boom");
+
     await expect(
-      interceptWithRootSpan(() => throwError(() => new Error("boom")))
+      interceptWithRootSpan(() => throwError(() => error))
     ).rejects.toThrow("boom");
 
+    // #then
     const [span] = traceExporter.getFinishedSpans();
     expect(span.attributes["error.type"]).toBe("Error");
     expect(span.attributes["error.message"]).toBe("boom");
+    expect(span.attributes["error.stack"]).toBe(error.stack);
+  });
+
+  it("should not record error.stack when the error has no stack", async () => {
+    const error = new Error("no stack");
+    error.stack = undefined;
+
+    await expect(
+      interceptWithRootSpan(() => throwError(() => error))
+    ).rejects.toThrow("no stack");
+
+    // #then
+    const [span] = traceExporter.getFinishedSpans();
+    expect(span.attributes["error.stack"]).toBeUndefined();
   });
 
   it("should seed attributes from the configured seed callback", async () => {
@@ -130,6 +147,60 @@ describe("WideEventInterceptor", () => {
     expect(result).toBe("ok");
     const [span] = traceExporter.getFinishedSpans();
     expect(span.attributes["wide_event.seed.error"]).toBe("seed boom");
+  });
+
+  it("should set span status to ERROR when the handler throws", async () => {
+    await expect(
+      interceptWithRootSpan(() => throwError(() => new Error("fail")))
+    ).rejects.toThrow("fail");
+
+    const [span] = traceExporter.getFinishedSpans();
+    expect(span.status.code).toBe(SpanStatusCode.ERROR);
+  });
+
+  it("should handle exotic errors with null constructor without replacing the original error", async () => {
+    const exoticError = Object.create(Error.prototype);
+    exoticError.message = "exotic";
+    Object.defineProperty(exoticError, "constructor", { value: null });
+
+    await expect(
+      interceptWithRootSpan(() => throwError(() => exoticError))
+    ).rejects.toBe(exoticError);
+
+    const [span] = traceExporter.getFinishedSpans();
+    expect(span.attributes["error.type"]).toBe("Error");
+    expect(span.attributes["error.message"]).toBe("exotic");
+  });
+
+  it("should not flush attributes when the observable is unsubscribed before completion", async () => {
+    const span = trace.getTracer("test").startSpan("http_request");
+    const neverCompletes = new Observable((s) => {
+      s.next("partial");
+    });
+
+    const obs$ = context.with(trace.setSpan(context.active(), span), () =>
+      interceptor.intercept(
+        executionContext,
+        callHandler(() => neverCompletes)
+      )
+    );
+
+    const sub = obs$.subscribe();
+    sub.unsubscribe();
+    span.end();
+
+    const [finished] = traceExporter.getFinishedSpans();
+    expect(finished.attributes["code.function.name"]).toBeUndefined();
+  });
+
+  it("should not throw and should produce no seed error when seed returns null", async () => {
+    const result = await interceptWithRootSpan(() => of("ok"), {
+      wideEvents: { seed: () => null as any },
+    });
+
+    expect(result).toBe("ok");
+    const [span] = traceExporter.getFinishedSpans();
+    expect(span.attributes["wide_event.seed.error"]).toBeUndefined();
   });
 
   it("should propagate the handler result untouched when no span is active", async () => {

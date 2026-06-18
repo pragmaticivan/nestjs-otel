@@ -6,7 +6,7 @@ import {
   type NestInterceptor,
   Optional,
 } from "@nestjs/common";
-import { context, type Span, trace } from "@opentelemetry/api";
+import { context, type Span, SpanStatusCode, trace } from "@opentelemetry/api";
 import { Observable } from "rxjs";
 import { finalize, tap } from "rxjs/operators";
 import type { OpenTelemetryModuleOptions } from "../interfaces";
@@ -50,22 +50,37 @@ export class WideEventInterceptor implements NestInterceptor {
     const contextWithBag = activeContext.setValue(WIDE_EVENT_CONTEXT_KEY, bag);
 
     return new Observable((subscriber) => {
+      let terminated = false;
       const subscription = context.with(contextWithBag, () =>
         next
           .handle()
           .pipe(
             tap({
               error: (error: unknown) => {
+                terminated = true;
                 bag.set(
                   "error.type",
-                  error instanceof Error ? error.constructor.name : "unknown"
+                  error instanceof Error
+                    ? (error.constructor?.name ?? "Error")
+                    : "unknown"
                 );
                 if (error instanceof Error) {
                   bag.set("error.message", error.message);
+                  if (error.stack) {
+                    bag.set("error.stack", error.stack);
+                  }
                 }
+                span?.setStatus({ code: SpanStatusCode.ERROR });
+              },
+              complete: () => {
+                terminated = true;
               },
             }),
-            finalize(() => this.flush(bag, span))
+            finalize(() => {
+              if (terminated) {
+                this.flush(bag, span);
+              }
+            })
           )
           .subscribe(subscriber)
       );
@@ -79,7 +94,11 @@ export class WideEventInterceptor implements NestInterceptor {
       return;
     }
     try {
-      for (const [key, value] of Object.entries(seed(executionContext))) {
+      const result = seed(executionContext);
+      if (result == null) {
+        return;
+      }
+      for (const [key, value] of Object.entries(result)) {
         if (value !== undefined) {
           bag.set(key, value);
         }

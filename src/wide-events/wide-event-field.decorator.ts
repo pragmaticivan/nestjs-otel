@@ -2,11 +2,27 @@ import type { AttributeValue } from "@opentelemetry/api";
 import { copyMetadataFromFunctionToFunction } from "../opentelemetry.utils";
 import { getWideEventBag } from "./wide-event.context";
 
-const isAttributeValue = (value: unknown): value is AttributeValue =>
-  typeof value === "string" ||
-  typeof value === "number" ||
-  typeof value === "boolean" ||
-  Array.isArray(value);
+const isAttributeValue = (value: unknown): value is AttributeValue => {
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return true;
+  }
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  let elementType: string | undefined;
+  for (const el of value) {
+    if (el == null) continue;
+    const t = typeof el;
+    if (t !== "string" && t !== "number" && t !== "boolean") return false;
+    if (elementType && t !== elementType) return false;
+    elementType = t;
+  }
+  return true;
+};
 
 const record = (
   key: string,

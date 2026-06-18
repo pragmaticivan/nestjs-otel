@@ -103,6 +103,31 @@ describe("WideEventService", () => {
       expect(bag.get("db.duration_ms")).toBeGreaterThanOrEqual(0);
     });
 
+    it("should accumulate elapsed time when the same key is timed multiple times", () => {
+      // #given
+      let tick = 0;
+      jest.spyOn(performance, "now").mockImplementation(() => tick);
+
+      withBag(() => {
+        // #when — first timer: 10ms
+        tick = 0;
+        const stop1 = service.startTimer("db.duration_ms");
+        tick = 10;
+        stop1();
+
+        // second timer: 25ms
+        tick = 100;
+        const stop2 = service.startTimer("db.duration_ms");
+        tick = 125;
+        stop2();
+      });
+
+      // #then
+      expect(bag.get("db.duration_ms")).toBe(35);
+
+      jest.restoreAllMocks();
+    });
+
     it("should be a no-op when stopped without an active bag", () => {
       const stop = service.startTimer("db.duration_ms");
 

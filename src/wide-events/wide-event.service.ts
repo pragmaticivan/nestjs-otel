@@ -52,9 +52,15 @@ export class WideEventService {
    * the timer and records the elapsed time in milliseconds.
    */
   startTimer(key: string): () => void {
+    const bag = getWideEventBag();
     const start = performance.now();
     return () => {
-      getWideEventBag()?.set(key, performance.now() - start);
+      if (!bag) {
+        return;
+      }
+      const elapsed = performance.now() - start;
+      const current = bag.get(key);
+      bag.set(key, (typeof current === "number" ? current : 0) + elapsed);
     };
   }
 }
