@@ -1,5 +1,15 @@
 # Changelog
 
+## [8.1.0](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.3...v8.1.0) (2026-06-18)
+
+
+### Features
+
+* add wide events support for tracing ([c907a6d](https://github.com/pragmaticivan/nestjs-otel/commit/c907a6d3fdb132fb368b718fccc6d4eeb27d3797))
+* add wide events support for tracing ([378f884](https://github.com/pragmaticivan/nestjs-otel/commit/378f88440029c7d6b515b050ecb64d1ca4277c5c))
+* **wide-events:** capture error stack and accumulate timer durations ([02e6526](https://github.com/pragmaticivan/nestjs-otel/commit/02e6526a97a7ffcb7074e966ae387b838bba5f6f))
+* **wide-events:** target trace root span via span processor ([a9b3778](https://github.com/pragmaticivan/nestjs-otel/commit/a9b377834f2f2e212710564101b07310d33234f0))
+
 ## [8.0.3](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.2...v8.0.3) (2026-05-15)
 
 
