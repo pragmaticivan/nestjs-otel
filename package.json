@@ -69,8 +69,8 @@
     "ultracite": "^6.4.0"
   },
   "peerDependencies": {
-    "@nestjs/common": ">= 11 < 12",
-    "@nestjs/core": ">= 11 < 12",
+    "@nestjs/common": ">= 11 < 13",
+    "@nestjs/core": ">= 11 < 13",
     "rxjs": "^7.1.0"
   },
   "jest": {
