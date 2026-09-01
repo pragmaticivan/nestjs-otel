@@ -12,12 +12,12 @@
     "build": "tsc",
     "lint": "ultracite check",
     "format": "ultracite fix",
-    "test": "npm run test:unit && npm run test:e2e",
-    "test:coverage": "jest --coverage",
-    "test:unit": "jest",
-    "test:watch": "jest --watch",
-    "test:e2e": "jest --config ./tests/jest-e2e.json --runInBand --forceExit --detectOpenHandles",
-    "test:e2e:watch": "jest --config ./tests/jest-e2e.json --runInBand --watch",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run src",
+    "test:watch": "vitest",
+    "test:e2e": "vitest run tests/e2e",
+    "test:e2e:watch": "vitest tests/e2e",
     "prepare": "husky"
   },
   "repository": {
@@ -54,42 +54,23 @@
     "@opentelemetry/sdk-metrics": "^2.2.0",
     "@opentelemetry/sdk-trace-node": "^2.2.0",
     "@types/express": "^5.0.6",
-    "@types/jest": "^30.0.0",
     "@types/node": "^25.0.1",
     "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.1.11",
     "husky": "^9.1.7",
-    "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
     "reflect-metadata": "^0.2.2",
     "rimraf": "^6.1.2",
     "rxjs": "^7.8.2",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.6",
     "typescript": "5.9.3",
-    "ultracite": "^6.4.0"
+    "ultracite": "^6.4.0",
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "@nestjs/common": ">= 11 < 12",
     "@nestjs/core": ">= 11 < 12",
     "rxjs": "^7.1.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts",
-      "node"
-    ],
-    "rootDir": "./src",
-    "reporters": [
-      "default"
-    ],
-    "testRegex": ".spec.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "coverageDirectory": "./test-results/coverage",
-    "testEnvironment": "node"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [

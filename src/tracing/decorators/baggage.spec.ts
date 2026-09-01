@@ -6,11 +6,11 @@ describe("Baggage Decorator", () => {
   const mockCtx: any = {};
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("should return undefined if no baggage is present", () => {
-    jest.spyOn(propagation, "getBaggage").mockReturnValue(undefined);
+    vi.spyOn(propagation, "getBaggage").mockReturnValue(undefined);
     const result = baggageParamFactory(undefined, mockCtx);
     expect(result).toBeUndefined();
   });
@@ -19,7 +19,7 @@ describe("Baggage Decorator", () => {
     const baggage = propagation.createBaggage({
       "test-key": { value: "test-value" },
     });
-    jest.spyOn(propagation, "getBaggage").mockReturnValue(baggage);
+    vi.spyOn(propagation, "getBaggage").mockReturnValue(baggage);
 
     const result = baggageParamFactory(undefined, mockCtx);
     expect(result).toBeDefined();
@@ -31,7 +31,7 @@ describe("Baggage Decorator", () => {
     const baggage = propagation.createBaggage({
       "test-key": { value: "test-value" },
     });
-    jest.spyOn(propagation, "getBaggage").mockReturnValue(baggage);
+    vi.spyOn(propagation, "getBaggage").mockReturnValue(baggage);
 
     const result = baggageParamFactory("test-key", mockCtx);
     expect(result).toBe("test-value");
@@ -41,7 +41,7 @@ describe("Baggage Decorator", () => {
     const baggage = propagation.createBaggage({
       "other-key": { value: "other-value" },
     });
-    jest.spyOn(propagation, "getBaggage").mockReturnValue(baggage);
+    vi.spyOn(propagation, "getBaggage").mockReturnValue(baggage);
 
     const result = baggageParamFactory("test-key", mockCtx);
     expect(result).toBeUndefined();

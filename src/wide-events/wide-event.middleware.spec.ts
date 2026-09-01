@@ -30,7 +30,7 @@ describe("WideEventMiddleware", () => {
     // #given
     const span = trace.getTracer("test").startSpan("http_request");
     const req: Record<symbol, unknown> = {};
-    const next = jest.fn();
+    const next = vi.fn();
 
     // #when
     context.with(trace.setSpan(context.active(), span), () =>
@@ -46,7 +46,7 @@ describe("WideEventMiddleware", () => {
   it("should call next without stashing when no span is active", () => {
     // #given
     const req: Record<symbol, unknown> = {};
-    const next = jest.fn();
+    const next = vi.fn();
 
     // #when
     middleware.use(req, {}, next);

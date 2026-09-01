@@ -106,7 +106,7 @@ describe("WideEventService", () => {
     it("should accumulate elapsed time when the same key is timed multiple times", () => {
       // #given
       let tick = 0;
-      jest.spyOn(performance, "now").mockImplementation(() => tick);
+      vi.spyOn(performance, "now").mockImplementation(() => tick);
 
       withBag(() => {
         // #when — first timer: 10ms
@@ -125,7 +125,7 @@ describe("WideEventService", () => {
       // #then
       expect(bag.get("db.duration_ms")).toBe(35);
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it("should be a no-op when stopped without an active bag", () => {
