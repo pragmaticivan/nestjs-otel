@@ -1,5 +1,13 @@
 # Changelog
 
+## [8.1.1](https://github.com/pragmaticivan/nestjs-otel/compare/v8.1.0...v8.1.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **deps:** allow NestJS 12 in the peer range ([f34a65d](https://github.com/pragmaticivan/nestjs-otel/commit/f34a65df78f52dce3564151053b4501577949ca8))
+* **deps:** allow NestJS 12 in the peer range ([3d4e498](https://github.com/pragmaticivan/nestjs-otel/commit/3d4e498ccb5b1429a75b06286248c8218b8e4b59))
+
 ## [8.1.0](https://github.com/pragmaticivan/nestjs-otel/compare/v8.0.3...v8.1.0) (2026-06-18)
 
 
