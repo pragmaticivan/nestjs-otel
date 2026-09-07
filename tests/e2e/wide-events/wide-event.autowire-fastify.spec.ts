@@ -19,7 +19,7 @@ class TestModule {}
 
 describe("Wide Events auto-wired middleware (Fastify)", () => {
   let app: INestApplication;
-  const useSpy = jest.spyOn(WideEventMiddleware.prototype, "use");
+  const useSpy = vi.spyOn(WideEventMiddleware.prototype, "use");
 
   beforeAll(async () => {
     const testingModule = await Test.createTestingModule({
@@ -29,7 +29,10 @@ describe("Wide Events auto-wired middleware (Fastify)", () => {
       new FastifyAdapter()
     );
     await app.init();
-    await (app as NestFastifyApplication).getHttpAdapter().getInstance().ready();
+    await (app as NestFastifyApplication)
+      .getHttpAdapter()
+      .getInstance()
+      .ready();
   });
 
   afterAll(async () => {

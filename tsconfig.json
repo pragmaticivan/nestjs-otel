@@ -12,7 +12,9 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "types": ["node", "vitest/globals"]
   },
   "include": ["./src/**/*.ts"]
 }

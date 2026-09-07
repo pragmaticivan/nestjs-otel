@@ -5,7 +5,7 @@
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
     },
-    "globals": ["jest"]
+    "globals": ["vi"]
   },
   "linter": {
     "rules": {

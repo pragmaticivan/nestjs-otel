@@ -15,7 +15,7 @@ class TestModule {}
 
 describe("Wide Events auto-wired middleware", () => {
   let app: INestApplication;
-  const useSpy = jest.spyOn(WideEventMiddleware.prototype, "use");
+  const useSpy = vi.spyOn(WideEventMiddleware.prototype, "use");
 
   beforeAll(async () => {
     const testingModule = await Test.createTestingModule({
