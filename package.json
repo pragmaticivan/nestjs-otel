@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prebuild": "rimraf lib",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "lint": "ultracite check",
     "format": "ultracite fix",
     "test": "npm run test:unit && npm run test:e2e",

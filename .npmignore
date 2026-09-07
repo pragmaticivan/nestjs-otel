@@ -11,3 +11,4 @@ commitlint.config.js
 REFERENCE.md
 *.tsbuildinfo
 tsconfig.json
+tsconfig.build.json
