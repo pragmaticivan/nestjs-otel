@@ -104,7 +104,7 @@ export class OpenTelemetryCoreModule
   }
 
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(WideEventMiddleware).forRoutes("*");
+    consumer.apply(WideEventMiddleware).forRoutes("{*path}");
   }
 
   async onApplicationBootstrap() {
